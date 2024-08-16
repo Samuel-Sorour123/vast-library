@@ -182,3 +182,227 @@
 {"time":1723037941469,"msg":"Client[C16]: disconnected from matcher[9]"}
 {"time":1723037941473,"msg":"Client[C16]: socket connected"}
 {"time":1723037941473,"msg":"Client[C16]: assigned to matcher[9]"}
+{"time":1723464974880,"msg":"Client[C1]: socket connected"}
+{"time":1723464974881,"msg":"Client[C1]: assigned to matcher[1]"}
+{"time":1723464974881,"msg":"Client[C1]: being migrated to Matcher[2]"}
+{"time":1723464974882,"msg":"Client[C1]: disconnected from matcher[2]"}
+{"time":1723464974898,"msg":"Client[C1]: socket connected"}
+{"time":1723464974898,"msg":"Client[C1]: assigned to matcher[2]"}
+{"time":1723464974999,"msg":"Client[C2]: socket connected"}
+{"time":1723464974999,"msg":"Client[C2]: assigned to matcher[1]"}
+{"time":1723464974999,"msg":"Client[C2]: being migrated to Matcher[2]"}
+{"time":1723464975001,"msg":"Client[C2]: disconnected from matcher[2]"}
+{"time":1723464975013,"msg":"Client[C2]: socket connected"}
+{"time":1723464975014,"msg":"Client[C2]: assigned to matcher[2]"}
+{"time":1723464975109,"msg":"Client[C3]: socket connected"}
+{"time":1723464975109,"msg":"Client[C3]: assigned to matcher[1]"}
+{"time":1723464975217,"msg":"Client[C4]: socket connected"}
+{"time":1723464975217,"msg":"Client[C4]: assigned to matcher[1]"}
+{"time":1723464975217,"msg":"Client[C4]: being migrated to Matcher[2]"}
+{"time":1723464975217,"msg":"Client[C4]: disconnected from matcher[2]"}
+{"time":1723464975226,"msg":"Client[C4]: socket connected"}
+{"time":1723464975226,"msg":"Client[C4]: assigned to matcher[2]"}
+{"time":1723464975331,"msg":"Client[C5]: socket connected"}
+{"time":1723464975331,"msg":"Client[C5]: assigned to matcher[1]"}
+{"time":1723464975333,"msg":"Client[C5]: being migrated to Matcher[4]"}
+{"time":1723464975333,"msg":"Client[C5]: disconnected from matcher[4]"}
+{"time":1723464975340,"msg":"Client[C5]: socket connected"}
+{"time":1723464975340,"msg":"Client[C5]: assigned to matcher[4]"}
+{"time":1723464975439,"msg":"Client[C6]: socket connected"}
+{"time":1723464975440,"msg":"Client[C6]: assigned to matcher[1]"}
+{"time":1723464975440,"msg":"Client[C6]: being migrated to Matcher[2]"}
+{"time":1723464975440,"msg":"Client[C6]: disconnected from matcher[2]"}
+{"time":1723464975448,"msg":"Client[C6]: socket connected"}
+{"time":1723464975448,"msg":"Client[C6]: assigned to matcher[2]"}
+{"time":1723466651479,"msg":"Client[C1]: socket connected"}
+{"time":1723466651479,"msg":"Client[C1]: assigned to matcher[1]"}
+{"time":1723466651479,"msg":"Client[C1]: being migrated to Matcher[2]"}
+{"time":1723466651480,"msg":"Client[C1]: disconnected from matcher[2]"}
+{"time":1723466651497,"msg":"Client[C1]: socket connected"}
+{"time":1723466651497,"msg":"Client[C1]: assigned to matcher[2]"}
+{"time":1723466651592,"msg":"Client[C2]: socket connected"}
+{"time":1723466651592,"msg":"Client[C2]: assigned to matcher[1]"}
+{"time":1723466651592,"msg":"Client[C2]: being migrated to Matcher[2]"}
+{"time":1723466651593,"msg":"Client[C2]: disconnected from matcher[2]"}
+{"time":1723466651604,"msg":"Client[C2]: socket connected"}
+{"time":1723466651604,"msg":"Client[C2]: assigned to matcher[2]"}
+{"time":1723466651702,"msg":"Client[C3]: socket connected"}
+{"time":1723466651703,"msg":"Client[C3]: assigned to matcher[1]"}
+{"time":1723466651812,"msg":"Client[C4]: socket connected"}
+{"time":1723466651813,"msg":"Client[C4]: assigned to matcher[1]"}
+{"time":1723466651813,"msg":"Client[C4]: being migrated to Matcher[2]"}
+{"time":1723466651813,"msg":"Client[C4]: disconnected from matcher[2]"}
+{"time":1723466651821,"msg":"Client[C4]: socket connected"}
+{"time":1723466651821,"msg":"Client[C4]: assigned to matcher[2]"}
+{"time":1723466651925,"msg":"Client[C5]: socket connected"}
+{"time":1723466651925,"msg":"Client[C5]: assigned to matcher[1]"}
+{"time":1723466651927,"msg":"Client[C5]: being migrated to Matcher[4]"}
+{"time":1723466651927,"msg":"Client[C5]: disconnected from matcher[4]"}
+{"time":1723466651934,"msg":"Client[C5]: socket connected"}
+{"time":1723466651934,"msg":"Client[C5]: assigned to matcher[4]"}
+{"time":1723466652037,"msg":"Client[C6]: socket connected"}
+{"time":1723466652037,"msg":"Client[C6]: assigned to matcher[1]"}
+{"time":1723466652037,"msg":"Client[C6]: being migrated to Matcher[2]"}
+{"time":1723466652037,"msg":"Client[C6]: disconnected from matcher[2]"}
+{"time":1723466652044,"msg":"Client[C6]: socket connected"}
+{"time":1723466652044,"msg":"Client[C6]: assigned to matcher[2]"}
+{"time":1723466704384,"msg":"Client[C1]: socket connected"}
+{"time":1723466704384,"msg":"Client[C1]: assigned to matcher[1]"}
+{"time":1723466704384,"msg":"Client[C1]: being migrated to Matcher[2]"}
+{"time":1723466704385,"msg":"Client[C1]: disconnected from matcher[2]"}
+{"time":1723466704399,"msg":"Client[C1]: socket connected"}
+{"time":1723466704400,"msg":"Client[C1]: assigned to matcher[2]"}
+{"time":1723466704501,"msg":"Client[C2]: socket connected"}
+{"time":1723466704501,"msg":"Client[C2]: assigned to matcher[1]"}
+{"time":1723466704501,"msg":"Client[C2]: being migrated to Matcher[2]"}
+{"time":1723466704502,"msg":"Client[C2]: disconnected from matcher[2]"}
+{"time":1723466704510,"msg":"Client[C2]: socket connected"}
+{"time":1723466704510,"msg":"Client[C2]: assigned to matcher[2]"}
+{"time":1723466704612,"msg":"Client[C3]: socket connected"}
+{"time":1723466704612,"msg":"Client[C3]: assigned to matcher[1]"}
+{"time":1723466704722,"msg":"Client[C4]: socket connected"}
+{"time":1723466704722,"msg":"Client[C4]: assigned to matcher[1]"}
+{"time":1723466704722,"msg":"Client[C4]: being migrated to Matcher[2]"}
+{"time":1723466704722,"msg":"Client[C4]: disconnected from matcher[2]"}
+{"time":1723466704730,"msg":"Client[C4]: socket connected"}
+{"time":1723466704730,"msg":"Client[C4]: assigned to matcher[2]"}
+{"time":1723466704837,"msg":"Client[C5]: socket connected"}
+{"time":1723466704837,"msg":"Client[C5]: assigned to matcher[1]"}
+{"time":1723466704839,"msg":"Client[C5]: being migrated to Matcher[4]"}
+{"time":1723466704839,"msg":"Client[C5]: disconnected from matcher[4]"}
+{"time":1723466704848,"msg":"Client[C5]: socket connected"}
+{"time":1723466704849,"msg":"Client[C5]: assigned to matcher[4]"}
+{"time":1723466704946,"msg":"Client[C6]: socket connected"}
+{"time":1723466704946,"msg":"Client[C6]: assigned to matcher[1]"}
+{"time":1723466704946,"msg":"Client[C6]: being migrated to Matcher[2]"}
+{"time":1723466704946,"msg":"Client[C6]: disconnected from matcher[2]"}
+{"time":1723466704953,"msg":"Client[C6]: socket connected"}
+{"time":1723466704953,"msg":"Client[C6]: assigned to matcher[2]"}
+{"time":1723466765634,"msg":"Client[C1]: socket connected"}
+{"time":1723466765634,"msg":"Client[C1]: assigned to matcher[1]"}
+{"time":1723466765634,"msg":"Client[C1]: being migrated to Matcher[2]"}
+{"time":1723466765635,"msg":"Client[C1]: disconnected from matcher[2]"}
+{"time":1723466765645,"msg":"Client[C1]: socket connected"}
+{"time":1723466765645,"msg":"Client[C1]: assigned to matcher[2]"}
+{"time":1723466765750,"msg":"Client[C2]: socket connected"}
+{"time":1723466765750,"msg":"Client[C2]: assigned to matcher[1]"}
+{"time":1723466765750,"msg":"Client[C2]: being migrated to Matcher[2]"}
+{"time":1723466765751,"msg":"Client[C2]: disconnected from matcher[2]"}
+{"time":1723466765759,"msg":"Client[C2]: socket connected"}
+{"time":1723466765759,"msg":"Client[C2]: assigned to matcher[2]"}
+{"time":1723466765862,"msg":"Client[C3]: socket connected"}
+{"time":1723466765863,"msg":"Client[C3]: assigned to matcher[1]"}
+{"time":1723466765973,"msg":"Client[C4]: socket connected"}
+{"time":1723466765973,"msg":"Client[C4]: assigned to matcher[1]"}
+{"time":1723466765973,"msg":"Client[C4]: being migrated to Matcher[2]"}
+{"time":1723466765973,"msg":"Client[C4]: disconnected from matcher[2]"}
+{"time":1723466765980,"msg":"Client[C4]: socket connected"}
+{"time":1723466765981,"msg":"Client[C4]: assigned to matcher[2]"}
+{"time":1723466766087,"msg":"Client[C5]: socket connected"}
+{"time":1723466766087,"msg":"Client[C5]: assigned to matcher[1]"}
+{"time":1723466766089,"msg":"Client[C5]: being migrated to Matcher[4]"}
+{"time":1723466766089,"msg":"Client[C5]: disconnected from matcher[4]"}
+{"time":1723466766097,"msg":"Client[C5]: socket connected"}
+{"time":1723466766097,"msg":"Client[C5]: assigned to matcher[4]"}
+{"time":1723466766194,"msg":"Client[C6]: socket connected"}
+{"time":1723466766194,"msg":"Client[C6]: assigned to matcher[1]"}
+{"time":1723466766194,"msg":"Client[C6]: being migrated to Matcher[2]"}
+{"time":1723466766194,"msg":"Client[C6]: disconnected from matcher[2]"}
+{"time":1723466766202,"msg":"Client[C6]: socket connected"}
+{"time":1723466766202,"msg":"Client[C6]: assigned to matcher[2]"}
+{"time":1723466770884,"msg":"Client[C1]: socket connected"}
+{"time":1723466770884,"msg":"Client[C1]: assigned to matcher[1]"}
+{"time":1723466770884,"msg":"Client[C1]: being migrated to Matcher[2]"}
+{"time":1723466770885,"msg":"Client[C1]: disconnected from matcher[2]"}
+{"time":1723466770896,"msg":"Client[C1]: socket connected"}
+{"time":1723466770896,"msg":"Client[C1]: assigned to matcher[2]"}
+{"time":1723466771002,"msg":"Client[C2]: socket connected"}
+{"time":1723466771002,"msg":"Client[C2]: assigned to matcher[1]"}
+{"time":1723466771003,"msg":"Client[C2]: being migrated to Matcher[2]"}
+{"time":1723466771003,"msg":"Client[C2]: disconnected from matcher[2]"}
+{"time":1723466771014,"msg":"Client[C2]: socket connected"}
+{"time":1723466771014,"msg":"Client[C2]: assigned to matcher[2]"}
+{"time":1723466771110,"msg":"Client[C3]: socket connected"}
+{"time":1723466771110,"msg":"Client[C3]: assigned to matcher[1]"}
+{"time":1723466771218,"msg":"Client[C4]: socket connected"}
+{"time":1723466771218,"msg":"Client[C4]: assigned to matcher[1]"}
+{"time":1723466771219,"msg":"Client[C4]: being migrated to Matcher[2]"}
+{"time":1723466771219,"msg":"Client[C4]: disconnected from matcher[2]"}
+{"time":1723466771226,"msg":"Client[C4]: socket connected"}
+{"time":1723466771226,"msg":"Client[C4]: assigned to matcher[2]"}
+{"time":1723466771329,"msg":"Client[C5]: socket connected"}
+{"time":1723466771330,"msg":"Client[C5]: assigned to matcher[1]"}
+{"time":1723466771333,"msg":"Client[C5]: being migrated to Matcher[4]"}
+{"time":1723466771333,"msg":"Client[C5]: disconnected from matcher[4]"}
+{"time":1723466771341,"msg":"Client[C5]: socket connected"}
+{"time":1723466771341,"msg":"Client[C5]: assigned to matcher[4]"}
+{"time":1723466771438,"msg":"Client[C6]: socket connected"}
+{"time":1723466771438,"msg":"Client[C6]: assigned to matcher[1]"}
+{"time":1723466771438,"msg":"Client[C6]: being migrated to Matcher[2]"}
+{"time":1723466771438,"msg":"Client[C6]: disconnected from matcher[2]"}
+{"time":1723466771446,"msg":"Client[C6]: socket connected"}
+{"time":1723466771446,"msg":"Client[C6]: assigned to matcher[2]"}
+{"time":1723466852241,"msg":"Client[C1]: socket connected"}
+{"time":1723466852241,"msg":"Client[C1]: assigned to matcher[1]"}
+{"time":1723466852241,"msg":"Client[C1]: being migrated to Matcher[2]"}
+{"time":1723466852242,"msg":"Client[C1]: disconnected from matcher[2]"}
+{"time":1723466852252,"msg":"Client[C1]: socket connected"}
+{"time":1723466852252,"msg":"Client[C1]: assigned to matcher[2]"}
+{"time":1723466852358,"msg":"Client[C2]: socket connected"}
+{"time":1723466852358,"msg":"Client[C2]: assigned to matcher[1]"}
+{"time":1723466852358,"msg":"Client[C2]: being migrated to Matcher[2]"}
+{"time":1723466852359,"msg":"Client[C2]: disconnected from matcher[2]"}
+{"time":1723466852366,"msg":"Client[C2]: socket connected"}
+{"time":1723466852366,"msg":"Client[C2]: assigned to matcher[2]"}
+{"time":1723466852469,"msg":"Client[C3]: socket connected"}
+{"time":1723466852469,"msg":"Client[C3]: assigned to matcher[1]"}
+{"time":1723466852578,"msg":"Client[C4]: socket connected"}
+{"time":1723466852578,"msg":"Client[C4]: assigned to matcher[1]"}
+{"time":1723466852578,"msg":"Client[C4]: being migrated to Matcher[2]"}
+{"time":1723466852579,"msg":"Client[C4]: disconnected from matcher[2]"}
+{"time":1723466852586,"msg":"Client[C4]: socket connected"}
+{"time":1723466852586,"msg":"Client[C4]: assigned to matcher[2]"}
+{"time":1723466852690,"msg":"Client[C5]: socket connected"}
+{"time":1723466852690,"msg":"Client[C5]: assigned to matcher[1]"}
+{"time":1723466852693,"msg":"Client[C5]: being migrated to Matcher[4]"}
+{"time":1723466852693,"msg":"Client[C5]: disconnected from matcher[4]"}
+{"time":1723466852700,"msg":"Client[C5]: socket connected"}
+{"time":1723466852700,"msg":"Client[C5]: assigned to matcher[4]"}
+{"time":1723466852799,"msg":"Client[C6]: socket connected"}
+{"time":1723466852799,"msg":"Client[C6]: assigned to matcher[1]"}
+{"time":1723466852799,"msg":"Client[C6]: being migrated to Matcher[2]"}
+{"time":1723466852799,"msg":"Client[C6]: disconnected from matcher[2]"}
+{"time":1723466852806,"msg":"Client[C6]: socket connected"}
+{"time":1723466852806,"msg":"Client[C6]: assigned to matcher[2]"}
+{"time":1723467087458,"msg":"Client[C1]: socket connected"}
+{"time":1723467087458,"msg":"Client[C1]: assigned to matcher[1]"}
+{"time":1723467087459,"msg":"Client[C1]: being migrated to Matcher[2]"}
+{"time":1723467087460,"msg":"Client[C1]: disconnected from matcher[2]"}
+{"time":1723467087476,"msg":"Client[C1]: socket connected"}
+{"time":1723467087476,"msg":"Client[C1]: assigned to matcher[2]"}
+{"time":1723467087575,"msg":"Client[C2]: socket connected"}
+{"time":1723467087575,"msg":"Client[C2]: assigned to matcher[1]"}
+{"time":1723467087575,"msg":"Client[C2]: being migrated to Matcher[2]"}
+{"time":1723467087576,"msg":"Client[C2]: disconnected from matcher[2]"}
+{"time":1723467087583,"msg":"Client[C2]: socket connected"}
+{"time":1723467087583,"msg":"Client[C2]: assigned to matcher[2]"}
+{"time":1723467087687,"msg":"Client[C3]: socket connected"}
+{"time":1723467087687,"msg":"Client[C3]: assigned to matcher[1]"}
+{"time":1723467087796,"msg":"Client[C4]: socket connected"}
+{"time":1723467087796,"msg":"Client[C4]: assigned to matcher[1]"}
+{"time":1723467087796,"msg":"Client[C4]: being migrated to Matcher[2]"}
+{"time":1723467087796,"msg":"Client[C4]: disconnected from matcher[2]"}
+{"time":1723467087807,"msg":"Client[C4]: socket connected"}
+{"time":1723467087807,"msg":"Client[C4]: assigned to matcher[2]"}
+{"time":1723467087905,"msg":"Client[C5]: socket connected"}
+{"time":1723467087905,"msg":"Client[C5]: assigned to matcher[1]"}
+{"time":1723467087910,"msg":"Client[C5]: being migrated to Matcher[4]"}
+{"time":1723467087910,"msg":"Client[C5]: disconnected from matcher[4]"}
+{"time":1723467087917,"msg":"Client[C5]: socket connected"}
+{"time":1723467087917,"msg":"Client[C5]: assigned to matcher[4]"}
+{"time":1723467088014,"msg":"Client[C6]: socket connected"}
+{"time":1723467088014,"msg":"Client[C6]: assigned to matcher[1]"}
+{"time":1723467088014,"msg":"Client[C6]: being migrated to Matcher[2]"}
+{"time":1723467088014,"msg":"Client[C6]: disconnected from matcher[2]"}
+{"time":1723467088024,"msg":"Client[C6]: socket connected"}
+{"time":1723467088024,"msg":"Client[C6]: assigned to matcher[2]"}

@@ -54,8 +54,8 @@ async function executeInstruction(instruction, step, success, fail) {
                         alias: opts.alias,
                         //logLayer: 'Matcher_' + opts.alias,
                         //logFile: 'Matcher_' + opts.alias,
-                        logDisplayLevel : 3,
-                        logRecordLevel : 4,
+                        logDisplayLevel : 0,
+                        logRecordLevel : 5,
                         eventDisplayLevel : 0,
                         eventRecordLevel : 5
                     },
@@ -190,7 +190,6 @@ var dataFromTextFiles = async (filename) => {
       // ('\r\n') in input.txt as a single line break.
   
       for await (const data of rl) {
-        console.log("The data is: " + data + "\n");
         var dataLine = [];
         var cur = "";
         var isString = 0;
