@@ -1,3 +1,4 @@
 /Dockerfile
 /node_modules
-/visualiser/logs_and_events/*
+/visualiser/logs_and_events
+/visualiser/script.txt
