@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Experiment Parameters</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+  </head>
+  <body>
+    <h1>Experiment Parameters</h1>
+    <div class="information">
+      <form action="/option1/run" method="post">
+        <div class="input">
+          <label>newMatcher:</label
+          ><input type="number" name="newMatcher" required />
+        </div>
+        <div class="input">
+          <label>newClient:</label
+          ><input type="number" name="newClient" required />
+        </div>
+        <div class="input">
+          <label>publish:</label>
+          <input type="number" name="publish" required />
+        </div>
+        <div class="input">
+          <label>subscribe:</label>
+          <input type="number" name="subscribe" required />
+        </div>
+        <div class="input">
+          <label>moveClient:</label>
+          <input type="number" name="moveClient" required />
+        </div>
+        <button type="submit">Run Experiment</button>
+      </form>
+    </div>
+  </body>
+</html>

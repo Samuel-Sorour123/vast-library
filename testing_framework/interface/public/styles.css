@@ -1,54 +1,82 @@
 /* public/styles.css */
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
-  }
-  
-  h1 {
-    text-align: center;
-  }
-  
-  form {
-    max-width: 400px;
-    margin: 20px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-  }
-  
-  label {
-    display: block;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  
-  input[type="number"] {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
-    box-sizing: border-box;
-  }
-  
-  button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-color: #000000;
+}
 
-  #expstat {
-    background-color: #3bdb13;
-    margin: auto;
-    border-radius: 8px;
-    text-align: center;
-    max-width: 400px;
-  }
-  
+h1 {
+  text-align: center;
+  color: azure;
+}
+
+.information {
+  max-width: 800px;
+  margin: 20px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+p {
+  text-align: center;
+}
+
+ol {
+  list-style-type: upper-roman;
+}
+
+.options {
+  display: flex;
+  justify-content: space-around;
+}
+
+a {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  padding: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  background: #a1a1a1;
+  color: #002a57;
+  border-style: solid;
+  border-radius: 3px;
+  border-color: #727272;
+}
+
+a:hover {
+  background: rgb(212, 212, 212);
+}
+
+.input {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px; /* Space between input fields */
+}
+
+label {
+  margin-right: 10px; /* Space between label and input */
+  text-align: left; /* Left-align label */
+  width: 150px; /* Fixed width for label to maintain alignment */
+}
+
+input[type="number"] {
+  max-width: 200px;
+  padding: 8px;
+  box-sizing: border-box; /* Ensures padding is included in total width */
+}
+
+button {
+  width: 30%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

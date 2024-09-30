@@ -3,34 +3,24 @@ const app = express();
 const { execFile } = require("child_process");
 const path = require("path");
 
-const experimentParamsHTML = `
-     <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Experiment Parameters</title>
-      <link rel="stylesheet" type="text/css" href="styles.css">
-    </head>
-    <body>
-      <h1>Experiment Parameters</h1>
-      <form action="/run" method="post">
-        <label>newMatcher:<br /><input type="number" name="newMatcher" required /></label>
-        <label>newClient:<br /><input type="number" name="newClient" required /></label>
-        <label>publish:<br /><input type="number" name="publish" required /></label>
-        <label>subscribe:<br /><input type="number" name="subscribe" required /></label>
-        <label>moveClient:<br /><input type="number" name="moveClient" required /></label>
-        <button type="submit">Run Experiment</button>
-      </form>
-    </body>
-    </html>
-  `;
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
-  res.send(experimentParamsHTML);
-});
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-app.post("/run", (req, res) => {
+
+app.get("/", (req, res) => {
+  res.render("index");
+})
+
+app.get("/option1", (req, res) => {
+  res.render("option1_form");
+})
+
+// Handle form submission for Option 1
+app.post('/option1/run', (req, res) => {
   const experimentParams = {
     newMatcher: parseInt(req.body.newMatcher, 10),
     newClient: parseInt(req.body.newClient, 10),
@@ -40,72 +30,30 @@ app.post("/run", (req, res) => {
   };
 
   const experimentParamsJson = JSON.stringify(experimentParams);
-  const experimentScriptPath = path.join(
-    __dirname,
-    "../generator/experiment2.js"
-  );
-  const command = `node ${experimentScriptPath} ${experimentParamsJson}`;
+  const experimentScriptPath = path.join(__dirname, '../generator/experiment2.js');
 
-  console.log(`Running command: ${command}`);
-
-  execFile(
-    "node",
-    [experimentScriptPath, experimentParamsJson],
-    (error, stdout) => {
-      if (error) {
-        console.error(`Error: ${error.message}`);
-        res.send(`<!DOCTYPE html>
-    <html>
-    <head>
-      <title>Experiment Parameters</title>
-      <link rel="stylesheet" type="text/css" href="styles.css">
-    </head>
-    <body>
-      <h1>Experiment Parameters</h1>
-      <form action="/run" method="post">
-        <label>newMatcher:<br /><input type="number" name="newMatcher" required /></label>
-        <label>newClient:<br /><input type="number" name="newClient" required /></label>
-        <label>publish:<br /><input type="number" name="publish" required /></label>
-        <label>subscribe:<br /><input type="number" name="subscribe" required /></label>
-        <label>moveClient:<br /><input type="number" name="moveClient" required /></label>
-        <button type="submit">Run Experiment</button>
-      </form>
-      <h1> Experiment Status </h1>
-      <pre>Error: ${error.message}</pre>
-    </body>
-    </html>`);
-        return;
-      }
-      console.log(`stdout:\n${stdout}`);
-      const combinedHTML = `<!DOCTYPE html>
-    <html>
-    <head>
-      <title>Experiment Parameters</title>
-      <link rel="stylesheet" type="text/css" href="styles.css">
-    </head>
-    <body>
-      <h1>Experiment Parameters</h1>
-      <form action="/run" method="post">
-        <label>newMatcher:<br /><input type="number" name="newMatcher" required /></label>
-        <label>newClient:<br /><input type="number" name="newClient" required /></label>
-        <label>publish:<br /><input type="number" name="publish" required /></label>
-        <label>subscribe:<br /><input type="number" name="subscribe" required /></label>
-        <label>moveClient:<br /><input type="number" name="moveClient" required /></label>
-        <button type="submit">Run Experiment</button>
-      </form>
-      <div id="expstat">
-      <h1> Experiment Status </h1>
-      <label>Network Operations Created</label>
-      <button type="submit">Run Simulator</button>
-</div>
-    </body>
-    </html>
-      `;
-      res.send(combinedHTML);
+  // Use execFile to execute the script without a shell
+  execFile('node', [experimentScriptPath, experimentParamsJson], (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      res.render('result', { output: `Error: ${error.message}` });
+      return;
     }
-  );
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+    }
+    console.log(`stdout:\n${stdout}`);
+    res.render('result', { output: stdout });
+  });
 });
 
-app.listen(3000, () => {
-  console.log("Server is running at http://localhost:3000");
+// Routes for Option 2 and Option 3 can be added similarly
+// app.get('/option2', ...);
+// app.post('/option2/run', ...);
+// app.get('/option3', ...);
+// app.post('/option3/run', ...);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
 });
