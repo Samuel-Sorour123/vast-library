@@ -1,6 +1,8 @@
 const fs = require("fs");
 const { event } = require("jquery");
 
+const filePath = "./../../visualiser/logs_and_events/Client_events.txt";
+//The allSubscriptions, allPublications and allPublicationsReceived JSON objects are assigned values at specific indexes.
 
 //allSubscriptions is a JSON object that is indexed by subscription ids.
 //It stores the supscription details of every subscription that has been made
@@ -26,6 +28,9 @@ var totalMessagesSent = 0;
 
 //totalMessagesReceived denotes the number of publications that were actually received by clients
 var totalMessagesReceived = 0;
+
+//Latency information
+var latencyInformation = [];
 
 class Subscription {
   constructor(time, subID, clientID, channel, aoi) {
@@ -96,6 +101,19 @@ class Client {
     }
     string = string + "####################\n\n";
     return string;
+  }
+}
+
+class Latency {
+  constructor(pubSender, pubReceiver, timeElapsed, pub) {
+    this.pubSender = pubSender;
+    this.pubReceiver = pubReceiver;
+    this.timeElapsed = timeElapsed;
+    this.publication = pub;
+  }
+
+  toString() {
+    return "Client ID that made the publication: " + this.pubSender + "\nClient ID that received the publication: " + this.pubReceiver + "\nTime that was elapsed: " + this.timeElapsed + "\nThe publication was: " + this.publication + "\n";
   }
 }
 
@@ -283,6 +301,41 @@ function errorType1() {
   return errorCount;
 }
 
+function latency(filePath) {
+  let allPublicationsReceivedLatency = {}
+  let allPublicationsLatency = {}
+  let data = readFile(filePath);
+  let dataLines = data.split("\n");
+  for (let i = 0; i < dataLines.length - 1; i++) {
+    let clientEvent = JSON.parse(dataLines[i]);
+
+    if (clientEvent.event == 9) {
+      allPublicationsLatency[clientEvent.pub.pubID] = clientEvent;
+    } else if (clientEvent.event == 10) {
+      // Ensure it is an array or initialize as an array
+      if (!Array.isArray(allPublicationsReceivedLatency[clientEvent.pub.pubID])) {
+        allPublicationsReceivedLatency[clientEvent.pub.pubID] = [];
+      }
+      // Add the event to the array
+      allPublicationsReceivedLatency[clientEvent.pub.pubID].push(clientEvent);
+    }
+  }
+
+
+  let pubKeys = Object.keys(allPublicationsLatency);
+let pubReceiveKeys = Object.keys(allPublicationsReceivedLatency);
+for (let i = 0; i < pubKeys.length; i++) {
+  
+  while (allPublicationsReceivedLatency[pubReceiveKeys[i]].length != 0) {
+    let pubSent = allPublicationsLatency[pubKeys[i]];
+    let pubReceived = allPublicationsReceivedLatency[pubReceiveKeys[i]].pop();
+    let timeElapsed = pubReceived.time - pubSent.time;
+    let latency = new Latency(pubSent.id, pubReceived.id, timeElapsed, pubSent.pub);
+    latencyInformation.push(latency);
+  }
+}
+}
+
 function determineCorrectness(error1, error2, error3)
 {
 //Pe denotes the total number of erroneous publications received
@@ -303,46 +356,38 @@ function determineConsistency(error1)
   return consistency;
 }
 
-const filePath = "./../../visualiser/logs_and_events/Client_events.txt";
-//The allSubscriptions, allPublications and allPublicationsReceived JSON objects are assigned values at specific indexes.
+function determineThroughput(error1, error2, error3, timeInterval)
+{
+  const Pi = totalMessagesSent;
+  const Pa = Pi - error1;
+  //Nrec denotes the total number of publications that were successfully received
+  const Nrec = Pa + error2 + error3;
+  const throughput = Nrec/timeInterval;
+  return throughput;
+}
+
+//RELIABILITY
 loadData(filePath);
-
 let keys = Object.keys(allPublications);
-
 //All the publication events are processed and it is determined for each publication how many times each client should have received and did actually receive the publication.
 for (let i = 0; i < keys.length; i++) {
   let publication = allPublications[keys[i]];
   processPublicationEvent(publication);
 }
-
-//Determine the number of type 1 errors.
 //This is the number of times a publication was supposed to be received and it wasn't
 let error1 = errorType1();
-
-//Determine the number of type 2 errors.
 //This is the number of times a client received too many publications. We count the number of extras that were received.
 let error2 = errorType2();
-
-//Determine the number of type 3 errors.
 //This is the number of unwanted publications that were received. It is unwanted if a client receives publication to which it is not subscribed. 
 let error3 = errorType3();
-
 let correctnesss = determineCorrectnesss(error1, error2, error3);
 let consistency = determineConsistency(error1);
 
 
-console.log("The total number of type 1 errors: " + error1 + "\n");
-console.log("The total number of type 2 errors: " + error2 + "\n");
-console.log("The total number of type 3 errors: " + error3 + "\n");
-console.log(
-  "The total number of publications that should have been received: " +
-    totalMessagesReceived +
-    "\n"
-);
-console.log(
-  "The total number of publications that were actually received: " +
-    totalMessagesSent +
-    "\n"
-);
-console.log("The correctness was: " + correctnesss);
-console.log("The consistency was: " + consistency);
+//LATENCY
+latency();
+
+//THROUGHPUT
+let pubRecKeys = Object.keys(allPublicationsReceived);
+let timeInterval = allPublicationsReceived[pubRecKeys[pubRecKeys.length-1]].time - allPublications[keys[0]].time;
+let throughput = determineThroughput(error1, error2, error3, timeInterval);

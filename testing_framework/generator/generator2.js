@@ -220,13 +220,18 @@ function probabilisticChoice(probabilities) {
 }
 
 function generateRandomPayload(minCharacter, maxCharacters) {
-  const numCharacters = getRandomInt(minCharacter, maxCharacters);
-  let payload = "";
+  let numCharacters = getRandomInt(minCharacter, maxCharacters);
+  let payload = "\"";
   for (let i = 0; i < numCharacters; i++) {
     let asciiValue = getRandomInt(asciiValueRange[0], asciiValueRange[1]);
+    while ((asciiValue == 34) || (asciiValue == 39))
+    {
+      asciiValue = getRandomInt(asciiValueRange[0], asciiValueRange[1]);
+    }
     let asciiCharacter = String.fromCharCode(asciiValue);
     payload = payload + asciiCharacter;
   }
+  payload = payload + "\"";
   return payload;
 }
 

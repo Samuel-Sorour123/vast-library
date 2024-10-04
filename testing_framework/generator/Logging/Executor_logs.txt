@@ -1,0 +1,5 @@
+{"time":1727954820192,"msg":"Executing instruction 0. Type: newMatcher"}
+{"time":1727954820245,"msg":"Matcher GW created and assigned an ID 1"}
+{"time":1727954820245,"msg":"Executing instruction 1. Type: newMatcher"}
+{"time":1727954820261,"msg":"Matcher M2 created and assigned an ID 2"}
+{"time":1727954820261,"msg":"Executing instruction 2. Type: newClient"}
