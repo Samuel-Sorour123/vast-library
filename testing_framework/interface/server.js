@@ -30,7 +30,7 @@ app.post("/option1/run", (req, res) => {
   const experimentParamsJson = JSON.stringify(experimentParams);
   const experimentScriptPath = path.join(
     __dirname,
-    "../generator/generator2.js"
+    "../centralised/generator/generatorConfig.js"
   );
 
   execFile(

@@ -1,6 +1,6 @@
 const fs = require("fs");
-const matcher = require("../../lib/matcher.js");
-const client = require("../../lib/client.js");
+const matcher = require("../../../lib/matcher.js");
+const client = require("../../../lib/client.js");
 
 var log = LOG.newLayer("Executor_Logs", "Executor_logs", "Logging", 5, 5);
 var clientIDs2Alias = new Map();

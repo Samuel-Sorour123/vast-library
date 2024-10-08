@@ -88,8 +88,8 @@ class InstructionManager {
 
     this.keys = Object.keys(args);
     this.categories = {};
-    this.totalInstructionsExecuted = 0;
-    this.numInsutructionsToExecute = 0;
+    this.totalInstructionsGenerated = 0;
+    this.numInsutructionsToGenerate = 0;
 
     for (let i = 0; i < this.keys.length; i++) {
       this.categories[this.keys[i]] = {
@@ -97,7 +97,7 @@ class InstructionManager {
         instructionCounter: 0,
         instructionProbability: 0,
       };
-      this.numInsutructionsToExecute = this.numInsutructionsToExecute + args[this.keys[i]];
+      this.numInsutructionsToGenerate = this.numInsutructionsToGenerate + args[this.keys[i]];
     }
     this.calculateProbabilities();
   }
@@ -111,7 +111,7 @@ class InstructionManager {
       if (instruction == this.keys[i])
       {
         this.categories[this.keys[i]].instructionCounter++;
-        this.totalInstructionsExecuted++;
+        this.totalInstructionsGenerated++;
         break;
       }
     }
@@ -119,7 +119,7 @@ class InstructionManager {
   }
 
   calculateProbabilities() {
-    let totalInstructionsLeft = this.numInsutructionsToExecute - this.totalInstructionsExecuted;
+    let totalInstructionsLeft = this.numInsutructionsToGenerate - this.totalInstructionsGenerated;
     if (totalInstructionsLeft == 0)
     {
       for (let i = 0; i < this.keys.length; i++)
@@ -153,8 +153,8 @@ class InstructionManager {
       let string = "";
       for (let i = 0; i < this.keys.length; i++)
       {
-        string = string + "The number of type " + this.keys[i] + " instructions to execute is: " + this.categories[this.keys[i]].numInstructions + "\n";
-        string = string + "The number of type " + this.keys[i] + " instructions that have been executed is: " + this.categories[this.keys[i]].instructionCounter+ "\n";
+        string = string + "The number of type " + this.keys[i] + " instructions to generate is: " + this.categories[this.keys[i]].numInstructions + "\n";
+        string = string + "The number of type " + this.keys[i] + " instructions that have been generated is: " + this.categories[this.keys[i]].instructionCounter+ "\n";
         string = string + "The probability of choosing instruction " + this.keys[i] + " is: " + this.categories[this.keys[i]].instructionProbability + "\n\n";
       }
       console.log("INSTRUCTION MANAGER INFORMATION:\n" + string);
@@ -374,7 +374,7 @@ function fetchInstructionSet() {
       instructionInfo.displayInstructionManager();
   }
 
-  while((instructionInfo.numInsutructionsToExecute - instructionInfo.totalInstructionsExecuted) != 0)
+  while((instructionInfo.numInsutructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0)
   {
     let choice = probabilisticChoice(instructionInfo.fetchProbabilities(2));
 
@@ -395,14 +395,15 @@ function fetchInstructionSet() {
         instructionInfo.displayInstructionManager();
       break;
     }
-
   }
+  instructions = instructions + "\nend";
  
   return instructions;
 }
 
 const jsonInput = process.argv[2];
 const args = processData(jsonInput);
+console.log(args);
 var instructionInfo = new InstructionManager(args);
 var matchers = {};
 var clients = {};

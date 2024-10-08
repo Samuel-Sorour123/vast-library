@@ -1,0 +1,5 @@
+Hostname - Static IP address
+craftberrypi112 - 
+craftberrypi114 - 192.168.0.10
+craftberrypi113 - 
+craftberrypi116 - 

@@ -1,0 +1,31 @@
+newMatcher GW true localhost 8000 8001 20000 811 962 84
+newMatcher M2 false localhost 8000 8010 20010 863 287 47
+newClient C1 localhost 20000 615 308 100
+newClient C2 localhost 20000 642 536 48
+newClient C3 localhost 20000 945 162 60
+newClient C4 localhost 20000 712 262 75
+newClient C5 localhost 20000 886 672 67
+publish C1 441 555 159 channel3 "wc</7?~?Kj8Y(,CjS"
+moveClient C5 212 456
+publish C2 810 673 128 channel1 "4@=i&o+8Yc7LH$#f?+ I"
+subscribe C1 297 693 263 channel1
+subscribe C3 313 192 67 channel3
+subscribe C1 430 360 211 channel3
+publish C2 219 756 203 channel3 ";P~2lUnb9~"
+subscribe C4 449 225 151 channel3
+publish C5 905 763 11 channel2 "Fh@OQS6L+HQ`>E<J"
+publish C5 433 611 248 channel2 "mG/{DtR~n0Tg"
+moveClient C5 390 315
+subscribe C4 540 555 161 channel3
+publish C1 615 745 203 channel2 "~Nb&F`xBJ92"
+subscribe C2 733 292 112 channel3
+subscribe C4 448 752 105 channel2
+publish C1 287 646 190 channel2 "RXH5^QrNd+V@&)k)or>("
+publish C5 693 634 271 channel3 "Te1clnBI)EoU~{`\v{"
+publish C1 372 562 273 channel3 ",Hu-Au!("
+subscribe C1 793 809 145 channel2
+subscribe C1 566 558 219 channel2
+publish C4 674 660 163 channel2 "y45ghebOIAf"
+moveClient C1 374 866
+subscribe C4 313 326 205 channel2
+end
