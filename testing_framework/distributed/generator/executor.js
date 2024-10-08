@@ -4,7 +4,7 @@ const client = require("../../../lib/client.js");
 const { execFile, exec } = require("child_process");
 const { stderr, stdout } = require("process");
 
-var log = LOG.newLayer("Executor_Logs", "Executor_logs", "Logging", 5, 5);
+var log = LOG.newLayer("Executor_Logs", "Executor_logs", "Logging", 0, 5);
 var clientIDs2Alias = new Map();
 var matcherIDs2alias = new Map();
 
@@ -16,8 +16,8 @@ var matchers = {};
 
 var instructions = [];
 
-var matcherScriptPath = "~/vast-library/testing_framework/distributed/generator/matcher.js";
-var clientScriptPath = "~/vast-library/testing_framework/distributed/generator/client.js";
+var clientsAliasToStaticIP = new Map();
+var matchersAliasToStaticIP = new Map();
 
 class Instruction {
   constructor(
@@ -54,9 +54,9 @@ class Instruction {
     };
   }
 
-  executeInstructionObject() {
+  executeInstructionObject(step) {
     return new Promise((resolve, reject) => {
-      this.executeInstruction(
+      this.executeInstruction(step,
         this.type,
         this.options,
         function (successMessage) {
@@ -69,7 +69,8 @@ class Instruction {
     });
   }
 
-  async executeInstruction(type, options, success, fail) {
+  async executeInstruction(step, type, options, success, fail) {
+
     switch (type) {
       case "wait":
         delay(opts.waitTime, function () {
@@ -92,22 +93,25 @@ class Instruction {
               alias: options.alias,
             }
           };
-          const instructionScriptPath = "./newMatcher.js";
-          const instructionArguments = matchers[options.alias];
-          execFile("node", [instructionScriptPath, instructionArguments], (err, stderr, stdout) =>{
-            if(err)
-            {
-              fail("The terminal command \'node " + instructionScriptPath + " " + instructionArguments + "\' could not be executed");
+
+          const instructionScript = "newMatcher.js";
+          const instructionArguments = JSON.stringify(matchers[options.alias]);
+          const piUser = "pi";
+          const piHost = matchersAliasToStaticIP.get(options.alias);
+          const piScriptPath = `~/vast-library/distributed/generator/${instructionScript}`;
+          const sshCommand = `ssh ${piUser}@${piHost} 'node ${piScriptPath} ${instructionArguments}'`
+          
+          exec(sshCommand, (err, stdout, stderr) => {
+            if (err) {
+              return fail("The terminal command could not be executed");
             }
-            if(stderr)
-            {
-              fail("The matcher with alias " + options.alias + " could not be created");
+            if (stderr) {
+              return fail("The matcher couldn't be created");
             }
-            if(stdout)
-            {
-              success( "Matcher " + options.alias + " created and assigned an ID " + id);
+            if (stdout) {
+              return success("Matcher with alias " + options.alias + " was created and was assigned an id of " + options.GW_Host);
             }
-          })
+          });
 
         } else {
           fail("There already exists a matcher with that alias");
@@ -124,6 +128,20 @@ class Instruction {
             y_ord: options.y_ord,
             radius: options.radius,
           };
+          const instructionScriptPath = "./newClient.js";
+          const instructionArguments = JSON.stringify(clients[options.alias]);
+          execFile("node", [instructionScriptPath, instructionArguments], (err, stdout, stderr)=>{
+              if (err){
+                return fail("The terminal command could not be executed");
+              }
+              if (stderr)
+              {
+                return fail("Client could not be created");
+              }
+              if (stdout){
+                return success("Client with alias " + options.alias + " was created");
+              }
+          });
         } else {
           fail("There already is a client with that alias");
         }
@@ -370,10 +388,10 @@ async function executeAllInstructions(step) {
     log.debug(
       "Executing instruction " + step + ". Type: " + instructions[step].type
     );
-    var result = await instructions[step].executeInstructionObject();
+    var result = await instructions[step].executeInstructionObject(step);
     log.debug(result);
   } catch (error) {
-    log.debug("Could not execute instruction" + step + "\t Error: " + error);
+    log.debug("Could not execute instruction " + step + "\t Error: " + error);
   }
   executeAllInstructions(step + 1);
 }
