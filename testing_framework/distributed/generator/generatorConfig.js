@@ -1,12 +1,11 @@
-const { match } = require("assert");
 const fs = require("fs");
-const { getSystemErrorMap } = require("util");
+const path = require("path");
 //Running an experiment on a single host (Matchers are stationary but clients are moving)
 //The script generates a text file that the simulator uses to run a simulation
 
 const channels = ["channel1", "channel2", "channel3"];
-const payloadLength = [5, 20];
-const asciiValueRange = [32, 126];
+const payloadLength = [10, 40];
+const asciiValueRange = [97, 122];
 
 class Matcher {
   constructor(
@@ -104,8 +103,6 @@ class InstructionManager {
 
   updateCounter(instruction) {
     for (let i = 0; i < this.keys.length; i++) {
-      console.log(instruction);
-      console.log(this.keys[i]);
       if (instruction == this.keys[i]) {
         this.categories[this.keys[i]].instructionCounter++;
         this.totalInstructionsGenerated++;
@@ -146,7 +143,6 @@ class InstructionManager {
       string = string + "The number of type " + this.keys[i] + " instructions that have been generated is: " + this.categories[this.keys[i]].instructionCounter + "\n";
       string = string + "The probability of choosing instruction " + this.keys[i] + " is: " + this.categories[this.keys[i]].instructionProbability + "\n\n";
     }
-    console.log("INSTRUCTION MANAGER INFORMATION:\n" + string);
   }
 }
 
@@ -159,16 +155,32 @@ const processData = (jsonString) => {
   }
 };
 
-function writeFile(filename, instructions) {
-  fs.writeFile(filename, instructions, function callback(err) {
-    if (err) {
-      // An error occurred during the file write operation
-      console.error("Error writing to file", err);
-    } else {
-      // File was written successfully
-      console.log("File written successfully");
-    }
-  });
+function saveInstructionsToFile(instructions) {
+  const directory = './files'; // Directory path
+  const filePath = path.join(directory, 'instructions.txt'); // File path
+
+  // Check if the directory exists
+  if (!fs.existsSync(directory)) {
+    // Create the directory if it doesn't exist
+    fs.mkdirSync(directory);
+  }
+
+  // Write the instructions to the file in the 'files' directory
+  fs.writeFileSync(filePath, instructions, 'utf8');
+}
+
+function saveStaticIPs(staticIPs) {
+  const directory = './files'; // Directory path
+  const filePath = path.join(directory, 'static.json'); // File path
+
+  // Check if the directory exists
+  if (!fs.existsSync(directory)) {
+    // Create the directory if it doesn't exist
+    fs.mkdirSync(directory);
+  }
+
+  // Write the static IPs to the file in the 'files' directory
+  fs.writeFileSync(filePath, JSON.stringify(staticIPs, null, 3), 'utf8');
 }
 
 function getRandomInt(min, max) {
@@ -188,7 +200,6 @@ function sumProbabilitiesUpToIndex(probabilities, index) {
 }
 
 function probabilisticChoice(probabilities) {
-  console.log("The probabilities are: " + probabilities);
   let sum = probabilities.reduce(
     (accumulator, current) => accumulator + current,
     0
@@ -213,7 +224,7 @@ function generateRandomPayload(minCharacter, maxCharacters) {
   let payload = "\"";
   for (let i = 0; i < numCharacters; i++) {
     let asciiValue = getRandomInt(asciiValueRange[0], asciiValueRange[1]);
-    while ((asciiValue == 34) || (asciiValue == 39)) {
+    while ((asciiValue == 34) || (asciiValue == 39) || (asciiValue == 123) || (asciiValue == 125) || (asciiValue == 40) || (asciiValue == 41)) {
       asciiValue = getRandomInt(asciiValueRange[0], asciiValueRange[1]);
     }
     let asciiCharacter = String.fromCharCode(asciiValue);
@@ -226,6 +237,7 @@ function generateRandomPayload(minCharacter, maxCharacters) {
 function generateWaitInsruction(minLength, maxLength) {
   let length = getRandomInt(minLength, maxLength);
   let instruction = "wait " + length.toString();
+  return instruction;
 }
 
 function createMatchers(numMatchers) {
@@ -341,7 +353,6 @@ function fetchInstructionSet() {
   let clientIDArray = Object.keys(clients);
 
   for (let i = 0; i < matcherIDArray.length; i++) {
-    console.log("We are executing the newMatcher instruction set. i = " + i);
     if (i == 0) {
       instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
       instructionInfo.updateCounter("newMatcher");
@@ -419,8 +430,8 @@ function assignAddresses(staticAddressFile, args) {
   }
 
   // Write the data to a file
-  let staticIPs = {masterStaticIP : "192.168.101.30", matchersAliasToStaticIP, clientsAliasToStaticIP};
-  fs.writeFileSync('staticIPs.json', JSON.stringify(staticIPs, null, 3));
+  let staticIPs = { masterStaticIP: "192.168.101.30", matchersAliasToStaticIP, clientsAliasToStaticIP };
+  saveStaticIPs(staticIPs);
 }
 
 const jsonInput = process.argv[2];
@@ -429,14 +440,15 @@ const args = processData(jsonInput);
 
 var matchersAliasToStaticIP = {}
 var clientsAliasToStaticIP = {}
-
 assignAddresses(staticAddressFile, args);
+
 
 var instructionInfo = new InstructionManager(args);
 var matchers = {};
 var clients = {};
 createMatchers(instructionInfo.categories["newMatcher"].numInstructions);
 createClients(instructionInfo.categories["newClient"].numInstructions);
-instructionInfo.displayInstructionManager();
 var instructions = fetchInstructionSet();
-writeFile("instructions.txt", instructions);
+
+
+saveInstructionsToFile(instructions);

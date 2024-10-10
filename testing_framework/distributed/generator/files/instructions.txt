@@ -1,0 +1,41 @@
+newMatcher GW true 192.169.101.15 8000 8001 20000 278 596 70
+wait 3564
+newMatcher M2 false 192.169.101.14 8000 8010 20010 155 347 81
+wait 3086
+newClient C1 192.168.101.12 20000 851 991 58
+wait 3198
+newClient C2 192.168.101.9 20000 534 381 54
+wait 3296
+newClient C3 192.169.101.13 20000 558 575 84
+wait 3745
+subscribe C3 546 707 177 channel2
+wait 2323
+moveClient C2 295 919
+wait 2970
+subscribe C2 558 622 61 channel3
+wait 3156
+publish C1 460 405 223 channel3 "woablplegppdzslvgwztephoufinji"
+wait 3125
+publish C3 715 176 50 channel2 "ahrcepcrnwjpsrzzissjdomrdvvsgxg"
+wait 2183
+moveClient C1 193 93
+wait 2890
+subscribe C3 261 244 204 channel1
+wait 3104
+publish C3 562 645 13 channel1 "pbojaxebhjljqlqdfmcbbdbgfvyyjm"
+wait 3154
+publish C3 454 890 46 channel2 "wadewbhuirvhhfhacrahrpnfvihynzb"
+wait 2742
+moveClient C1 973 245
+wait 3576
+subscribe C2 710 131 1 channel3
+wait 2995
+moveClient C3 814 668
+wait 3060
+subscribe C3 285 486 280 channel2
+wait 2980
+publish C1 586 150 146 channel1 "kvuzdhkljwnoreo"
+wait 3201
+moveClient C1 525 625
+wait 3405
+end
