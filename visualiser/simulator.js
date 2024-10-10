@@ -166,7 +166,7 @@ async function execute(step){
     catch(error){
         log.error(error);
     }
-    execute(step+1);
+
 }
 
 async function delay(m, callback) {    
