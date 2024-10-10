@@ -102,14 +102,11 @@ class InstructionManager {
     this.calculateProbabilities();
   }
 
-  updateCounter(instruction)
-  {
-    for (let i = 0; i < this.keys.length; i++)
-    {
+  updateCounter(instruction) {
+    for (let i = 0; i < this.keys.length; i++) {
       console.log(instruction);
       console.log(this.keys[i]);
-      if (instruction == this.keys[i])
-      {
+      if (instruction == this.keys[i]) {
         this.categories[this.keys[i]].instructionCounter++;
         this.totalInstructionsGenerated++;
         break;
@@ -120,45 +117,37 @@ class InstructionManager {
 
   calculateProbabilities() {
     let totalInstructionsLeft = this.numInsutructionsToGenerate - this.totalInstructionsGenerated;
-    if (totalInstructionsLeft == 0)
-    {
-      for (let i = 0; i < this.keys.length; i++)
-        {
-          this.categories[this.keys[i]].instructionProbability = 0;
-        }
+    if (totalInstructionsLeft == 0) {
+      for (let i = 0; i < this.keys.length; i++) {
+        this.categories[this.keys[i]].instructionProbability = 0;
+      }
     }
-    else
-    {
-      for (let i = 0; i < this.keys.length; i++)
-        {
-          this.categories[this.keys[i]].instructionProbability = (this.categories[this.keys[i]].numInstructions - this.categories[this.keys[i]].instructionCounter)/totalInstructionsLeft;
-        }
+    else {
+      for (let i = 0; i < this.keys.length; i++) {
+        this.categories[this.keys[i]].instructionProbability = (this.categories[this.keys[i]].numInstructions - this.categories[this.keys[i]].instructionCounter) / totalInstructionsLeft;
+      }
     }
-    
+
   }
 
   // Method to retrieve the current state of a category
-  fetchProbabilities(index)
-  {
+  fetchProbabilities(index) {
     let probabilities = [];
-    for (let i = index; i < this.keys.length; i++)
-    {
-      probabilities[i-index] = this.categories[this.keys[i]].instructionProbability;
+    for (let i = index; i < this.keys.length; i++) {
+      probabilities[i - index] = this.categories[this.keys[i]].instructionProbability;
     }
     return probabilities;
   }
 
-  displayInstructionManager()
-    {
-      let string = "";
-      for (let i = 0; i < this.keys.length; i++)
-      {
-        string = string + "The number of type " + this.keys[i] + " instructions to generate is: " + this.categories[this.keys[i]].numInstructions + "\n";
-        string = string + "The number of type " + this.keys[i] + " instructions that have been generated is: " + this.categories[this.keys[i]].instructionCounter+ "\n";
-        string = string + "The probability of choosing instruction " + this.keys[i] + " is: " + this.categories[this.keys[i]].instructionProbability + "\n\n";
-      }
-      console.log("INSTRUCTION MANAGER INFORMATION:\n" + string);
+  displayInstructionManager() {
+    let string = "";
+    for (let i = 0; i < this.keys.length; i++) {
+      string = string + "The number of type " + this.keys[i] + " instructions to generate is: " + this.categories[this.keys[i]].numInstructions + "\n";
+      string = string + "The number of type " + this.keys[i] + " instructions that have been generated is: " + this.categories[this.keys[i]].instructionCounter + "\n";
+      string = string + "The probability of choosing instruction " + this.keys[i] + " is: " + this.categories[this.keys[i]].instructionProbability + "\n\n";
     }
+    console.log("INSTRUCTION MANAGER INFORMATION:\n" + string);
+  }
 }
 
 const processData = (jsonString) => {
@@ -224,8 +213,7 @@ function generateRandomPayload(minCharacter, maxCharacters) {
   let payload = "\"";
   for (let i = 0; i < numCharacters; i++) {
     let asciiValue = getRandomInt(asciiValueRange[0], asciiValueRange[1]);
-    while ((asciiValue == 34) || (asciiValue == 39))
-    {
+    while ((asciiValue == 34) || (asciiValue == 39)) {
       asciiValue = getRandomInt(asciiValueRange[0], asciiValueRange[1]);
     }
     let asciiCharacter = String.fromCharCode(asciiValue);
@@ -249,10 +237,11 @@ function createMatchers(numMatchers) {
     let y = getRandomInt(0, 1000);
 
     if (m == 1) {
+      let staticAddress = matchersAliasToStaticIP["GW"];
       let matcher = new Matcher(
         "GW",
         true,
-        "localhost",
+        staticAddress,
         "8000",
         "8001",
         "20000",
@@ -265,10 +254,11 @@ function createMatchers(numMatchers) {
       let matcherID = "M" + m.toString();
       let vonPort = ((m - 1) * 10 + 8000).toString();
       let clientPort = ((m - 1) * 10 + 20000).toString();
+      let staticAddress = matchersAliasToStaticIP[matcherID];
       let matcher = new Matcher(
         matcherID,
         false,
-        "localhost",
+        staticAddress,
         "8000",
         vonPort,
         clientPort,
@@ -290,7 +280,8 @@ function createClients(numClients) {
     let x = getRandomInt(0, 1000);
     let y = getRandomInt(0, 1000);
     let clientID = "C" + c.toString();
-    let client = new Client(clientID, "localhost", "20000", x, y, r);
+    let staticAddress = clientsAliasToStaticIP[clientID];
+    let client = new Client(clientID, staticAddress, "20000", x, y, r);
     clients[clientID] = client;
   }
 }
@@ -335,7 +326,7 @@ function fetchRandomSubscriptionString() {
   return subscription;
 }
 
-function fetchRandomClientMovement(){
+function fetchRandomClientMovement() {
   let clientMovement = "moveClient ";
   let clientKeyArray = Object.keys(clients);
   let clientID = clientKeyArray[getRandomInt(0, clientKeyArray.length - 1)];
@@ -351,53 +342,45 @@ function fetchInstructionSet() {
 
   for (let i = 0; i < matcherIDArray.length; i++) {
     console.log("We are executing the newMatcher instruction set. i = " + i);
-    if (i == 0)
-    {
-      instructions = matchers[matcherIDArray[i]].fetchInstruction();
+    if (i == 0) {
+      instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
-    else
-    {
-      instructions =
-      instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction();
+    else {
+      instructions = instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
-    
   }
 
   for (let j = 0; j < clientIDArray.length; j++) {
-    instructions =
-      instructions + "\n" + clients[clientIDArray[j]].fetchInstruction();
-      instructionInfo.updateCounter("newClient");
-      instructionInfo.displayInstructionManager();
+    instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
+    instructionInfo.updateCounter("newClient");
+    instructionInfo.displayInstructionManager();
   }
 
-  while((instructionInfo.numInsutructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0)
-  {
+  while ((instructionInfo.numInsutructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0) {
     let choice = probabilisticChoice(instructionInfo.fetchProbabilities(2));
-
-    switch(choice){
+    switch (choice) {
       case 0:
-        instructions = instructions + "\n" + fetchRandomPublicationString();
+        instructions = instructions + "\n" + fetchRandomPublicationString() + "\n" + generateWaitInsruction(2000, 4000);
         instructionInfo.updateCounter("publish");
         instructionInfo.displayInstructionManager();
-      break;
-      case 1: 
-      instructions = instructions + "\n" + fetchRandomSubscriptionString();
-      instructionInfo.updateCounter("subscribe");
-      instructionInfo.displayInstructionManager();
-      break;
+        break;
+      case 1:
+        instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInsruction(2000, 4000);
+        instructionInfo.updateCounter("subscribe");
+        instructionInfo.displayInstructionManager();
+        break;
       case 2:
-        instructions = instructions + "\n" + fetchRandomClientMovement();
+        instructions = instructions + "\n" + fetchRandomClientMovement() + "\n" + generateWaitInsruction(2000, 4000);
         instructionInfo.updateCounter("moveClient");
         instructionInfo.displayInstructionManager();
-      break;
+        break;
     }
   }
   instructions = instructions + "\nend";
- 
   return instructions;
 }
 
@@ -410,44 +393,44 @@ function readFile(filePath) {
   }
 }
 
-function assignAddresses(filePath, args) {
-  let staticAddresses = readFile(filePath).split("\n");
+function assignAddresses(staticAddressFile, args) {
+  let staticAddresses = readFile(staticAddressFile).split("\n");
   let numAddresses = staticAddresses.length;
 
   if (numAddresses < (args.newMatcher + args.newClient)) {
-      console.error("There aren't enough IP addresses");
+    console.error("There aren't enough IP addresses");
   } else {
-      for (let i = 0; i < args.newMatcher; i++) {
-          let randomIndex = getRandomInt(0, staticAddresses.length - 1);
-          if (i === 0) {
-              matchersAliasToStaticIP["GW"] = staticAddresses[randomIndex];
-          } else {
-              let id = "M" + (i + 1).toString();
-              matchersAliasToStaticIP[id] = staticAddresses[randomIndex];
-          }
-          staticAddresses.splice(randomIndex, 1);
+    for (let i = 0; i < args.newMatcher; i++) {
+      let randomIndex = getRandomInt(0, staticAddresses.length - 1);
+      if (i === 0) {
+        matchersAliasToStaticIP["GW"] = staticAddresses[randomIndex];
+      } else {
+        let id = "M" + (i + 1).toString();
+        matchersAliasToStaticIP[id] = staticAddresses[randomIndex];
       }
-      for (let j = 0; j < args.newClient; j++) {
-          let id = "C" + (j + 1).toString();
-          clientsAliasToStaticIP[id] = staticAddresses[randomIndex];
-          staticAddresses.splice(randomIndex, 1);
-      }
+      staticAddresses.splice(randomIndex, 1);
+    }
+    for (let j = 0; j < args.newClient; j++) {
+      let randomIndex = getRandomInt(0, staticAddresses.length - 1);
+      let id = "C" + (j + 1).toString();
+      clientsAliasToStaticIP[id] = staticAddresses[randomIndex];
+      staticAddresses.splice(randomIndex, 1);
+    }
   }
 
   // Write the data to a file
-  fs.writeFileSync('staticIPs.json', JSON.stringify({ matchersAliasToStaticIP, clientsAliasToStaticIP }, null, 2));
+  let staticIPs = {masterStaticIP : "192.168.101.30", matchersAliasToStaticIP, clientsAliasToStaticIP};
+  fs.writeFileSync('staticIPs.json', JSON.stringify(staticIPs, null, 3));
 }
 
 const jsonInput = process.argv[2];
 const staticAddressFile = process.argv[3];
-const args = processData(jsonInput, args);
+const args = processData(jsonInput);
 
-
-assignAddresses(staticAddressFile);
 var matchersAliasToStaticIP = {}
 var clientsAliasToStaticIP = {}
 
-
+assignAddresses(staticAddressFile, args);
 
 var instructionInfo = new InstructionManager(args);
 var matchers = {};

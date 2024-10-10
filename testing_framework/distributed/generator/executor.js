@@ -1,402 +1,465 @@
-const fs = require("fs");
-const matcher = require("../../../lib/matcher.js");
-const client = require("../../../lib/client.js");
-const { execFile, exec } = require("child_process");
-const { stderr, stdout } = require("process");
+// CF Marais December 2021
+// A discrete event simulator for VAST, used for code verification and bug finding
 
-var log = LOG.newLayer("Executor_Logs", "Executor_logs", "Logging", 0, 5);
-var clientIDs2Alias = new Map();
-var matcherIDs2alias = new Map();
+// imports
+const matcher = require('../lib/matcher.js');
+const client = require('../lib/client.js');
+const mqtt = require('mqtt');
 
-//Indexed by the client's alias
-var clients = {};
+var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', 'logs_and_events', 5, 5);
 
-//Indexed by the matcher's alias
+// Data structures to store matchers
+// alias --> matcher{}.
 var matchers = {};
+var matcherIDs2alias = {};
+var clients = {};
+var clientIDs2alias = {};
 
 var instructions = [];
 
-var clientsAliasToStaticIP = new Map();
-var matchersAliasToStaticIP = new Map();
+//importing data from text file
+var fs = require('fs');
+const readline = require('readline');
 
-class Instruction {
-  constructor(
-    type,
-    alias,
-    isGateway,
-    GW_Host,
-    GW_port,
-    VON_port,
-    client_port,
-    x_ord,
-    y_ord,
-    radius,
-    channel,
-    payload,
-    waitTime,
-    timeStamp
-  ) {
-    this.type = type;
-    this.options = {
-      alias: alias,
-      isGateway: isGateway == "true" ? true : false,
-      GW_Host: GW_Host,
-      GW_port: GW_port,
-      VON_port: VON_port,
-      client_port: client_port,
-      x_ord: x_ord,
-      y_ord: y_ord,
-      radius: radius,
-      channel: channel,
-      payload: payload,
-      waitTime: waitTime,
-      timeStamp: timeStamp,
-    };
-  }
+var filename = process.argv[2] || "./simulator/example_script.txt";
+var processRunning = process.argv[3] || "master";
 
-  executeInstructionObject(step) {
-    return new Promise((resolve, reject) => {
-      this.executeInstruction(step,
-        this.type,
-        this.options,
-        function (successMessage) {
-          resolve(successMessage);
-        },
-        function (failMessage) {
-          reject(failMessage);
-        }
-      );
-    });
-  }
+//Javascript Object that stores the static IP addresses of the matchers and clients
+const staticAddresses = require("staticIPs.json");
 
-  async executeInstruction(step, type, options, success, fail) {
+//MQTT client object
+var mqttClient;
+
+//Makes sure the instructions are saved in a textfile
+if (filename.length > 4 && filename.slice(-4) != ".txt") {
+    error("Please Provide A Text File");
+}
+
+// Interpret and execute instruction
+async function executeInstruction(instruction, step, success, fail) {
+    var opts = instruction.opts;
+    var type = instruction.type;
 
     switch (type) {
-      case "wait":
-        delay(opts.waitTime, function () {
-          success("waited for " + opts.waitTime + " milliseconds");
+
+        case 'wait': {
+            delay(opts.waitTime, function () {
+                success('waited for ' + opts.waitTime + ' milliseconds');
+            });
+        }
+            break;
+
+        case 'newMatcher': {
+
+            if (!matchers.hasOwnProperty(opts.alias)) {
+
+                matchers[opts.alias] = new matcher(opts.x, opts.y, opts.radius,
+                    {
+                        isGateway: opts.isGateway,
+                        GW_host: opts.GW_host,
+                        GW_port: opts.GW_port,
+                        VON_port: opts.VON_port,
+                        client_port: opts.client_port,
+                        alias: opts.alias,
+                        //logLayer: 'Matcher_' + opts.alias,
+                        //logFile: 'Matcher_' + opts.alias,
+                        logDisplayLevel: 0,
+                        logRecordLevel: 5,
+                        eventDisplayLevel: 0,
+                        eventRecordLevel: 5
+                    },
+                    function (id) {
+                        matcherIDs2alias[id] = opts.alias;
+                        success('Matcher: ' + opts.alias + ' created with ID: ' + id);
+                    }
+                );
+            }
+            else {
+                fail('Matcher already exists with alias: ' + opts.alias);
+            }
+        }
+            break;
+
+        case 'newClient': {
+            if (!clients.hasOwnProperty(opts.alias)) {
+
+                clients[opts.alias] = new client(opts.host, opts.port, opts.alias, opts.x, opts.y, opts.radius, function (id) {
+                    clientIDs2alias[id] = opts.alias;
+                    clients[opts.alias].setAlias = opts.alias;
+                    let m = clients[opts.alias].getMatcherID();
+                    success('Client ' + opts.alias + ' assigned to matcher: ' + matcherIDs2alias[m]);
+                });
+            }
+            else {
+                fail('client already exists with alias: ' + alias);
+            }
+        }
+            break;
+
+        case 'subscribe': {
+
+            if (clients.hasOwnProperty(opts.alias)) {
+                clients[opts.alias].subscribe(opts.x, opts.y, opts.radius, opts.channel);
+                success(opts.alias + ': added subscription:', opts.x, opts.y, opts.radius, opts.channel);
+            }
+            else {
+                fail('Invalid client alias for subscription: ' + opts.alias);
+            }
+        }
+            break;
+
+        case 'publish': {
+
+            if (clients.hasOwnProperty(opts.alias)) {
+                clients[opts.alias].publish(opts.x, opts.y, opts.radius, opts.payload, opts.channel);
+                success(opts.alias + ' published:', opts.payload, 'on channel: ' + opts.channel)
+            }
+            else {
+                fail('client with alias "' + alias + '" does not exist');
+            }
+        }
+            break;
+
+        case 'moveClient': {
+
+            if (clients.hasOwnProperty(opts.alias)) {
+                clients[opts.alias].move(opts.x, opts.y);
+                success(opts.alias + ' request move to [' + opts.x + '; ' + opts.y + ']');
+            }
+            else {
+                fail('client with alias "' + alias + '" does not exist');
+            }
+        }
+            break;
+
+        case 'end': {
+            log.debug('Ending Simulation');
+            process.exit(0);
+        }
+            break;
+
+        default: {
+            fail('instruction at step ' + step + 'is not valid');
+        }
+    }
+}
+
+// A function wrapper used to execute steps synchronously using a promise
+var executeInstructionWrapper = function (instruction, step) {
+    return new Promise(function (resolve, reject) {
+
+        executeInstruction(instruction, step,
+            function (successResponse) {
+                resolve(successResponse);
+            },
+
+            function (failResponse) {
+                reject(failResponse);
+            });
+    });
+}
+
+async function execute(step) {
+    step = step || 0;
+
+    if (step >= instructions.length) {
+        log.debug('Reached end of instructions');
+        return;
+    }
+
+    if (instructions[step].type == "wait") {
+        try {
+            log.debug('Executing wait instruction with step ' + step + ': Waiting ' + instructions[step].opts.waitTime);
+            let result = await executeInstructionWrapper(instructions[step], step);
+            log.debug(result);
+            await execute(step + 1);
+        }
+        catch (error) {
+            log.error(error);
+        }
+    }
+    else {
+        try {
+            log.debug('Publishing instruction ' + step + '. Type: ' + instructions[step].type);
+            mqttClient.publish('instructions', step.toString());
+            await execute(step + 1);
+        }
+        catch (error) {
+            log.error(error);
+        }
+    }
+
+}
+
+async function delay(m, callback) {
+    m = m || 100;
+    await new Promise(function () {
+        setTimeout(callback, m);
+    });
+}
+
+//function to obtain all the data from a text file
+var dataFromTextFiles = async (filename) => {
+    try {
+        var dataFromTextFile = [];
+        const fileStream = fs.createReadStream(filename);
+
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity,
         });
-        break;
+        // Note: we use the crlfDelay option to recognize all instances of CR LF
+        // ('\r\n') in input.txt as a single line break.
 
-      case "newMatcher":
-        if (!matchers.hasOwnProperty(options.alias)) {
-          matchers[options.alias] = {
-            x_ord: options.x_ord,
-            y_ord: options.y_ord,
-            radius: options.radius,
-            options: {
-              isGateway: options.isGateway,
-              GW_Host: options.GW_Host,
-              GW_port: options.GW_port,
-              VON_port: options.VON_port,
-              client_port: options.client_port,
-              alias: options.alias,
+        for await (const data of rl) {
+            var dataLine = [];
+            var cur = "";
+            var isString = 0;
+
+            for (var d of data) {
+                if (d == '"') {
+                    isString = 1 - isString;
+                }
+
+                else if (isString == 1) {
+                    cur += d;
+                }
+
+                else if (
+                    (d >= "a" && d <= "z") || (d >= "A" && d <= "Z") ||
+                    (d >= "0" && d <= "9") || (d == "/")) {
+                    cur += d;
+                }
+
+                else {
+                    if (cur.length != 0)
+                        dataLine.push(cur);
+
+                    cur = "";
+                }
             }
-          };
+            if (cur.length != 0)
+                dataLine.push(cur);
 
-          const instructionScript = "newMatcher.js";
-          const instructionArguments = JSON.stringify(matchers[options.alias]);
-          const piUser = "pi";
-          const piHost = matchersAliasToStaticIP.get(options.alias);
-          const piScriptPath = `~/vast-library/distributed/generator/${instructionScript}`;
-          const sshCommand = `ssh ${piUser}@${piHost} 'node ${piScriptPath} ${instructionArguments}'`
-          
-          exec(sshCommand, (err, stdout, stderr) => {
-            if (err) {
-              return fail("The terminal command could not be executed");
-            }
-            if (stderr) {
-              return fail("The matcher couldn't be created");
-            }
-            if (stdout) {
-              return success("Matcher with alias " + options.alias + " was created and was assigned an id of " + options.GW_Host);
-            }
-          });
-
-        } else {
-          fail("There already exists a matcher with that alias");
+            dataFromTextFile.push(dataLine);
         }
-        break;
 
-      case "newClient":
-        if (!clients.hasOwnProperty(options.alias)) {
-          clients[options.alias] = {
-            GW_Host: options.GW_Host,
-            GW_port: options.GW_port,
-            alias: options.alias,
-            x_ord: options.x_ord,
-            y_ord: options.y_ord,
-            radius: options.radius,
-          };
-          const instructionScriptPath = "./newClient.js";
-          const instructionArguments = JSON.stringify(clients[options.alias]);
-          execFile("node", [instructionScriptPath, instructionArguments], (err, stdout, stderr)=>{
-              if (err){
-                return fail("The terminal command could not be executed");
-              }
-              if (stderr)
-              {
-                return fail("Client could not be created");
-              }
-              if (stdout){
-                return success("Client with alias " + options.alias + " was created");
-              }
-          });
-        } else {
-          fail("There already is a client with that alias");
-        }
-        break;
-
-      case "publish":
-        if (clients.hasOwnProperty(options.alias)) {
-          success("Client with alias " + options.alias + " published");
-        } else {
-          fail("There isn't a client with that alias so a publication can't be made");
-        }
-        break;
-
-      case "subscribe":
-        if (clients.hasOwnProperty(options.alias)) {
-          success("Client with alias " + options.alias + " subscribed");
-        } else {
-          fail("There isn't a client with that alias so a subscription can't be made");
-        }
-        break;
-
-      case "moveClient":
-        if (clients.hasOwnProperty(options.alias)) {
-          success("Client with alias " + options.alias + " moved");
-        } else {
-          fail("There is no client with that alias so a client move could not be performed");
-        }
-        break;
-
-      case "end":
-        process.exit(0);
-        break;
-
-      default:
-        fail("Something went wrong");
+        return dataFromTextFile;
+    } catch (e) {
+        log.error("Error:", e.stack);
     }
+};
 
-  }
+var dataFromTextFile = dataFromTextFiles(filename).then((dataFromTextFile) => {
 
-  toString() {
-    return (
-      "INSTRUCTION\nType: " +
-      this.type +
-      "\nAlias: " +
-      this.options.alias +
-      "\nisGateway: " +
-      this.options.isGateway +
-      "\nGW_Host: " +
-      this.options.GW_Host +
-      "\nGW_port: " +
-      this.options.GW_port +
-      "\nVON_port: " +
-      this.options.VON_port +
-      "\nclient_port: " +
-      this.options.client_port +
-      "\nx_ord: " +
-      this.options.x_ord +
-      "\ny_ord: " +
-      this.options.y_ord +
-      "\nradius: " +
-      this.options.radius +
-      "\nchannel: " +
-      this.options.channel +
-      "\npayload: " +
-      this.options.payload +
-      "\nwaitTime: " +
-      this.options.waitTime +
-      "\nTimestamp: " +
-      this.options.timeStamp +
-      "\n"
-    );
-  }
-}
+    var i = 1;  // line counter
+    dataFromTextFile.map((dataFromTextFile) => {
 
-function readFile(filePath) {
-  try {
-    const data = fs.readFileSync(filePath);
-    return data.toString();
-  } catch (error) {
-    console.error("Unable to read the file");
-  }
-}
+        switch (dataFromTextFile[0]) {
 
-function extractBetweenQuotes(str) {
-  const match = str.match(/"(.*?)"/);
-  if (match && match[1]) {
-    return match[1];
-  }
-  return null; // Return null if no match is found
-}
+            case "wait": {
+                if (dataFromTextFile.length != 2) {
+                    error(`wrong input in line number ${i}`);
+                }
+                else {
+                    instructions.push(new instruction(dataFromTextFile[0],
+                        {
+                            waitTime: dataFromTextFile[1]
+                        }
+                    ));
+                }
+                i++;
+            }
+                break;
 
-function loadInstructions(data) {
-  let allInstructions = data.split("\n");
-  for (let i = 0; i < allInstructions.length; i++) {
-    let instructionString = allInstructions[i];
-    let message = extractBetweenQuotes(instructionString);
-    if (message != null) {
-      let arguments = instructionString.split(" ", 6);
-      arguments.push(message);
-      let type = arguments[0];
-      let alias = arguments[1];
-      let x_ord = arguments[2];
-      let y_ord = arguments[3];
-      let radius = arguments[4];
-      let payload = arguments[5];
-      let channel = arguments[6];
-      instructions.push(
-        new Instruction(
-          type,
-          alias,
-          null,
-          null,
-          null,
-          null,
-          null,
-          parseInt(x_ord),
-          parseInt(y_ord),
-          parseInt(radius),
-          channel,
-          payload,
-          null,
-          null
-        )
-      );
-    } else {
-      let arguments = instructionString.split(" ");
-      let type = arguments[0];
-      if (type == "newMatcher") {
-        let alias = arguments[1];
-        let isGateway = arguments[2];
-        let GW_Host = arguments[3];
-        let GW_port = arguments[4];
-        let VON_port = arguments[5];
-        let client_port = arguments[6];
-        let x_ord = arguments[7];
-        let y_ord = arguments[8];
-        let radius = arguments[9];
-        instructions.push(
-          new Instruction(
-            type,
-            alias,
-            isGateway,
-            GW_Host,
-            GW_port,
-            VON_port,
-            client_port,
-            x_ord,
-            y_ord,
-            radius,
-            null,
-            null,
-            null,
-            null
-          )
-        );
-      } else if (type == "newClient") {
-        let alias = arguments[1];
-        let GW_Host = arguments[2];
-        let GW_port = arguments[3];
-        let x_ord = arguments[4];
-        let y_ord = arguments[5];
-        let radius = arguments[6];
-        instructions.push(
-          new Instruction(
-            type,
-            alias,
-            null,
-            GW_Host,
-            GW_port,
-            null,
-            null,
-            x_ord,
-            y_ord,
-            radius,
-            null,
-            null,
-            null,
-            null
-          )
-        );
-      } else if (type == "subscribe") {
-        let alias = arguments[1];
-        let x_ord = arguments[2];
-        let y_ord = arguments[3];
-        let radius = arguments[4];
-        let channel = arguments[5];
-        instructions.push(
-          new Instruction(
-            type,
-            alias,
-            null,
-            null,
-            null,
-            null,
-            null,
-            x_ord,
-            y_ord,
-            radius,
-            channel,
-            null,
-            null,
-            null
-          )
-        );
-      } else if (type == "moveClient") {
-        let alias = arguments[1];
-        let x_ord = arguments[2];
-        let y_ord = arguments[3];
-        instructions.push(
-          new Instruction(
-            type,
-            alias,
-            null,
-            null,
-            null,
-            null,
-            null,
-            x_ord,
-            y_ord,
-            null,
-            null,
-            null,
-            null,
-            null
-          )
-        );
-      }
-      else if (type == "end") {
-        instructions.push(new Instruction(type, null, null, null, null, null, null, null, null, null, null, null, null, null));
-      }
+            case "newMatcher": {
+                if (dataFromTextFile.length != 10) {
+                    error(`wrong input in line number ${i}`);
+                } else {
+                    instructions.push(
+                        new instruction(dataFromTextFile[0], {
+                            alias: dataFromTextFile[1],
+                            isGateway: dataFromTextFile[2] == "true" ? true : false,
+                            GW_host: dataFromTextFile[3],
+                            GW_port: Number(dataFromTextFile[4]),
+                            VON_port: Number(dataFromTextFile[5]),
+                            client_port: Number(dataFromTextFile[6]),
+                            x: Number(dataFromTextFile[7]),
+                            y: Number(dataFromTextFile[8]),
+                            radius: Number(dataFromTextFile[9]),
+                        })
+                    );
+                }
+                i++;
+            }
+                break;
+
+            case "newClient": {
+                if (dataFromTextFile.length != 7) {
+                    error(`wrong input in line number ${i}`);
+                } else {
+                    instructions.push(
+                        new instruction(dataFromTextFile[0], {
+                            alias: dataFromTextFile[1],
+                            host: dataFromTextFile[2],
+                            port: Number(dataFromTextFile[3]),
+                            x: Number(dataFromTextFile[4]),
+                            y: Number(dataFromTextFile[5]),
+                            radius: Number(dataFromTextFile[6]),
+                        })
+                    );
+                }
+                i++;
+            }
+                break;
+
+            case "subscribe": {
+                if (dataFromTextFile.length != 6) {
+                    error(`wrong input in line number ${i}`);
+                } else {
+                    instructions.push(
+                        new instruction(dataFromTextFile[0], {
+                            alias: dataFromTextFile[1],
+                            x: Number(dataFromTextFile[2]),
+                            y: Number(dataFromTextFile[3]),
+                            radius: Number(dataFromTextFile[4]),
+                            channel: dataFromTextFile[5],
+                        })
+                    );
+                }
+                i++;
+            }
+                break;
+
+            case "publish": {
+                if (dataFromTextFile.length != 7) {
+                    error(`wrong input in line number ${i}`);
+                } else {
+                    instructions.push(
+                        new instruction(dataFromTextFile[0], {
+                            alias: dataFromTextFile[1],
+                            x: Number(dataFromTextFile[2]),
+                            y: Number(dataFromTextFile[3]),
+                            radius: Number(dataFromTextFile[4]),
+                            channel: dataFromTextFile[5],
+                            payload: dataFromTextFile[6],
+                        })
+                    );
+                }
+                i++;
+            }
+                break;
+
+            case "moveClient": {
+                if (dataFromTextFile.length != 4) {
+                    error(`wrong input in line number ${i}`);
+                } else {
+                    instructions.push(
+                        new instruction(dataFromTextFile[0], {
+                            alias: dataFromTextFile[1],
+                            x: Number(dataFromTextFile[2]),
+                            y: Number(dataFromTextFile[3])
+                        })
+                    );
+                }
+                i++;
+            }
+                break;
+
+            // instruction to end simulation
+            case "end": {
+                instructions.push(new instruction(dataFromTextFile[0]));
+                return;
+            }
+
+            default: {
+                // NOT a comment or empty line, alert user and end process
+                if (dataFromTextFile.length > 0 && !dataFromTextFile[0].startsWith('//')) {
+                    error(`Unrecognised Input in line number ${i}`);
+                }
+                i++;
+                break;
+            }
+        };
+    });
+
+    // start executing once all instructions loaded
+    if (processRunning == "master") {
+        startMQTT();
+        startClients();
     }
-  }
+    else {
+        startMQTT();
+        listenMQTT();
+    }
+});
+
+
+var error = function (message) {
+    log.error(message);
+    process.exit();
 }
 
-async function executeAllInstructions(step) {
-  step = step || 0;
-
-  if (step >= instructions.length) {
-    log.debug("Reached end of instructions");
-    return;
-  }
-
-  try {
-    log.debug(
-      "Executing instruction " + step + ". Type: " + instructions[step].type
-    );
-    var result = await instructions[step].executeInstructionObject(step);
-    log.debug(result);
-  } catch (error) {
-    log.debug("Could not execute instruction " + step + "\t Error: " + error);
-  }
-  executeAllInstructions(step + 1);
+var instruction = function (type, opts) {
+    this.type = type;
+    this.opts = opts;
 }
 
-let data = readFile("instructions.txt");
-loadInstructions(data);
+function startMQTT() {
+    mqttClient = mqtt.connect('mqtt://192.168.101.30');
+    mqttClient.on('connect', function () {
 
-executeAllInstructions();
+        if (processRunning == "master") {
+            console.log("Master client has connected to the MQTT broker");
+            execute();
+        }
+        else {
+            console.log("Client has connected to the MQTT broker");
+            listenMQTT();
+        }
+
+    });
+}
+
+
+async function listenMQTT() {
+    mqttClient.subscribe('instructions', function (err) {
+        if (err) {
+            console.log("Failed to subscribe to the instructions topic");
+        }
+        else {
+            console.log(`${processRunning} subscribed to the instructions topic`);
+        }
+    });
+
+
+    mqttClient.on('message', async function (topic, message) {
+        if (topic === 'instructions') {
+            const step = parseInt(message.toString(), 10);
+            if (!isNaN(step) && (step < instructions.length)) {
+                const instruction = instructions[step];
+                const alias = instructions.opts.alias;
+                if (alias === processRunning) {
+                    try {
+                        log.debug(`${processRunning} executing instruction ${step}\t Type: ${instruction.type}`);
+                        const result = await executeInstructionWrapper(instruction, step);
+                        log.debug(result);
+                    } catch (error) {
+                        log.error(error);
+                    }
+                }
+                else {
+                    log.debug(`${processRunning} ignoring instruction ${step}. Alias does not match`);
+                }
+            }
+            else
+            {
+                log.error('The instruction step is invalid: ' + message.toString());
+            }
+        }
+    })
+}
+
+
+dataFromTextFile;
+
