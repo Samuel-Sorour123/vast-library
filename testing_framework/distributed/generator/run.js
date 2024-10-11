@@ -24,54 +24,105 @@
 
 const fs = require('fs');
 const { exec } = require('child_process');
+const { getSystemErrorMap } = require('util');
 
-// const instructionsFilePath = './files/instructions.js';
-// const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/sayhe.js';
-// const sshUser = 'pi';
-// const staticIPs = JSON.parse(fs.readFileSync("./files/static.json"));
-
-// function startClients() {
-//     for (const alias in staticIPs) {
-//         const ip = staticIPs.alias.static_IP_address;
-//         const sshCommand = `ssh ${sshUser}@${ip} 'node ${remoteScriptPath} ${instructionsFilePath} ${alias}'`;
-//         exec(sshCommand, (err, stdout, stderr) => {
-//             if (err) {
-//                 console.log("There was an error executing the command line arguments for " + alias);
-//                 return;
-//             }
-//             if (stderr) {
-//                 console.log("There was an error when executing the executor.js script for " + alias);
-//                 return;
-//             }
-//             if (stdout) {
-//                 console.log("Seems to be fine");
-//             }
-
-//         });
-//     }
-// }
-
-const remoteScriptPath = '~/testing/test.js';
+const instructionsFilePath = './files/instructions.js';
+const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
 const sshUser = 'pi';
+const staticIPs = JSON.parse(fs.readFileSync("./files/static.json"));
 
-function startClients() {
-    for (const alias in staticIPs) {
-        const ip = staticIPs.alias.static_IP_address;
-        const sshCommand = `ssh ${sshUser}@${ip} 'node ${remoteScriptPath}'`;
-        exec(sshCommand, (err, stdout, stderr) => {
-            if (err) {
-                console.log("There was an error executing the command line arguments for " + alias);
-                return;
-            }
-            if (stderr) {
-                console.log("There was an error when executing the executor.js script for " + alias);
-                return;
-            }
-            if (stdout) {
-                console.log("Seems to be fine");
-            }
+const filesPath = '~/vast-library/testing_framework/distributed/generator/files';
+const instructionsSource = './files/instructions.txt';
+const staticSource = './files/static.json';
 
-        });
+function startExecution() {
+    for (const type in staticIPs) {
+        console.log("The type is " + type);
+
+        if (type == "master") {
+            const ip = staticIPs.master.static_IP_address;
+            const command = "node executor.js ./files/instructions.txt master";
+            console.log("The ip is " + ip);
+        }
+        else {
+            for (const alias in staticIPs[type]) {
+                const ip = staticIPs[type][alias].static_IP_address;
+                const sshCommand = `ssh ${sshUser}@${ip} 'node ${remoteScriptPath} ${instructionsFilePath} ${alias}'`;
+                console.log("The alias is " + alias);
+                console.log("The IP is " + ip);
+                console.log("The sshCommand is " + sshCommand + "\n\n##########################################");
+                exec(sshCommand, (err, stdout, stderr) => {
+                    if (err) {
+                        console.log("There was an error executing the command line arguments for " + alias);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log("There was an error when executing the executor.js script for " + alias);
+                        return;
+                    }
+                    if (stdout) {
+                        console.log("Seems to be fine");
+                    }
+                });
+            }
+        }
+
     }
 }
 
+
+function sendInstructions() {
+
+    for (const type in staticIPs) {
+        if (type != "master") {
+            for (const alias in staticIPs[type]) {
+                const ip = staticIPs[type][alias].static_IP_address;
+                const instructionCommand = `scp ${instructionsSource}  ${sshUser}@${ip}:${filesPath}`;
+                exec(instructionCommand, (err, stdout) => {
+                    if (err) {
+                        console.log("There was an error executing the instruction copy command for " + alias);
+                        return;
+                    }
+                    if (stdout) {
+                        console.log("The instructions.txt files was sent to " + alias);
+                    }
+                });
+                const staticCommand = `scp ${staticSource} ${sshUser}@${ip}:${filesPath}`;
+                exec(staticCommand, (err, stdout) => {
+                    if (err) {
+                        console.log("There was an error executing the static.json copy command for " + alias);
+                        return;
+                    }
+                    if (stdout) {
+                        console.log("The static.json file was sent to " + alias);
+                    }
+                })
+            }
+        }
+
+    }
+}
+
+function generateInstructions() {
+    const generateInstructionsCommand = 'node generator.js info.json';
+    exec(generateInstructions, (err, stdout, stderr) => {
+        if (err) {
+            console.log("There was an issue executing the command that generates the instructions.txt file");
+            return;
+        }
+        if (stderr) {
+            console.log("There was an issue with the generator.js script");
+            return;
+        }
+        if (stdout)
+        {
+            console.log("Seems like everything worked with generating the instructions");
+        }
+    })
+}
+
+function collectLogFiles() {
+
+}
+
+startExecution();

@@ -1,39 +1,39 @@
-newMatcher GW true 192.168.101.9 8000 8001 20000 535 20 30
-wait 2189
-newMatcher M2 false 192.168.101.12 8000 8010 20010 723 800 79
-wait 2177
-newClient C1 192.168.101.15 20000 864 529 56
-wait 2785
-newClient C2 192.168.101.14 20000 144 611 9
-wait 2951
-moveClient C1 239 691
-wait 3038
-subscribe C1 366 752 64 channel3
-wait 3709
-publish C2 434 420 150 channel3 "ftpoofrpfpxhnjozsyubtiz"
-wait 2845
-publish C2 295 278 227 channel2 "gmwuwxznibdnednuszsjz"
-wait 3313
-moveClient C1 243 976
-wait 2762
-publish C1 431 473 187 channel2 "lxphofavccbizegckrqddlmsderdxnrumwafkgq"
-wait 2689
-publish C2 811 445 94 channel2 "qygtbqkriiceglwxyknmvphwtzxmaepruzorhdz"
-wait 2746
-subscribe C1 780 853 144 channel3
-wait 3360
-moveClient C1 533 227
-wait 2834
-moveClient C2 706 755
-wait 3786
-subscribe C2 783 351 152 channel3
-wait 2820
-publish C1 841 659 137 channel3 "zwbepeymqemahlcotgq"
-wait 3968
-subscribe C1 818 231 148 channel1
-wait 2219
-subscribe C2 591 671 179 channel2
-wait 2352
-moveClient C1 739 451
-wait 2584
+newMatcher GW true 192.168.101.15 8000 8001 20000 139 368 59
+wait 2334
+newMatcher M2 false 192.168.101.12 8000 8010 20010 3 501 97
+wait 3007
+newClient C1 192.168.101.9 20000 635 685 99
+wait 2668
+newClient C2 192.168.101.14 20000 241 967 15
+wait 2477
+moveClient C2 259 577
+wait 3573
+publish C1 654 723 247 channel1 "ehptwxsgmpaumgevijkd"
+wait 3103
+subscribe C1 312 150 146 channel3
+wait 2863
+subscribe C1 425 245 245 channel1
+wait 2686
+moveClient C1 4 980
+wait 2608
+subscribe C1 375 239 117 channel3
+wait 2359
+publish C2 679 523 161 channel3 "uelnznqlqnwrgijtgerfil"
+wait 2053
+moveClient C1 354 808
+wait 3411
+publish C2 714 378 169 channel2 "ogqwsutzfnviztlxzsiqaijlfmrmmbmuwmpniqu"
+wait 3184
+moveClient C2 509 668
+wait 2604
+subscribe C2 628 931 54 channel1
+wait 3170
+moveClient C1 643 931
+wait 3824
+subscribe C2 79 693 65 channel3
+wait 3100
+publish C1 245 221 63 channel3 "ncwxhowqsjmcjiuisc"
+wait 2980
+publish C2 613 112 58 channel1 "hjstgygvezjvxjsdiallfwiqbfndswpv"
+wait 2481
 end

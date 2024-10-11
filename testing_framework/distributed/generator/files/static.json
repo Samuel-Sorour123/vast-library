@@ -1,8 +1,12 @@
 {
+   "master": {
+      "hostname": "Lenovo",
+      "static_IP_address": "192.168.101.40"
+   },
    "clients": {
       "C1": {
-         "hostname": "raspberrypi15",
-         "static_IP_address": "192.168.101.15"
+         "hostname": "raspberrypi9",
+         "static_IP_address": "192.168.101.9"
       },
       "C2": {
          "hostname": "raspberrypi14",
@@ -11,13 +15,12 @@
    },
    "matchers": {
       "GW": {
-         "hostname": "raspberrypi9",
-         "static_IP_address": "192.168.101.9"
+         "hostname": "raspberrypi15",
+         "static_IP_address": "192.168.101.15"
       },
       "M2": {
          "hostname": "raspberrypi12",
          "static_IP_address": "192.168.101.12"
       }
-   },
-   "master": "192.168.101.40"
+   }
 }
