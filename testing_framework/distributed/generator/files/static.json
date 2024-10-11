@@ -1,12 +1,23 @@
 {
-   "masterStaticIP": "192.168.101.30",
-   "matchersAliasToStaticIP": {
-      "GW": "192.169.101.15",
-      "M2": "192.169.101.14"
+   "clients": {
+      "C1": {
+         "hostname": "raspberrypi15",
+         "static_IP_address": "192.168.101.15"
+      },
+      "C2": {
+         "hostname": "raspberrypi14",
+         "static_IP_address": "192.168.101.14"
+      }
    },
-   "clientsAliasToStaticIP": {
-      "C1": "192.168.101.12",
-      "C2": "192.168.101.9",
-      "C3": "192.169.101.13"
-   }
+   "matchers": {
+      "GW": {
+         "hostname": "raspberrypi9",
+         "static_IP_address": "192.168.101.9"
+      },
+      "M2": {
+         "hostname": "raspberrypi12",
+         "static_IP_address": "192.168.101.12"
+      }
+   },
+   "master": "192.168.101.40"
 }

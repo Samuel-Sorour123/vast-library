@@ -404,44 +404,75 @@ function readFile(filePath) {
   }
 }
 
-function assignAddresses(staticAddressFile, args) {
-  let staticAddresses = readFile(staticAddressFile).split("\n");
-  let numAddresses = staticAddresses.length;
+function getRandomSubsetAndRemove(obj, numToSelect) {
+  let keys = Object.keys(obj); // Get array of keys
 
-  if (numAddresses < (args.newMatcher + args.newClient)) {
-    console.error("There aren't enough IP addresses");
-  } else {
-    for (let i = 0; i < args.newMatcher; i++) {
-      let randomIndex = getRandomInt(0, staticAddresses.length - 1);
-      if (i === 0) {
-        matchersAliasToStaticIP["GW"] = staticAddresses[randomIndex];
-      } else {
-        let id = "M" + (i + 1).toString();
-        matchersAliasToStaticIP[id] = staticAddresses[randomIndex];
-      }
-      staticAddresses.splice(randomIndex, 1);
+  // Shuffle the array using Fisher-Yates algorithm
+  for (let i = keys.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]]; // Swap elements
+  }
+
+  // Select the first `numToSelect` keys from the shuffled array
+  let selectedKeys = keys.slice(0, numToSelect);
+
+  // Create a subset object with the selected key-value pairs and remove from original
+  let subset = {};
+  selectedKeys.forEach(key => {
+    subset[key] = obj[key];
+    delete obj[key]; // Remove selected key-value pair from the original object
+  });
+
+  return subset;
+}
+
+function assignAddresses(info) {
+
+  let hosts = info.hosts.raspberrypi;
+  let settings = info.simulation.nodes;
+  let randomSubset = getRandomSubsetAndRemove(hosts, settings.newMatcher);
+  let randomSubsetKeys = Object.keys(randomSubset);
+  let static = {};
+  static["master"] = {"hostname": "Lenovo", "static_IP_address" : info.hosts.computer};
+  static.clients = {};
+  static.matchers = {};
+  for (let i = 0; i < settings.newMatcher; i++) {
+    if (i == 0) {
+      matchersAliasToStaticIP["GW"] = randomSubset[randomSubsetKeys[i]];
+      static.matchers["GW"] = {"hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]]};
     }
-    for (let j = 0; j < args.newClient; j++) {
-      let randomIndex = getRandomInt(0, staticAddresses.length - 1);
-      let id = "C" + (j + 1).toString();
-      clientsAliasToStaticIP[id] = staticAddresses[randomIndex];
-      staticAddresses.splice(randomIndex, 1);
+    else {
+      let alias = "M" + (i + 1).toString();
+      matchersAliasToStaticIP[alias] = randomSubset[randomSubsetKeys[i]];
+      static.matchers[alias] = {"hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]]};
     }
   }
 
-  // Write the data to a file
-  let staticIPs = { masterStaticIP: "192.168.101.30", matchersAliasToStaticIP, clientsAliasToStaticIP };
-  saveStaticIPs(staticIPs);
+  randomSubset = getRandomSubsetAndRemove(hosts, settings.newClient);
+  randomSubsetKeys = Object.keys(randomSubset);
+
+  for (let j = 0; j < settings.newClient; j++) {
+    let alias = "C" + (j + 1).toString();
+    clientsAliasToStaticIP[alias] = randomSubset[randomSubsetKeys[j]];
+    static.clients[alias] = {"hostname": randomSubsetKeys[j], "static_IP_address": randomSubset[randomSubsetKeys[j]]};
+  }
+
+ 
+  saveStaticIPs(static);
 }
 
-const jsonInput = process.argv[2];
-const staticAddressFile = process.argv[3];
-const args = processData(jsonInput);
+// const jsonInput = process.argv[2];
+// const staticAddressFile = process.argv[3];
+// const args = processData(jsonInput);
+
+const jsonFileName = process.argv[2];
+const info = JSON.parse(fs.readFileSync(jsonFileName));
+const args = info.simulation.nodes;
 
 var matchersAliasToStaticIP = {}
 var clientsAliasToStaticIP = {}
-assignAddresses(staticAddressFile, args);
-
+assignAddresses(info);
+console.log("Hello");
 
 var instructionInfo = new InstructionManager(args);
 var matchers = {};

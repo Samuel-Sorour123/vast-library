@@ -21,7 +21,7 @@ var instructions = [];
 var fs = require('fs');
 const readline = require('readline');
 
-var filename = process.argv[2] || "./simulator/example_script.txt";
+var filename = process.argv[2] || "./files/instructions.txt";
 var processRunning = process.argv[3] || "master";
 
 //Javascript Object that stores the static IP addresses of the matchers and clients
@@ -43,9 +43,9 @@ async function executeInstruction(instruction, step, success, fail) {
     switch (type) {
 
         case 'wait': {
-            delay(opts.waitTime, function () {
-                success('waited for ' + opts.waitTime + ' milliseconds');
-            });
+            await delay(opts.waitTime);
+            success('waited for ' + opts.waitTime + ' milliseconds');
+
         }
             break;
 
@@ -115,7 +115,7 @@ async function executeInstruction(instruction, step, success, fail) {
                 success(opts.alias + ' published:', opts.payload, 'on channel: ' + opts.channel)
             }
             else {
-                fail('client with alias "' + alias + '" does not exist');
+                fail('client with alias "' + opts.alias + '" does not exist');
             }
         }
             break;
@@ -191,12 +191,17 @@ async function execute(step) {
 
 }
 
-async function delay(m, callback) {
-    m = m || 100;
-    await new Promise(function () {
-        setTimeout(callback, m);
-    });
+// async function delay(m, callback) {
+//     m = m || 100;
+//     await new Promise(function () {
+//         setTimeout(callback, m);
+//     });
+// }
+
+function delay(millis) {
+    return new Promise(resolve => setTimeout(resolve, millis));
 }
+
 
 //function to obtain all the data from a text file
 var dataFromTextFiles = async (filename) => {
@@ -384,14 +389,7 @@ var dataFromTextFile = dataFromTextFiles(filename).then((dataFromTextFile) => {
     });
 
     // start executing once all instructions loaded
-    if (processRunning == "master") {
-        startMQTT();
-        startClients();
-    }
-    else {
-        startMQTT();
-        listenMQTT();
-    }
+    startMQTT();
 });
 
 
@@ -438,7 +436,7 @@ async function listenMQTT() {
             const step = parseInt(message.toString(), 10);
             if (!isNaN(step) && (step < instructions.length)) {
                 const instruction = instructions[step];
-                const alias = instructions.opts.alias;
+                const alias = instruction.opts.alias;
                 if (alias === processRunning) {
                     try {
                         log.debug(`${processRunning} executing instruction ${step}\t Type: ${instruction.type}`);
