@@ -2,12 +2,11 @@
 // A discrete event simulator for VAST, used for code verification and bug finding
 
 // imports
-const matcher = require('../lib/matcher.js');
-const client = require('../lib/client.js');
+const matcher = require('../../../lib/matcher.js');
+const client = require('../../../lib/client.js');
 const mqtt = require('mqtt');
 
-var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', 'logs_and_events', 5, 5);
-
+var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', 'logs_and_events', 0, 5);
 // Data structures to store matchers
 // alias --> matcher{}.
 var matchers = {};
@@ -20,19 +19,22 @@ var instructions = [];
 //importing data from text file
 var fs = require('fs');
 const readline = require('readline');
+const { map, data } = require('jquery');
+
 
 var filename = process.argv[2] || "./files/instructions.txt";
 var processRunning = process.argv[3] || "master";
 
-//Javascript Object that stores the static IP addresses of the matchers and clients
-const staticAddresses = require("staticIPs.json");
-
 //MQTT client object
 var mqttClient;
+
+var static = JSON.parse(fs.readFileSync("static.json"));
+
 
 //Makes sure the instructions are saved in a textfile
 if (filename.length > 4 && filename.slice(-4) != ".txt") {
     error("Please Provide A Text File");
+    console.log("Hello")
 }
 
 // Interpret and execute instruction
@@ -63,9 +65,9 @@ async function executeInstruction(instruction, step, success, fail) {
                         alias: opts.alias,
                         //logLayer: 'Matcher_' + opts.alias,
                         //logFile: 'Matcher_' + opts.alias,
-                        logDisplayLevel: 0,
+                        logDisplayLevel: 5,
                         logRecordLevel: 5,
-                        eventDisplayLevel: 0,
+                        eventDisplayLevel: 5,
                         eventRecordLevel: 5
                     },
                     function (id) {
@@ -172,7 +174,7 @@ async function execute(step) {
             log.debug('Executing wait instruction with step ' + step + ': Waiting ' + instructions[step].opts.waitTime);
             let result = await executeInstructionWrapper(instructions[step], step);
             log.debug(result);
-            await execute(step + 1);
+            execute(step + 1);
         }
         catch (error) {
             log.error(error);
@@ -182,10 +184,20 @@ async function execute(step) {
         try {
             log.debug('Publishing instruction ' + step + '. Type: ' + instructions[step].type);
             mqttClient.publish('instructions', step.toString());
-            await execute(step + 1);
+            mqttClient.on('message', async function (topic, message) {
+                if (topic === 'logging') {
+                    if (message.toString() == 'success') {
+                        log.debug('Instruction was successfully executed'); 
+                    }
+                    else if (message.toString() == 'fail') {
+                        log.error('Instruction failed to execute');
+                    }
+                }
+            });
+            execute(step + 1);
         }
         catch (error) {
-            log.error(error);
+            log.error("Could not publish instruction with step " + step);
         }
     }
 
@@ -259,7 +271,6 @@ var dataFromTextFile = dataFromTextFiles(filename).then((dataFromTextFile) => {
 
     var i = 1;  // line counter
     dataFromTextFile.map((dataFromTextFile) => {
-
         switch (dataFromTextFile[0]) {
 
             case "wait": {
@@ -389,6 +400,7 @@ var dataFromTextFile = dataFromTextFiles(filename).then((dataFromTextFile) => {
     });
 
     // start executing once all instructions loaded
+    console.log('Have finished loading the instructions');
     startMQTT();
 });
 
@@ -404,58 +416,94 @@ var instruction = function (type, opts) {
 }
 
 function startMQTT() {
-    mqttClient = mqtt.connect('mqtt://192.168.101.30');
+    mqttClient = mqtt.connect('mqtt://192.168.0.30');
     mqttClient.on('connect', function () {
-
         if (processRunning == "master") {
-            console.log("Master client has connected to the MQTT broker");
-            execute();
+            let expectedClients = determineExpectedClients();
+            let readyClients = [];
+            
+            mqttClient.subscribe('ready', function(err) {
+                if (err)
+                {
+                    error("Master could not subscribe to ready");
+                }
+                else
+                {
+                    log.debug("Master subscribed to topic ready");
+                    mqttClient.on('message', function(topic, message){
+                        if (topic == 'ready')
+                        {
+                            const client = message.toString();
+                            log.debug("Received ready message from client " + client);
+                            readyClients.push(client);
+                            if (readyClients.length == expectedClients.length)
+                            {
+                                log.debug("All clients are ready, we can start the execution")
+                                execute(0);
+                            }
+                        }
+                    })
+                }
+               
+            });
         }
         else {
-            console.log("Client has connected to the MQTT broker");
-            listenMQTT();
+            mqttClient.subscribe('instructions', function (err) {
+                if (err) {
+                    error(processRunning + " could not subscribe to instructions");
+                }
+                else {
+                    listenMQTT();
+                    mqttClient.publish('ready', processRunning);
+                }
+            });
         }
-
     });
 }
 
-
-async function listenMQTT() {
-    mqttClient.subscribe('instructions', function (err) {
-        if (err) {
-            console.log("Failed to subscribe to the instructions topic");
-        }
-        else {
-            console.log(`${processRunning} subscribed to the instructions topic`);
-        }
-    });
-
-
+function listenMQTT() {
     mqttClient.on('message', async function (topic, message) {
-        if (topic === 'instructions') {
+        if (topic == 'instructions') {
             const step = parseInt(message.toString(), 10);
             if (!isNaN(step) && (step < instructions.length)) {
                 const instruction = instructions[step];
                 const alias = instruction.opts.alias;
-                if (alias === processRunning) {
+                if (alias == processRunning) {
                     try {
-                        log.debug(`${processRunning} executing instruction ${step}\t Type: ${instruction.type}`);
-                        const result = await executeInstructionWrapper(instruction, step);
-                        log.debug(result);
+                        // const result = await executeInstructionWrapper(instruction, step);
+                        // log.debug(result);
+                        log.debug(processRunning + " executes step" + step);
+                        mqttClient.publish('logging', 'success');
+
                     } catch (error) {
-                        log.error(error);
+                        error(processRunning + " failed to execute " + step);
+                        mqttClient.publish('logging', 'fail');
                     }
                 }
                 else {
-                    log.debug(`${processRunning} ignoring instruction ${step}. Alias does not match`);
+                    log.debug("The alias " + alias + " does not match up with" + processRunning + " so we ignore");
                 }
             }
-            else
-            {
-                log.error('The instruction step is invalid: ' + message.toString());
+            else {
+                error("The step is out of bounds: " + step);
             }
         }
-    })
+    });
+
+
+}
+
+function determineExpectedClients()
+{
+    let expectedClients = [];
+    for (const alias in static.clients)
+    {
+        expectedClients.push(alias);
+    }
+    for (const alias in static.matchers){
+        expectedClients.push(alias);
+    }
+    return expectedClients;
 }
 
 

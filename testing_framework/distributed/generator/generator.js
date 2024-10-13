@@ -249,7 +249,7 @@ function createMatchers(numMatchers) {
     let y = getRandomInt(0, 1000);
 
     if (m == 1) {
-      let staticAddress = matchersAliasToStaticIP["GW"];
+      let staticAddress = '\"' + matchersAliasToStaticIP["GW"] +'\"';
       let matcher = new Matcher(
         "GW",
         true,
@@ -292,7 +292,7 @@ function createClients(numClients) {
     let x = getRandomInt(0, 1000);
     let y = getRandomInt(0, 1000);
     let clientID = "C" + c.toString();
-    let staticAddress = clientsAliasToStaticIP[clientID];
+    let staticAddress = '\"' + clientsAliasToStaticIP[clientID] + '\"';
     let client = new Client(clientID, staticAddress, "20000", x, y, r);
     clients[clientID] = client;
   }
@@ -472,7 +472,6 @@ const args = info.simulation.nodes;
 var matchersAliasToStaticIP = {}
 var clientsAliasToStaticIP = {}
 assignAddresses(info);
-console.log("Hello");
 
 var instructionInfo = new InstructionManager(args);
 var matchers = {};

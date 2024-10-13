@@ -1,16 +1,15 @@
 {
   "hosts": {
-    "computer": "192.168.101.40",
+    "computer": "192.168.0.30",
     "raspberrypi": {
-      "raspberrypi9": "192.168.101.9",
-      "raspberrypi12": "192.168.101.12",
-      "raspberrypi14": "192.168.101.14",
-      "raspberrypi15": "192.168.101.15"
+      "raspberrypi12": "192.168.0.12",
+      "raspberrypi14": "192.168.0.14",
+      "raspberrypi15": "192.168.0.15"
     }
   },
   "simulation": {
     "nodes": {
-      "newMatcher": 2,
+      "newMatcher": 1,
       "newClient": 2,
       "publish": 5,
       "subscribe": 5,
