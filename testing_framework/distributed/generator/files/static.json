@@ -5,8 +5,8 @@
    },
    "clients": {
       "C1": {
-         "hostname": "raspberrypi12",
-         "static_IP_address": "192.168.0.12"
+         "hostname": "raspberrypi15",
+         "static_IP_address": "192.168.0.15"
       },
       "C2": {
          "hostname": "raspberrypi14",
@@ -15,8 +15,8 @@
    },
    "matchers": {
       "GW": {
-         "hostname": "raspberrypi15",
-         "static_IP_address": "192.168.0.15"
+         "hostname": "raspberrypi12",
+         "static_IP_address": "192.168.0.12"
       }
    }
 }

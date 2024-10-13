@@ -29,7 +29,7 @@ function startExecution() {
     for (const type in staticIPs) {
         if (type === "master") {
             const executorPath = path.resolve(__dirname, 'executor.js');
-            const child = spawn('node', [executorPath, instructionsFilePath, 'master'], { cwd: __dirname });
+            const child = spawn('node', [executorPath, 'master'], { cwd: __dirname });
 
             child.stdout.on('data', (data) => {
                 console.log(`stdout (master): ${data}`);
@@ -56,7 +56,7 @@ function startExecution() {
                 const initNVM = 'source ~/.nvm/nvm.sh';
 
                 // Properly quote paths and commands
-                const remoteCommand = `${initNVM} && node "${remoteScriptPath}" "${instructionsFilePath}" "${alias}"`;
+                const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
 
                 const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });

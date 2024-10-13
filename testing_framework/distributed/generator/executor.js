@@ -4,39 +4,31 @@
 // imports
 const matcher = require('../../../lib/matcher.js');
 const client = require('../../../lib/client.js');
+const fs = require('fs');
+const readline = require('readline');
 const mqtt = require('mqtt');
+const { map, data } = require('jquery');
+const path = require('path');
 
-var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', 'logs_and_events', 0, 5);
+
+var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', "logging", 0, 5);
+
 // Data structures to store matchers
 // alias --> matcher{}.
 var matchers = {};
 var matcherIDs2alias = {};
 var clients = {};
 var clientIDs2alias = {};
-
 var instructions = [];
 
-//importing data from text file
-var fs = require('fs');
-const readline = require('readline');
-const { map, data } = require('jquery');
-
-
-var instructionsPath = process.argv[2] | "./files/instructions.txt";
-var staticPath = "./files/static.json";
-var processRunning = process.argv[3] || "master";
-var staticAddresses = JSON.parse(fs.readFileSync(staticPath));
+const instructionsPath = path.resolve(__dirname, "files/instructions.txt");
+const staticPath = path.resolve(__dirname, "files/static.json");
+const processRunning = process.argv[2] || "master";
+const staticAddresses = JSON.parse(fs.readFileSync(staticPath));
 
 
 //MQTT client object
 var mqttClient;
-
-
-//Makes sure the instructions are saved in a textfile
-if (instructionsPath.length > 4 && instructionsPath.slice(-4) != ".txt") {
-    error("Please Provide A Text File");
-    console.log("Hello")
-}
 
 // Interpret and execute instruction
 async function executeInstruction(instruction, step, success, fail) {
@@ -509,5 +501,5 @@ function determineExpectedClients() {
     return expectedClients;
 }
 
-main("./files/instructions.txt");
+main(instructionsPath);
 
