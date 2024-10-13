@@ -15,7 +15,6 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const path = require('path');
 
-const instructionsFilePath = path.resolve(__dirname, './files/instructions.js');
 const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
 const sshUser = 'pi';
 
@@ -179,6 +178,43 @@ function deleteLogFiles() {
     // Implementation needed
 }
 
+function download()
+{
+   const gitCommand = "git clone https://github.com/Samuel-Sorour123/vast-library.git";
+   const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
+
+   for (const type in staticIPs) {
+       if (type !== "master") {
+           for (const alias in staticIPs[type]) {
+               const ip = staticIPs[type][alias].static_IP_address;
+
+               const sshCommand = ['ssh', `${sshUser}@${ip}`, gitCommand];
+               const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
+
+               child1.stdout.on('data', (data) => {
+                   console.log(`stdout: download (${alias}): ${data}`);
+               });
+
+               child1.stderr.on('data', (data) => {
+                   console.error(`stderr: download(${alias}): ${data}`);
+               });
+
+               child1.on('error', (err) => {
+                   console.error(`error: download(${alias}): ${err}`);
+               });
+
+               child1.on('close', (code) => {
+                   if (code === 0) {
+                       console.log(`vast-library was downloaded on ${alias}`);
+                   } else {
+                       console.error(`The download for ${alias} exited with code ${code}`);
+                   }
+               });
+           }
+       }
+   }
+}
+
 const args = process.argv.slice(2);
 const command = args[0];
 
@@ -199,6 +235,9 @@ switch (command) {
         console.log("Collecting log files");
         collectLogFiles();
         break;
+    case 'download':
+        console.log("Deleting current vast-library, Downloading latest vast-library");
+        download();
     default:
         console.log("Not a valid argument");
 }
