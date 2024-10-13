@@ -1,0 +1,1 @@
+{"time":1728848826996,"msg":"Master subscribed to topic ready"}

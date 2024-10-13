@@ -22,17 +22,18 @@ const readline = require('readline');
 const { map, data } = require('jquery');
 
 
-var filename = process.argv[2] || "./files/instructions.txt";
+var instructionsPath = process.argv[2] | "./files/instructions.txt";
+var staticPath = "./files/static.json";
 var processRunning = process.argv[3] || "master";
+var staticAddresses = JSON.parse(fs.readFileSync(staticPath));
+
 
 //MQTT client object
 var mqttClient;
 
-var static = JSON.parse(fs.readFileSync("static.json"));
-
 
 //Makes sure the instructions are saved in a textfile
-if (filename.length > 4 && filename.slice(-4) != ".txt") {
+if (instructionsPath.length > 4 && instructionsPath.slice(-4) != ".txt") {
     error("Please Provide A Text File");
     console.log("Hello")
 }
@@ -187,7 +188,7 @@ async function execute(step) {
             mqttClient.on('message', async function (topic, message) {
                 if (topic === 'logging') {
                     if (message.toString() == 'success') {
-                        log.debug('Instruction was successfully executed'); 
+                        log.debug('Instruction was successfully executed');
                     }
                     else if (message.toString() == 'fail') {
                         log.error('Instruction failed to execute');
@@ -267,7 +268,13 @@ var dataFromTextFiles = async (filename) => {
     }
 };
 
-var dataFromTextFile = dataFromTextFiles(filename).then((dataFromTextFile) => {
+async function main(filename) {
+    var dataFromTextFile = await dataFromTextFiles(filename);
+
+    if (!dataFromTextFile) {
+        log.error("Failed to load instructions from file");
+        process.exit(1);
+    }
 
     var i = 1;  // line counter
     dataFromTextFile.map((dataFromTextFile) => {
@@ -402,7 +409,9 @@ var dataFromTextFile = dataFromTextFiles(filename).then((dataFromTextFile) => {
     // start executing once all instructions loaded
     console.log('Have finished loading the instructions');
     startMQTT();
-});
+
+
+}
 
 
 var error = function (message) {
@@ -421,30 +430,26 @@ function startMQTT() {
         if (processRunning == "master") {
             let expectedClients = determineExpectedClients();
             let readyClients = [];
-            
-            mqttClient.subscribe('ready', function(err) {
-                if (err)
-                {
+
+            mqttClient.subscribe('ready', function (err) {
+                if (err) {
                     error("Master could not subscribe to ready");
                 }
-                else
-                {
+                else {
                     log.debug("Master subscribed to topic ready");
-                    mqttClient.on('message', function(topic, message){
-                        if (topic == 'ready')
-                        {
+                    mqttClient.on('message', function (topic, message) {
+                        if (topic == 'ready') {
                             const client = message.toString();
                             log.debug("Received ready message from client " + client);
                             readyClients.push(client);
-                            if (readyClients.length == expectedClients.length)
-                            {
+                            if (readyClients.length == expectedClients.length) {
                                 log.debug("All clients are ready, we can start the execution")
                                 execute(0);
                             }
                         }
                     })
                 }
-               
+
             });
         }
         else {
@@ -493,19 +498,16 @@ function listenMQTT() {
 
 }
 
-function determineExpectedClients()
-{
+function determineExpectedClients() {
     let expectedClients = [];
-    for (const alias in static.clients)
-    {
+    for (const alias in staticAddresses.clients) {
         expectedClients.push(alias);
     }
-    for (const alias in static.matchers){
+    for (const alias in staticAddresses.matchers) {
         expectedClients.push(alias);
     }
     return expectedClients;
 }
 
-
-dataFromTextFile;
+main("./files/instructions.txt");
 

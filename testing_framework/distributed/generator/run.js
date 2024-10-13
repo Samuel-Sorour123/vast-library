@@ -27,8 +27,6 @@ function startExecution() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
 
     for (const type in staticIPs) {
-        console.log("The type is " + type);
-
         if (type === "master") {
             const executorPath = path.resolve(__dirname, 'executor.js');
             const child = spawn('node', [executorPath, instructionsFilePath, 'master'], { cwd: __dirname });
