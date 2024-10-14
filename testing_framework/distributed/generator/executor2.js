@@ -193,12 +193,6 @@ async function execute(step) {
 
 }
 
-// async function delay(m, callback) {
-//     m = m || 100;
-//     await new Promise(function () {
-//         setTimeout(callback, m);
-//     });
-// }
 
 function delay(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));
@@ -556,7 +550,17 @@ async function handleClientMessage(topic, message) {
                     log.debug(`${processRunning} executed instruction ${step}:`, result);
                     console.log(`${processRunning} executed instruction ${step}:`, result);
 
-                    mqttClient.publish('result', `success step${step}`);
+                    mqttClient.publish('result', `success step${step}`, function(err){
+                        if (err){
+                          log.debug(`Failed to publish success step${step}`) ;
+                          console.log(`Failed to publish success step${step}`); 
+                        }
+                        else
+                        {
+                            log.debug(`Succeeded with publishing success step${step}`);
+                            console.log(`Succeeded with publishing success step${step}`);
+                        }
+                    });
                 } catch (err) {
                     console.error(`${processRunning} failed to execute step ${step}:`, err);
                     log.debug(`${processRunning} failed to execute step ${step}:`, err);

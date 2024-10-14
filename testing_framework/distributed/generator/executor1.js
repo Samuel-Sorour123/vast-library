@@ -513,7 +513,6 @@ function listenMQTT() {
                             });
 
                         } catch (error) {
-
                             console.error(`${processRunning} failed to execute step ${step}:`, err);
     
                             let message = `f step${step}`;

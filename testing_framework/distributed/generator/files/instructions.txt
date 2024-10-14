@@ -1,37 +1,37 @@
-newMatcher GW true "192.168.0.15" 8000 8001 20000 167 298 95
-wait 2757
-newClient C1 "192.168.0.12" 20000 642 802 95
-wait 3145
-newClient C2 "192.168.0.14" 20000 296 339 92
-wait 2956
-moveClient C1 673 741
-wait 2340
-publish C2 446 540 269 channel3 "ysznyvylmuksrzzxdxxr"
-wait 3172
-subscribe C2 366 406 252 channel2
-wait 3341
-subscribe C1 402 768 216 channel2
-wait 2847
-subscribe C2 98 739 20 channel3
-wait 2861
-moveClient C1 545 138
-wait 3209
-moveClient C1 872 160
-wait 2843
-subscribe C1 643 263 176 channel1
-wait 3985
-publish C2 391 185 163 channel3 "nxtmirhdawjcfuvaqszzdlalfmzhyqilp"
-wait 2762
-publish C2 510 647 179 channel3 "avkvqtrldeuqyxcepicygzmzjeiqgjin"
-wait 3266
-publish C1 608 171 81 channel2 "cgfwswswejt"
-wait 3296
-publish C2 643 708 287 channel3 "xnxzuroaobmnldgbt"
-wait 3481
-subscribe C1 304 631 286 channel2
-wait 3242
-moveClient C1 315 197
-wait 3951
-moveClient C1 318 217
-wait 2689
+newMatcher GW true "192.168.0.14" 8000 8001 20000 711 790 14
+wait 2893
+newClient C1 "192.168.0.15" 20000 557 917 70
+wait 2891
+newClient C2 "192.168.0.12" 20000 784 943 60
+wait 2353
+moveClient C2 106 807
+wait 3234
+moveClient C1 917 552
+wait 2613
+publish C2 615 752 236 channel2 "cvfyhucdnmyyozsslqusfq"
+wait 3274
+subscribe C2 259 282 48 channel2
+wait 3027
+moveClient C1 121 362
+wait 2052
+subscribe C2 540 803 10 channel3
+wait 2704
+subscribe C2 864 645 73 channel2
+wait 3283
+subscribe C2 626 170 141 channel2
+wait 3480
+subscribe C1 563 292 9 channel1
+wait 3462
+publish C2 188 751 93 channel1 "ebpsjmuwwywagwxzmhjbdlckefxdcv"
+wait 3568
+publish C2 132 657 83 channel1 "yqmshxpyxjcwrie"
+wait 2477
+moveClient C1 597 12
+wait 3125
+moveClient C1 246 810
+wait 2521
+publish C2 232 721 191 channel3 "qngwxfsiwtgz"
+wait 2563
+publish C1 478 801 168 channel1 "ckyssjsesgztbzbktzoxfclxu"
+wait 3114
 end
