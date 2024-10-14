@@ -1,9 +1,9 @@
-newMatcher GW true "192.168.0.14" 8000 8001 20000 734 776 80
-wait 2916
-newClient C1 "192.168.0.12" 20000 385 5 24
-wait 3383
-subscribe C1 757 271 185 channel2
-wait 3760
-publish C1 507 467 278 channel3 "lydfuhwxzdxyhwyiqiwlfonjbuxyboo"
-wait 2508
+newMatcher GW true "192.168.0.12" 8000 8001 20000 713 588 33
+wait 3430
+newClient C1 "192.168.0.14" 20000 853 326 1
+wait 2167
+subscribe C1 293 452 204 channel3
+wait 3749
+publish C1 610 849 25 channel1 "jcslikdtgpqaiayhbfstllnyerlevpqh"
+wait 3424
 end

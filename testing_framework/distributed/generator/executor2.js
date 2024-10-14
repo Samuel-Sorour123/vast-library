@@ -497,7 +497,7 @@ function handleMasterMessage(topic, message) {
         const payloadArray = payload.split(" ");
         const result = payloadArray[0];
         const step = payloadArray[1] + " " + payloadArray[2];
-       console.log(`Master received message on 'result': ${message}`);
+        //console.log(`Master received message on 'result': ${message}`);
 
         if (result === 'success') {
             log.debug("Instruction success: " + step);
@@ -559,14 +559,14 @@ async function handleClientMessage(topic, message) {
                         }
                         else
                         {
-                            log.debug(`Succeeded with publishing success step${step}`);
+                            log.debug(`Succeeded with publishing success step ${step}`);
                             //console.log(`Succeeded with publishing success step${step}`);
                         }
                     });
                 } catch (err) {
                     //console.error(`${processRunning} failed to execute step ${step}:`, err);
                     log.debug(`${processRunning} failed to execute step ${step}:`, err);
-                    mqttClient.publish('result', `fail step${step}`);
+                    mqttClient.publish('result', `fail step ${step}`);
                 }
             } else {
                 log.debug(`Instruction alias ${alias} does not match ${processRunning}, ignoring`);
