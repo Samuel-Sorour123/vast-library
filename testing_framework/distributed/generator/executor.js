@@ -128,7 +128,7 @@ async function executeInstruction(instruction, step, success, fail) {
             break;
 
         case 'end': {
-            mqttClient.publish('end', 'Simulation ended');
+            mqttClient.publish('end', 'stop');
             success('End instruction executed');
         }
             break;
@@ -157,11 +157,15 @@ var executeInstructionWrapper = function (instruction, step) {
 async function execute(step) {
     step = step || 0;
 
-    if (instructions[step].type == "end")
-    {
+    if (step == 0) {
+        console.log("Master starts executing the instructions");
+    }
+
+    if (instructions[step].type == "end") {
         log.debug('Executing the end instruction')
         let result = await executeInstructionWrapper(instructions[step], step);
         log.debug(result);
+        console.log("Master has finished executing the instructions");
         setTimeout(() => process.exit(0), 100);
         return;
     }
@@ -182,10 +186,11 @@ async function execute(step) {
             mqttClient.publish('instructions', step.toString());
             mqttClient.on('message', async function (topic, message) {
                 if (topic === 'logging') {
-                    if (message.toString() == 'success') {
+                    if (message.toString().includes("success")) {
+                        console.log("Master receives a success message indicating successful execution: " + message.toString());
                         log.debug('Instruction was successfully executed');
                     }
-                    else if (message.toString() == 'fail') {
+                    else if (message.toString().includes("fail")) {
                         log.error('Instruction failed to execute');
                     }
                 }
@@ -402,10 +407,7 @@ async function main(filename) {
     });
 
     // start executing once all instructions loaded
-    console.log('Have finished loading the instructions');
-    console.log("Yo yo yo, this is " + processRunning);
     startMQTT();
-
 
 }
 
@@ -421,10 +423,10 @@ var instruction = function (type, opts) {
 }
 
 function startMQTT() {
-    console.log("Oh yeah, This is " + processRunning)
     mqttClient = mqtt.connect('mqtt://192.168.0.30');
     mqttClient.on('connect', function () {
         if (processRunning == "master") {
+            console.log("Master was able to connect to the MQTT broker");
             let expectedClients = determineExpectedClients();
             let readyClients = [];
 
@@ -433,6 +435,7 @@ function startMQTT() {
                     error("Master could not subscribe to ready");
                 }
                 else {
+                    console.log("Master was able to subscribe to the topic ready");
                     log.debug("Master subscribed to topic ready");
                     mqttClient.on('message', function (topic, message) {
                         if (topic == 'ready') {
@@ -450,14 +453,16 @@ function startMQTT() {
             });
         }
         else {
-            console.log("The process running is " + processRunning)
             mqttClient.subscribe('instructions', function (err) {
                 if (err) {
                     error(processRunning + " could not subscribe to instructions");
                 }
                 else {
+                    console.log(alias + " was able to subscribe to the topic instructions")
                     listenMQTT();
+                    console.log(alias + " is listening to the topic instructions");
                     mqttClient.publish('ready', processRunning);
+                    console.log(alias + " is ready to start executing instructions")
                 }
             });
         }
@@ -466,39 +471,50 @@ function startMQTT() {
 
 function listenMQTT() {
     mqttClient.on('message', async function (topic, message) {
-        if (topic == 'instructions') {
-            const step = parseInt(message.toString(), 10);
-            if (!isNaN(step) && (step < instructions.length)) {
-                const instruction = instructions[step];
-                let alias = '';
-                if (instruction.opts && instruction.opts.alias)
-                {
-                    alias = instruction.opts.alias;
-                }
-                else
-                {
-                    return;
-                }
-                if (alias == processRunning)     {
-                    try {
-                        // const result = await executeInstructionWrapper(instruction, step);
-                        // log.debug(result);
-                        log.debug(processRunning + " executes step" + step);
-                        mqttClient.publish('logging', 'success');
+        switch (topic) {
+            case 'instructions': {
+                console.log(alias + " has received the message " + message.toString() + " from the instructions topic");
+                const step = parseInt(message.toString(), 10);
+                if (!isNaN(step) && (step < instructions.length)) {
+                    const instruction = instructions[step];
+                    let alias = '';
+                    if (instruction.opts && instruction.opts.alias) {
+                        alias = instruction.opts.alias;
+                    }
+                    else {
+                        return;
+                    }
+                    if (alias == processRunning) {
+                        try {
+                            console.log("The alias " + alias + " matches up with the alias of the instruction");
+                            // const result = await executeInstructionWrapper(instruction, step);
+                            // log.debug(result);
+                            log.debug(processRunning + " executes step" + step);
+                            mqttClient.publish('logging', 'success step ' + step);
 
-                    } catch (error) {
-                        error(processRunning + " failed to execute " + step);
-                        mqttClient.publish('logging', 'fail');
+                        } catch (error) {
+                            error(processRunning + " failed to execute " + step);
+                            mqttClient.publish('logging', 'fail');
+                        }
+                    }
+                    else {
+                        log.debug("The alias " + alias + " does not match up with" + processRunning + " so we ignore");
                     }
                 }
                 else {
-                    log.debug("The alias " + alias + " does not match up with" + processRunning + " so we ignore");
+                    error("The step is out of bounds: " + step);
                 }
             }
-            else {
-                error("The step is out of bounds: " + step);
+            break;
+            case 'end': {
+                if (message.toString() == 'stop')
+                {
+                    console.log(alias + " has stopped executing as there are no more instructions");
+                    process.exit(0);
+                }
             }
         }
+
     });
 
 
@@ -515,10 +531,8 @@ function determineExpectedClients() {
     return expectedClients;
 }
 
-function startProcess()
-{
-  console.log("We are executing executor.js " + processRunning);  
-  main(instructionsPath);
-}
 
-startProcess();
+console.log("The process running is " + alias);
+main(instructionsPath);
+
+
