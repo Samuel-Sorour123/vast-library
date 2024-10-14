@@ -12,7 +12,8 @@ const path = require('path');
 const { start } = require('repl');
 
 
-var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', "logging", 0, 5);
+var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', "logging", 5, 5);
+var detailedLogger = LOG.newLayer("Detailed", "Detailed", "logging", 5, 5);
 
 // Data structures to store matchers
 // alias --> matcher{}.
@@ -547,6 +548,9 @@ async function handleClientMessage(topic, message) {
                     console.log(`${processRunning} is about to execute instruction ${step}:`);
                     console.log(`Instruction ${instruction}`);
                     log.debug(`Instruction ${instruction}`);
+
+                    detailedLogger.debug("The type of instruction is" + instruction.type);
+                    detailedLogger.debug("The options of the instruction are " + JSON.stringify(instruction.opts));
 
                     const result = await executeInstructionWrapper(instruction, step);
 
