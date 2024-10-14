@@ -532,7 +532,7 @@ function determineExpectedClients() {
 }
 
 
-console.log("The process running is " + alias);
+console.log("The process running is " + processRunning);
 main(instructionsPath);
 
 

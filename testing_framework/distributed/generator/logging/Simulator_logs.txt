@@ -111,3 +111,4 @@
 {"time":1728902943281,"msg":"waited for 2553 milliseconds"}
 {"time":1728902943282,"msg":"Executing the end instruction"}
 {"time":1728902943282,"msg":"End instruction executed"}
+{"time":1728904493611,"msg":"Master subscribed to topic ready"}
