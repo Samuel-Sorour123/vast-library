@@ -9,14 +9,14 @@
          "static_IP_address": "192.168.0.12"
       },
       "C2": {
-         "hostname": "raspberrypi15",
-         "static_IP_address": "192.168.0.15"
+         "hostname": "raspberrypi14",
+         "static_IP_address": "192.168.0.14"
       }
    },
    "matchers": {
       "GW": {
-         "hostname": "raspberrypi14",
-         "static_IP_address": "192.168.0.14"
+         "hostname": "raspberrypi15",
+         "static_IP_address": "192.168.0.15"
       }
    }
 }

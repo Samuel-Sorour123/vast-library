@@ -112,3 +112,4 @@
 {"time":1728902943282,"msg":"Executing the end instruction"}
 {"time":1728902943282,"msg":"End instruction executed"}
 {"time":1728904493611,"msg":"Master subscribed to topic ready"}
+{"time":1728905340978,"msg":"Master subscribed to topic ready"}
