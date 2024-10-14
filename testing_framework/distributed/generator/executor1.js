@@ -12,7 +12,7 @@ const path = require('path');
 const { start } = require('repl');
 
 
-var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', "logging", 0, 5);
+var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', "logs_and_events", 0, 5);
 
 // Data structures to store matchers
 // alias --> matcher{}.
@@ -440,13 +440,15 @@ function startMQTT() {
                                     }
                                     else {
                                         mqttClient.on('message', async function (topic, message) {
-                                            if (topic === 'logging') {
-                                                if (message.toString().includes("success")) {
-                                                    console.log("Master receives a success message indicating successful execution: " + message.toString());
+                                            if (topic === 'result') {
+                                                let result = message.toString().split(" ");
+                                                if (result[0] === 's') {
+                                                    console.log("Successful Execution of " + result[1]);
                                                     log.debug('Instruction was successfully executed');
                                                 }
-                                                else if (message.toString().includes("fail")) {
+                                                else if (result[0] === 'f') {
                                                     log.error('Instruction failed to execute');
+                                                    console.log("Failed Execution: " + result[1]);
                                                 }
                                             }
                                         });
@@ -498,20 +500,29 @@ function listenMQTT() {
                              const result = await executeInstructionWrapper(instruction, step);
                             log.debug(result);
                             console.log(processRunning + " execution status: " + result);
-                            log.debug(processRunning + " executes step" + step);
-                            let message = "success step " + step;
-                            mqttClient.publish('logging', message, function (err) {
+                            console.debug(processRunning + " executes step" + step);
+                            let message = `s step ${step}`;
+                            mqttClient.publish('result', message, function (err) {
                                 if (err) {
-                                    console.log(processRunning + " was unable to publish the " + message);
+                                    console.log(processRunning + " was unable to publish the execution message:" + message);
                                 }
                                 else {
-                                    console.log(processRunning + " was able to publish the message " + message);
+                                    console.log(processRunning + " was able to publish the execution message:" + message);
                                 }
                             });
 
                         } catch (error) {
-                            error(processRunning + " failed to execute " + step);
-                            mqttClient.publish('logging', 'fail');
+
+                            console.error(`${processRunning} failed to execute step ${step}:`, err);
+    
+                            let message = `f step${step}`;
+                            mqttClient.publish('result', message, function (err) {
+                                if (err) {
+                                    console.log(`${processRunning} was unable to publish the message: ${message}`);
+                                } else {
+                                    console.log(`${processRunning} was able to publish the message: ${message}`);
+                                }
+                            });
                         }
                     }
                     else {
