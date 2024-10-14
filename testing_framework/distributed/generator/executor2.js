@@ -26,6 +26,7 @@ const instructionsPath = path.resolve(__dirname, "files/instructions.txt");
 const staticPath = path.resolve(__dirname, "files/static.json");
 const processRunning = process.argv[2] || "master";
 const staticAddresses = JSON.parse(fs.readFileSync(staticPath));
+const matcherLogsAndEvents = path.resolve(__dirname, "logging/");
 
 //MQTT client object
 var mqttClient;
@@ -58,6 +59,8 @@ async function executeInstruction(instruction, step, success, fail) {
                         alias: opts.alias,
                         //logLayer: 'Matcher_' + opts.alias,
                         //logFile: 'Matcher_' + opts.alias,
+                        logDirectory: matcherLogsAndEvents,
+                        eventsDirectory: matcherLogsAndEvents,
                         logDisplayLevel: 5,
                         logRecordLevel: 5,
                         eventDisplayLevel: 5,
@@ -432,8 +435,8 @@ async function onMasterConnect() {
        // console.log("Master unsubscribed from 'ready' topic");
         log.debug("Unsubscribed from ready");
         // Subscribe to 'logging' topic
-        await mqttClient.subscribe('logging');
-        log.debug("Subscribed to \'logging\'");
+        await mqttClient.subscribe('result');
+        log.debug("Subscribed to \'result\'");
        // console.log("Master subscribed to 'logging' topic");
 
         // Set up message handler for 'logging' messages
@@ -495,7 +498,7 @@ function handleMasterMessage(topic, message) {
         const payloadArray = payload.split(" ");
         const result = payloadArray[0];
         const step = payloadArray[1];
-       console.log(`Master received message on 'result': ${msg}`);
+       console.log(`Master received message on 'result': ${message}`);
 
         if (result === 'success') {
             log.debug("Instruction success: " + step);
