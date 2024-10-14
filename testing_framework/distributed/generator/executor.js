@@ -184,17 +184,6 @@ async function execute(step) {
         try {
             log.debug('Publishing instruction ' + step + '. Type: ' + instructions[step].type);
             mqttClient.publish('instructions', step.toString());
-            mqttClient.on('message', async function (topic, message) {
-                if (topic === 'logging') {
-                    if (message.toString().includes("success")) {
-                        console.log("Master receives a success message indicating successful execution: " + message.toString());
-                        log.debug('Instruction was successfully executed');
-                    }
-                    else if (message.toString().includes("fail")) {
-                        log.error('Instruction failed to execute');
-                    }
-                }
-            });
             execute(step + 1);
         }
         catch (error) {
@@ -444,6 +433,27 @@ function startMQTT() {
                             readyClients.push(client);
                             if (readyClients.length == expectedClients.length) {
                                 log.debug("All clients are ready, we can start the execution")
+                                mqttClient.unsubscribe('ready');
+                                mqttClient.subscribe("logging", function (error) {
+                                    if (err) {
+                                        error("Master could not subscribe to logging");
+                                    }
+                                    else {
+                                        mqttClient.on('message', async function (topic, message) {
+                                            console.log("Master receives a message " + message.toString() + " from the topic logging");
+                                            if (topic === 'logging') {
+                                                console.log("Does the message have the substring \'success\'?: " + message.toString().includes("success"));
+                                                if (message.toString().includes("success")) {
+                                                    console.log("Master receives a success message indicating successful execution: " + message.toString());
+                                                    log.debug('Instruction was successfully executed');
+                                                }
+                                                else if (message.toString().includes("fail")) {
+                                                    log.error('Instruction failed to execute');
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
                                 execute(0);
                             }
                         }
@@ -490,7 +500,15 @@ function listenMQTT() {
                             // const result = await executeInstructionWrapper(instruction, step);
                             // log.debug(result);
                             log.debug(processRunning + " executes step" + step);
-                            mqttClient.publish('logging', 'success step ' + step);
+                            let message = "success step " + step;
+                            mqttClient.publish('logging', message, function (err) {
+                                if (err) {
+                                    console.log(processRunning + " was unable to publish the " + message);
+                                }
+                                else {
+                                    console.log(processRunning + " was able to publish the message " + message);
+                                }
+                            });
 
                         } catch (error) {
                             error(processRunning + " failed to execute " + step);
@@ -505,10 +523,9 @@ function listenMQTT() {
                     error("The step is out of bounds: " + step);
                 }
             }
-            break;
+                break;
             case 'end': {
-                if (message.toString() == 'stop')
-                {
+                if (message.toString() == 'stop') {
                     console.log(processRunning + " has stopped executing as there are no more instructions");
                     process.exit(0);
                 }

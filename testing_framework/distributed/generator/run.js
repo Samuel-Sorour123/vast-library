@@ -48,6 +48,7 @@ function startExecution() {
             child.on('close', (code) => {
                 if (code === 0) {
                     console.log('The script executor.js master executed successfully.');
+                    process.exit(0);
                 } else {
                     console.error(`Master process exited with code ${code}`);
                 }
@@ -55,16 +56,10 @@ function startExecution() {
         } else {
             for (const alias in staticIPs[type]) {
                 const ip = staticIPs[type][alias].static_IP_address;
-                console.log ("The alias is " + alias);
-                console.log("The IP is " + ip);
-
+                
                 // Properly quote paths and commands
                 const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
-
-                console.log("The remote command is " + remoteCommand);
-                console.log("The sshCommand is " + sshCommand);
-
                 const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
 
                 child.stdout.on('data', (data) => {
