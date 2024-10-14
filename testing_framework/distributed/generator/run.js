@@ -14,6 +14,9 @@
 const fs = require('fs');
 const { spawn } = require('child_process');
 const path = require('path');
+const initNVM = 'source ~/.nvm/nvm.sh';
+const os = require('os');
+
 
 const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
 const sshUser = 'pi';
@@ -52,11 +55,15 @@ function startExecution() {
         } else {
             for (const alias in staticIPs[type]) {
                 const ip = staticIPs[type][alias].static_IP_address;
-                const initNVM = 'source ~/.nvm/nvm.sh';
+                console.log ("The alias is " + alias);
+                console.log("The IP is " + ip);
 
                 // Properly quote paths and commands
                 const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
+
+                console.log("The remote command is " + remoteCommand);
+                console.log("The sshCommand is " + sshCommand);
 
                 const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
 
@@ -178,41 +185,43 @@ function deleteLogFiles() {
     // Implementation needed
 }
 
-function download()
-{
-   const gitCommand = "git clone https://github.com/Samuel-Sorour123/vast-library.git";
-   const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
+function ssh(command, directory = "~/") {
+    const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
 
-   for (const type in staticIPs) {
-       if (type !== "master") {
-           for (const alias in staticIPs[type]) {
-               const ip = staticIPs[type][alias].static_IP_address;
+    for (const type in staticIPs) {
+        if (type !== "master") {
+            for (const alias in staticIPs[type]) {
+                const ip = staticIPs[type][alias].static_IP_address;
+                let remoteCommand = command;
+                if (directory !== "~/")
+                {
+                    remoteCommand = `cd ${directory} && ${command}` 
+                }
+                    const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
+                const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
 
-               const sshCommand = ['ssh', `${sshUser}@${ip}`, gitCommand];
-               const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
+                child1.stdout.on('data', (data) => {
+                    console.log(`stdout: ${command} (${alias}): ${data}`);
+                });
 
-               child1.stdout.on('data', (data) => {
-                   console.log(`stdout: download (${alias}): ${data}`);
-               });
+                child1.stderr.on('data', (data) => {
+                    console.error(`stderr: ${command} (${alias}): ${data}`);
+                });
 
-               child1.stderr.on('data', (data) => {
-                   console.error(`stderr: download(${alias}): ${data}`);
-               });
+                child1.on('error', (err) => {
+                    console.error(`error: ${command} (${alias}): ${err}`);
+                });
 
-               child1.on('error', (err) => {
-                   console.error(`error: download(${alias}): ${err}`);
-               });
-
-               child1.on('close', (code) => {
-                   if (code === 0) {
-                       console.log(`vast-library was downloaded on ${alias}`);
-                   } else {
-                       console.error(`The download for ${alias} exited with code ${code}`);
-                   }
-               });
-           }
-       }
-   }
+                child1.on('close', (code) => {
+                    if (code === 0) {
+                        console.log(`${command} was successful on ${alias}`);
+                    } else {
+                        console.error(`${command} was unsuccessful on ${alias} exited with code ${code}`);
+                    }
+                });
+            }
+        }
+    }
 }
 
 const args = process.argv.slice(2);
@@ -235,9 +244,19 @@ switch (command) {
         console.log("Collecting log files");
         collectLogFiles();
         break;
+    case 'delete':
+        console.log("Deleting current vast-library");
+        ssh("rm -rf vast-library");
+        break;
     case 'download':
-        console.log("Deleting current vast-library, Downloading latest vast-library");
-        download();
+        console.log("Downloading the latest vast-library");
+        ssh("git clone https://github.com/Samuel-Sorour123/vast-library.git");
+        break;
+    case 'install':
+        console.log("Installing the neccessary packages");
+        ssh(`${initNVM} && npm install`, '~/vast-library');
+        break;
+
     default:
         console.log("Not a valid argument");
 }

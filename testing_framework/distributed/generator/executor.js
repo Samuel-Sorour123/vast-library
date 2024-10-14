@@ -9,6 +9,7 @@ const readline = require('readline');
 const mqtt = require('mqtt');
 const { map, data } = require('jquery');
 const path = require('path');
+const { start } = require('repl');
 
 
 var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', "logging", 0, 5);
@@ -25,7 +26,6 @@ const instructionsPath = path.resolve(__dirname, "files/instructions.txt");
 const staticPath = path.resolve(__dirname, "files/static.json");
 const processRunning = process.argv[2] || "master";
 const staticAddresses = JSON.parse(fs.readFileSync(staticPath));
-
 
 //MQTT client object
 var mqttClient;
@@ -128,8 +128,8 @@ async function executeInstruction(instruction, step, success, fail) {
             break;
 
         case 'end': {
-            log.debug('Ending Simulation');
-            process.exit(0);
+            mqttClient.publish('end', 'Simulation ended');
+            success('End instruction executed');
         }
             break;
 
@@ -157,12 +157,15 @@ var executeInstructionWrapper = function (instruction, step) {
 async function execute(step) {
     step = step || 0;
 
-    if (step >= instructions.length) {
-        log.debug('Reached end of instructions');
+    if (instructions[step].type == "end")
+    {
+        log.debug('Executing the end instruction')
+        let result = await executeInstructionWrapper(instructions[step], step);
+        log.debug(result);
+        setTimeout(() => process.exit(0), 100);
         return;
     }
-
-    if (instructions[step].type == "wait") {
+    else if (instructions[step].type == "wait") {
         try {
             log.debug('Executing wait instruction with step ' + step + ': Waiting ' + instructions[step].opts.waitTime);
             let result = await executeInstructionWrapper(instructions[step], step);
@@ -400,6 +403,7 @@ async function main(filename) {
 
     // start executing once all instructions loaded
     console.log('Have finished loading the instructions');
+    console.log("Yo yo yo, this is " + processRunning);
     startMQTT();
 
 
@@ -417,6 +421,7 @@ var instruction = function (type, opts) {
 }
 
 function startMQTT() {
+    console.log("Oh yeah, This is " + processRunning)
     mqttClient = mqtt.connect('mqtt://192.168.0.30');
     mqttClient.on('connect', function () {
         if (processRunning == "master") {
@@ -445,6 +450,7 @@ function startMQTT() {
             });
         }
         else {
+            console.log("The process running is " + processRunning)
             mqttClient.subscribe('instructions', function (err) {
                 if (err) {
                     error(processRunning + " could not subscribe to instructions");
@@ -464,8 +470,16 @@ function listenMQTT() {
             const step = parseInt(message.toString(), 10);
             if (!isNaN(step) && (step < instructions.length)) {
                 const instruction = instructions[step];
-                const alias = instruction.opts.alias;
-                if (alias == processRunning) {
+                let alias = '';
+                if (instruction.opts && instruction.opts.alias)
+                {
+                    alias = instruction.opts.alias;
+                }
+                else
+                {
+                    return;
+                }
+                if (alias == processRunning)     {
                     try {
                         // const result = await executeInstructionWrapper(instruction, step);
                         // log.debug(result);
@@ -501,5 +515,10 @@ function determineExpectedClients() {
     return expectedClients;
 }
 
-main(instructionsPath);
+function startProcess()
+{
+  console.log("We are executing executor.js " + processRunning);  
+  main(instructionsPath);
+}
 
+startProcess();
