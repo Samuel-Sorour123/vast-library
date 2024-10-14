@@ -166,6 +166,7 @@ async function execute(step){
     catch(error){
         log.error(error);
     }
+    execute(1+step);
 
 }
 
@@ -363,7 +364,7 @@ var dataFromTextFile = dataFromTextFiles(filename).then((dataFromTextFile) => {
 
     // start executing once all instructions loaded
     execute();
-});1
+});
 
 var error = function(message){
     log.error(message);  

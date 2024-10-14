@@ -497,7 +497,7 @@ function handleMasterMessage(topic, message) {
         const payload = message.toString();
         const payloadArray = payload.split(" ");
         const result = payloadArray[0];
-        const step = payloadArray[1];
+        const step = payloadArray[1] + " " + payloadArray[2];
        console.log(`Master received message on 'result': ${message}`);
 
         if (result === 'success') {
@@ -553,7 +553,7 @@ async function handleClientMessage(topic, message) {
                     log.debug(`${processRunning} executed instruction ${step}:`, result);
                     console.log(`${processRunning} executed instruction ${step}:`, result);
 
-                    mqttClient.publish('result', `success step${step}`, function(err){
+                    mqttClient.publish('result', `success instruction ${step}`, function(err){
                         if (err){
                           log.debug(`Failed to publish success step${step}`) ;
                           console.log(`Failed to publish success step${step}`); 
