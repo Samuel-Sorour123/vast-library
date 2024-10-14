@@ -10,10 +10,10 @@
   "simulation": {
     "nodes": {
       "newMatcher": 1,
-      "newClient": 2,
-      "publish": 5,
-      "subscribe": 5,
-      "moveClient": 5
+      "newClient": 1,
+      "publish": 1,
+      "subscribe": 1,
+      "moveClient": 0
     },
     "settings": {}
   }
