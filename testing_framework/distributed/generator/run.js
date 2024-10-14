@@ -250,6 +250,9 @@ switch (command) {
     case 'install':
         console.log("Installing the neccessary packages");
         ssh(`${initNVM} && npm install`, '~/vast-library');
+    case 'pull':
+        console.log("Pulling from the git repo");
+        ssh(`git pull https://github.com/Samuel-Sorour123/vast-library.git`);
         break;
 
     default:

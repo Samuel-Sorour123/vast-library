@@ -425,21 +425,22 @@ function startMQTT() {
 
 // Function called when the master connects to the MQTT broker
 async function onMasterConnect() {
-    console.log("Master was able to connect to the MQTT broker");
+   // console.log("Master was able to connect to the MQTT broker");
 
     const expectedClients = determineExpectedClients();
 
     try {
         // Wait for all clients to be ready
         await waitForClientsReady(expectedClients);
-
+        log.debug("All the clients are have published \'ready\'");
         // After all clients are ready, proceed
         await mqttClient.unsubscribe('ready');
-        console.log("Master unsubscribed from 'ready' topic");
-
+       // console.log("Master unsubscribed from 'ready' topic");
+        log.debug("Unsubscribed from ready");
         // Subscribe to 'logging' topic
         await mqttClient.subscribe('logging');
-        console.log("Master subscribed to 'logging' topic");
+        log.debug("Subscribed to \'logging\'");
+       // console.log("Master subscribed to 'logging' topic");
 
         // Set up message handler for 'logging' messages
         mqttClient.on('message', handleMasterMessage);
@@ -462,13 +463,13 @@ function waitForClientsReady(expectedClients) {
             if (err) {
                 reject("Master could not subscribe to 'ready' topic");
             } else {
-                console.log("Master subscribed to 'ready' topic");
+              //  console.log("Master subscribed to 'ready' topic");
 
                 // Message handler for 'ready' messages
                 const onReadyMessage = (topic, message) => {
                     if (topic === 'ready') {
                         const client = message.toString();
-                        console.log(`Received 'ready' message from client: ${client}`);
+                      //  console.log(`Received 'ready' message from client: ${client}`);
 
                         if (!readyClients.includes(client)) {
                             readyClients.push(client);
@@ -476,7 +477,7 @@ function waitForClientsReady(expectedClients) {
 
                         // Check if all expected clients are ready
                         if (readyClients.length === expectedClients.length) {
-                            console.log("All clients are ready");
+                        //    console.log("All clients are ready");
 
                             // Remove the 'message' listener for 'ready' messages
                             mqttClient.removeListener('message', onReadyMessage);
@@ -497,11 +498,13 @@ function waitForClientsReady(expectedClients) {
 function handleMasterMessage(topic, message) {
     if (topic === 'logging') {
         const msg = message.toString();
-        console.log(`Master received message on 'logging': ${msg}`);
+       // console.log(`Master received message on 'logging': ${msg}`);
 
         if (msg.includes('success')) {
-            console.log('Instruction was successfully executed');
+            log.debug("Instruction success: " + message.toString());
+        //    console.log('Instruction was successfully executed');
         } else if (msg.includes('fail')) {
+            log.error("Instruction fail: " + message.toString());
             console.error('Instruction failed to execute');
         }
     }
@@ -511,14 +514,15 @@ function handleMasterMessage(topic, message) {
 async function onClientConnect() {
     try {
         await mqttClient.subscribe('instructions');
-        console.log(`${processRunning} subscribed to 'instructions' topic`);
-
+     //   console.log(`${processRunning} subscribed to 'instructions' topic`);
+        log.debug("Connected to MQTT broker")
         // Set up message handler for 'instructions' messages
         mqttClient.on('message', handleClientMessage);
 
         // Notify master that this client is ready
         mqttClient.publish('ready', processRunning);
-        console.log(`${processRunning} published 'ready' message`);
+        log.debug("Published \'ready\'");
+      //  console.log(`${processRunning} published 'ready' message`);
     } catch (err) {
         console.error(`${processRunning} could not subscribe to 'instructions':`, err);
     }
@@ -528,7 +532,7 @@ async function onClientConnect() {
 async function handleClientMessage(topic, message) {
     if (topic === 'instructions') {
         const step = parseInt(message.toString(), 10);
-        console.log(`${processRunning} received instruction for step ${step}`);
+       // console.log(`${processRunning} received instruction for step ${step}`);
 
         if (!isNaN(step) && step < instructions.length) {
             const instruction = instructions[step];
@@ -536,18 +540,22 @@ async function handleClientMessage(topic, message) {
 
             if (alias === processRunning) {
                 try {
+                    log.debug("Executing instruction " + step);
                     const result = await executeInstructionWrapper(instruction, step);
-                    console.log(`${processRunning} executed step ${step}:`, result);
+                    log.debug("Instruction step " + step + ": " + result);
+                    //console.log(`${processRunning} executed step ${step}:`, result);
                     mqttClient.publish('logging', `success step ${step}`);
                 } catch (err) {
-                    console.error(`${processRunning} failed to execute step ${step}:`, err);
+                   // console.error(`${processRunning} failed to execute step ${step}:`, err);
                     mqttClient.publish('logging', `fail step ${step}`);
                 }
             } else {
-                console.log(`Instruction alias '${alias}' does not match '${processRunning}', ignoring`);
+                log.debug(`Instruction alias ${alias} does not match ${processRunning}, ignoring`);
+                //console.log(`Instruction alias '${alias}' does not match '${processRunning}', ignoring`);
             }
         } else {
-            console.error(`Invalid step received: ${step}`);
+            log.debug(`Invalid step receiving`);
+            //console.error(`Invalid step received: ${step}`);
         }
     }
 }
