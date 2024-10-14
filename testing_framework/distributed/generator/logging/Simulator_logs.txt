@@ -364,3 +364,101 @@
 {"time":1728911486688,"msg":"waited for 3597 milliseconds"}
 {"time":1728911486688,"msg":"Executing the end instruction"}
 {"time":1728911486688,"msg":"End instruction executed"}
+{"time":1728912097066,"msg":"Master subscribed to topic ready"}
+{"time":1728912099847,"msg":"Received ready message from client C2"}
+{"time":1728912099896,"msg":"Received ready message from client GW"}
+{"time":1728912099896,"msg":"Received ready message from client C1"}
+{"time":1728912099896,"msg":"All clients are ready, we can start the execution"}
+{"time":1728912099897,"msg":"Publishing instruction 0. Type: newMatcher"}
+{"time":1728912099897,"msg":"Executing wait instruction with step 1: Waiting 3302"}
+{"time":1728912099950,"msg":"Instruction was successfully executed"}
+{"time":1728912099950,"msg":"Instruction was successfully executed"}
+{"time":1728912099950,"msg":"Instruction was successfully executed"}
+{"time":1728912099950,"msg":"Instruction was successfully executed"}
+{"time":1728912099950,"msg":"Instruction was successfully executed"}
+{"time":1728912099951,"msg":"Instruction was successfully executed"}
+{"time":1728912099951,"msg":"Instruction was successfully executed"}
+{"time":1728912099951,"msg":"Instruction was successfully executed"}
+{"time":1728912099951,"msg":"Instruction was successfully executed"}
+{"time":1728912099951,"msg":"Instruction was successfully executed"}
+{"time":1728912099951,"msg":"Instruction was successfully executed"}
+{"time":1728912103204,"msg":"waited for 3302 milliseconds"}
+{"time":1728912103204,"msg":"Publishing instruction 2. Type: newClient"}
+{"time":1728912103204,"msg":"Executing wait instruction with step 3: Waiting 3775"}
+{"time":1728912103211,"msg":"Instruction was successfully executed"}
+{"time":1728912103259,"msg":"Instruction was successfully executed"}
+{"time":1728912103259,"msg":"Instruction was successfully executed"}
+{"time":1728912103259,"msg":"Instruction was successfully executed"}
+{"time":1728912103259,"msg":"Instruction was successfully executed"}
+{"time":1728912103259,"msg":"Instruction was successfully executed"}
+{"time":1728912103259,"msg":"Instruction was successfully executed"}
+{"time":1728912103260,"msg":"Instruction was successfully executed"}
+{"time":1728912103260,"msg":"Instruction was successfully executed"}
+{"time":1728912103260,"msg":"Instruction was successfully executed"}
+{"time":1728912103260,"msg":"Instruction was successfully executed"}
+{"time":1728912106980,"msg":"waited for 3775 milliseconds"}
+{"time":1728912106981,"msg":"Publishing instruction 4. Type: newClient"}
+{"time":1728912106981,"msg":"Executing wait instruction with step 5: Waiting 2790"}
+{"time":1728912106991,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912107033,"msg":"Instruction was successfully executed"}
+{"time":1728912109774,"msg":"waited for 2790 milliseconds"}
+{"time":1728912109774,"msg":"Publishing instruction 6. Type: publish"}
+{"time":1728912109774,"msg":"Executing wait instruction with step 7: Waiting 3414"}
+{"time":1728912109786,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912109828,"msg":"Instruction was successfully executed"}
+{"time":1728912113189,"msg":"waited for 3414 milliseconds"}
+{"time":1728912113189,"msg":"Publishing instruction 8. Type: subscribe"}
+{"time":1728912113189,"msg":"Executing wait instruction with step 9: Waiting 3057"}
+{"time":1728912113200,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912113251,"msg":"Instruction was successfully executed"}
+{"time":1728912116249,"msg":"waited for 3057 milliseconds"}
+{"time":1728912116249,"msg":"Publishing instruction 10. Type: subscribe"}
+{"time":1728912116249,"msg":"Executing wait instruction with step 11: Waiting 2855"}
+{"time":1728912116259,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912116307,"msg":"Instruction was successfully executed"}
+{"time":1728912119107,"msg":"waited for 2855 milliseconds"}
+{"time":1728912119107,"msg":"Publishing instruction 12. Type: publish"}
+{"time":1728912119107,"msg":"Executing wait instruction with step 13: Waiting 2756"}
+{"time":1728912119115,"msg":"Instruction was successfully executed"}
+{"time":1728912119158,"msg":"Instruction was successfully executed"}
+{"time":1728912119158,"msg":"Instruction was successfully executed"}
+{"time":1728912119158,"msg":"Instruction was successfully executed"}
+{"time":1728912119158,"msg":"Instruction was successfully executed"}
+{"time":1728912119158,"msg":"Instruction was successfully executed"}
+{"time":1728912119159,"msg":"Instruction was successfully executed"}
+{"time":1728912119159,"msg":"Instruction was successfully executed"}
+{"time":1728912119159,"msg":"Instruction was successfully executed"}
+{"time":1728912119159,"msg":"Instruction was successfully executed"}

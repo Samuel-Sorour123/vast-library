@@ -18,7 +18,7 @@ const initNVM = 'source ~/.nvm/nvm.sh';
 const os = require('os');
 
 
-const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
+const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor2.js';
 const sshUser = 'pi';
 
 const filesPath = '~/vast-library/testing_framework/distributed/generator/files';
@@ -30,7 +30,7 @@ function startExecution() {
 
     for (const type in staticIPs) {
         if (type === "master") {
-            const executorPath = path.resolve(__dirname, 'executor.js');
+            const executorPath = path.resolve(__dirname, 'executor2.js');
             const child = spawn('node', [executorPath, 'master'], { cwd: __dirname });
 
             child.stdout.on('data', (data) => {
