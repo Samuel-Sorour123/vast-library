@@ -495,8 +495,9 @@ function listenMQTT() {
                     if (alias == processRunning) {
                         try {
                             console.log("The alias " + processRunning + " matches up with the alias of the instruction");
-                            // const result = await executeInstructionWrapper(instruction, step);
-                            // log.debug(result);
+                             const result = await executeInstructionWrapper(instruction, step);
+                            log.debug(result);
+                            console.log(processRunning + " execution status: " + result);
                             log.debug(processRunning + " executes step" + step);
                             let message = "success step " + step;
                             mqttClient.publish('logging', message, function (err) {
