@@ -458,11 +458,11 @@ function startMQTT() {
                     error(processRunning + " could not subscribe to instructions");
                 }
                 else {
-                    console.log(alias + " was able to subscribe to the topic instructions")
+                    console.log(processRunning + " was able to subscribe to the topic instructions")
                     listenMQTT();
-                    console.log(alias + " is listening to the topic instructions");
+                    console.log(processRunning + " is listening to the topic instructions");
                     mqttClient.publish('ready', processRunning);
-                    console.log(alias + " is ready to start executing instructions")
+                    console.log(processRunning + " is ready to start executing instructions")
                 }
             });
         }
@@ -473,7 +473,7 @@ function listenMQTT() {
     mqttClient.on('message', async function (topic, message) {
         switch (topic) {
             case 'instructions': {
-                console.log(alias + " has received the message " + message.toString() + " from the instructions topic");
+                console.log(processRunning + " has received the message " + message.toString() + " from the instructions topic");
                 const step = parseInt(message.toString(), 10);
                 if (!isNaN(step) && (step < instructions.length)) {
                     const instruction = instructions[step];
@@ -486,7 +486,7 @@ function listenMQTT() {
                     }
                     if (alias == processRunning) {
                         try {
-                            console.log("The alias " + alias + " matches up with the alias of the instruction");
+                            console.log("The alias " + processRunning + " matches up with the alias of the instruction");
                             // const result = await executeInstructionWrapper(instruction, step);
                             // log.debug(result);
                             log.debug(processRunning + " executes step" + step);
@@ -509,7 +509,7 @@ function listenMQTT() {
             case 'end': {
                 if (message.toString() == 'stop')
                 {
-                    console.log(alias + " has stopped executing as there are no more instructions");
+                    console.log(processRunning + " has stopped executing as there are no more instructions");
                     process.exit(0);
                 }
             }
