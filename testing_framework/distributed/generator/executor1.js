@@ -441,6 +441,7 @@ function startMQTT() {
                                     else {
                                         mqttClient.on('message', async function (topic, message) {
                                             if (topic === 'result') {
+                                                console.log("The message is " + message.toString());
                                                 let result = message.toString().split(" ");
                                                 if (result[0] === 's') {
                                                     console.log("Successful Execution of " + result[1]);
