@@ -440,7 +440,6 @@ function startMQTT() {
                                     }
                                     else {
                                         mqttClient.on('message', async function (topic, message) {
-                                            console.log("THE MESSAGE IS " + message.toString());
                                             if (topic === 'logging') {
                                                 if (message.toString().includes("success")) {
                                                     console.log("Master receives a success message indicating successful execution: " + message.toString());
