@@ -1,10 +1,10 @@
 {
   "hosts": {
-    "computer": "192.168.0.30",
+    "computer": "192.168.101.30",
     "raspberrypi": {
-      "raspberrypi12": "192.168.0.12",
-      "raspberrypi14": "192.168.0.14",
-      "raspberrypi15": "192.168.0.15"
+      "raspberrypi12": "192.168.101.12",
+      "raspberrypi14": "192.168.101.14",
+      "raspberrypi15": "192.168.101.15"
     }
   },
   "simulation": {

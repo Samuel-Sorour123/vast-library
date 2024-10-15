@@ -28,6 +28,7 @@ const matcherLogsAndEvents = path.resolve(__dirname, "logging/");
 
 //MQTT client object
 var mqttClient;
+const mqttBrokerAddress = staticAddresses.master.static_IP_address;
 
 // Interpret and execute instruction
 async function executeInstruction(instruction, step, success, fail) {
@@ -407,7 +408,7 @@ var instruction = function (type, opts) {
 }
 
 function startMQTT() {
-    mqttClient = mqtt.connect('mqtt://192.168.0.30');
+    mqttClient = mqtt.connect(`mqtt://${mqttBrokerAddress}`);
 
     mqttClient.on('connect', async () => {
         if (processRunning === "master") {
