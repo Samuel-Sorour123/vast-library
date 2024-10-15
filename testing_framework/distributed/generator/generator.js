@@ -3,20 +3,7 @@ const path = require("path");
 //Running an experiment on a single host (Matchers are stationary but clients are moving)
 //The script generates a text file that the simulator uses to run a simulation
 
-//Change
-/*
-newMatcher GW true "192.168.0.12" 8000 8001 20000 713 588 33
-wait 3430
-newClient C1 "192.168.0.14" 20000 853 326 1
-wait 2167
-subscribe C1 293 452 204 channel3
-wait 3749
-wait 3424
-end
 
-newClient C1 "192.168.0.14" 20000 853 326 1 this line should be newClient C1 "192.168.0.12" 20000 853 326 1
-lets see if you can spot the difference
-*/
 const channels = ["channel1", "channel2", "channel3"];
 const payloadLength = [10, 40];
 const asciiValueRange = [97, 122];

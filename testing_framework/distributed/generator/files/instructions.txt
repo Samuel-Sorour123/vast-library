@@ -1,9 +1,0 @@
-newMatcher GW true "192.168.0.12" 8000 8001 20000 569 786 12
-wait 3498
-newClient C1 "192.168.0.12" 21000 7 751 58
-wait 2918
-publish C1 791 113 84 channel3 "feqvbjmdldxkhaljfbqovlamhfsjnveh"
-wait 2590
-subscribe C1 838 373 154 channel3
-wait 3285
-end

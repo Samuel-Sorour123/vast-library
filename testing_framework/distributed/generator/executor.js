@@ -12,8 +12,6 @@ const path = require('path');
 const { start } = require('repl');
 
 
-var log = LOG.newLayer('Simulator_logs', 'Simulator_logs', "logging", 0, 5);
-
 // Data structures to store matchers
 // alias --> matcher{}.
 var matchers = {};
@@ -411,18 +409,18 @@ var instruction = function (type, opts) {
 function startMQTT() {
     mqttClient = mqtt.connect('mqtt://192.168.0.30');
 
-        mqttClient.on('connect', async () => {
-            if (processRunning === "master") {
-                await onMasterConnect();
-            } else {
-                await onClientConnect();
-            }
-        });
+    mqttClient.on('connect', async () => {
+        if (processRunning === "master") {
+            await onMasterConnect();
+        } else {
+            await onClientConnect();
+        }
+    });
 }
 
 // Function called when the master connects to the MQTT broker
 async function onMasterConnect() {
-   // console.log("Master was able to connect to the MQTT broker");
+    // console.log("Master was able to connect to the MQTT broker");
 
     const expectedClients = determineExpectedClients();
 
@@ -432,12 +430,12 @@ async function onMasterConnect() {
         log.debug("All the clients have published \'ready\'");
         // After all clients are ready, proceed
         await mqttClient.unsubscribe('ready');
-       // console.log("Master unsubscribed from 'ready' topic");
+        // console.log("Master unsubscribed from 'ready' topic");
         log.debug("Unsubscribed from ready");
         // Subscribe to 'logging' topic
         await mqttClient.subscribe('result');
         log.debug("Subscribed to \'result\'");
-       // console.log("Master subscribed to 'logging' topic");
+        // console.log("Master subscribed to 'logging' topic");
 
         // Set up message handler for 'logging' messages
         mqttClient.on('message', handleMasterMessage);
@@ -460,13 +458,13 @@ function waitForClientsReady(expectedClients) {
             if (err) {
                 reject("Master could not subscribe to 'ready' topic");
             } else {
-              //  console.log("Master subscribed to 'ready' topic");
+                //  console.log("Master subscribed to 'ready' topic");
 
                 // Message handler for 'ready' messages
                 const onReadyMessage = (topic, message) => {
                     if (topic === 'ready') {
                         const client = message.toString();
-                      //  console.log(`Received 'ready' message from client: ${client}`);
+                        //  console.log(`Received 'ready' message from client: ${client}`);
 
                         if (!readyClients.includes(client)) {
                             readyClients.push(client);
@@ -474,7 +472,7 @@ function waitForClientsReady(expectedClients) {
 
                         // Check if all expected clients are ready
                         if (readyClients.length === expectedClients.length) {
-                        //    console.log("All clients are ready");
+                            //    console.log("All clients are ready");
 
                             // Remove the 'message' listener for 'ready' messages
                             mqttClient.removeListener('message', onReadyMessage);
@@ -539,39 +537,38 @@ async function handleClientMessage(topic, message) {
 
         const instruction = instructions[step];
         const alias = instruction.opts?.alias || '';
-    
-            if (alias === processRunning) {
-                try {
-                    log.debug(`${processRunning} is about to execute instruction ${step}:`);
-                    //console.log(`${processRunning} is about to execute instruction ${step}:`);
-                    //console.log(`Instruction ${instruction}`);
-                    log.debug(`Instruction ${instruction}`);
 
-                    const result = await executeInstructionWrapper(instruction, step);
+        if (alias === processRunning) {
+            try {
+                log.debug(`${processRunning} is about to execute instruction ${step}:`);
+                //console.log(`${processRunning} is about to execute instruction ${step}:`);
+                //console.log(`Instruction ${instruction}`);
+                log.debug(`Instruction ${instruction}`);
 
-                    log.debug(`${processRunning} executed instruction ${step}:`, result);
-                    //console.log(`${processRunning} executed instruction ${step}:`, result);
+                const result = await executeInstructionWrapper(instruction, step);
 
-                    mqttClient.publish('result', `success instruction ${step}`, function(err){
-                        if (err){
-                          log.debug(`Failed to publish success step${step}`) ;
-                          //console.log(`Failed to publish success step${step}`); 
-                        }
-                        else
-                        {
-                            log.debug(`Succeeded with publishing success step ${step}`);
-                            //console.log(`Succeeded with publishing success step${step}`);
-                        }
-                    });
-                } catch (err) {
-                    //console.error(`${processRunning} failed to execute step ${step}:`, err);
-                    log.debug(`${processRunning} failed to execute step ${step}:`, err);
-                    mqttClient.publish('result', `fail step ${step}`);
-                }
-            } else {
-                log.debug(`Instruction alias ${alias} does not match ${processRunning}, ignoring`);
-                //console.log(`Instruction alias '${alias}' does not match '${processRunning}', ignoring`);
+                log.debug(`${processRunning} executed instruction ${step}:`, result);
+                //console.log(`${processRunning} executed instruction ${step}:`, result);
+
+                mqttClient.publish('result', `success instruction ${step}`, function (err) {
+                    if (err) {
+                        log.debug(`Failed to publish success step ${step}`);
+                        //console.log(`Failed to publish success step${step}`); 
+                    }
+                    else {
+                        log.debug(`Succeeded with publishing success step ${step}`);
+                        //console.log(`Succeeded with publishing success step${step}`);
+                    }
+                });
+            } catch (err) {
+                //console.error(`${processRunning} failed to execute step ${step}:`, err);
+                log.debug(`${processRunning} failed to execute step ${step}:`, err);
+                mqttClient.publish('result', `fail instruction ${step}`);
             }
+        } else {
+            log.debug(`Instruction alias ${alias} does not match ${processRunning}, ignoring`);
+            //console.log(`Instruction alias '${alias}' does not match '${processRunning}', ignoring`);
+        }
     }
 }
 
@@ -586,6 +583,12 @@ function determineExpectedClients() {
     return expectedClients;
 }
 
+var log;
+if (processRunning === 'master') {
+    log = LOG.newLayer('Master_Simulator_logs', 'Master_Simulator_logs', "logs_and_events", 0, 5);
+} else {
+    log = LOG.newLayer(`${processRunning}_Simulator_logs`, `${processRunning}_Simulator_logs`, "logs_and_events", 0, 5);
+}
 
 console.log("The process running is " + processRunning);
 main(instructionsPath);

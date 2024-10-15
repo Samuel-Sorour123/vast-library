@@ -18,12 +18,11 @@ const initNVM = 'source ~/.nvm/nvm.sh';
 const os = require('os');
 
 
-const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor2.js';
+const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
 const sshUser = 'pi';
 
-const filesPath = '~/vast-library/testing_framework/distributed/generator/files';
-const instructionsSource = path.resolve(__dirname, './files/instructions.txt');
-const staticSource = path.resolve(__dirname, './files/static.json');
+const filesDestinationPath = '~/vast-library/testing_framework/distributed/generator';
+const filesSourcePath = path.resolve(__dirname, './files');
 
 function startExecution() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
@@ -56,7 +55,7 @@ function startExecution() {
         } else {
             for (const alias in staticIPs[type]) {
                 const ip = staticIPs[type][alias].static_IP_address;
-                
+
                 // Properly quote paths and commands
                 const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
@@ -86,7 +85,7 @@ function startExecution() {
     }
 }
 
-function sendInstructions() {
+function sendFiles() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
 
     for (const type in staticIPs) {
@@ -94,8 +93,8 @@ function sendInstructions() {
             for (const alias in staticIPs[type]) {
                 const ip = staticIPs[type][alias].static_IP_address;
 
-                // Send instructions.txt
-                const instructionCommand = ['scp', instructionsSource, `${sshUser}@${ip}:${filesPath}`];
+                // Send files
+                const instructionCommand = ['scp', , '-r', filesSourcePath, `${sshUser}@${ip}:${filesDestinationPath}`];
                 const child1 = spawn(instructionCommand[0], instructionCommand.slice(1), { shell: false });
 
                 child1.stdout.on('data', (data) => {
@@ -115,30 +114,6 @@ function sendInstructions() {
                         console.log(`The instructions.txt file was sent to ${alias}`);
                     } else {
                         console.error(`scp process for instructions.txt to ${alias} exited with code ${code}`);
-                    }
-                });
-
-                // Send static.json
-                const staticCommand = ['scp', staticSource, `${sshUser}@${ip}:${filesPath}`];
-                const child2 = spawn(staticCommand[0], staticCommand.slice(1), { shell: false });
-
-                child2.stdout.on('data', (data) => {
-                    console.log(`stdout (scp static.json to ${alias}): ${data}`);
-                });
-
-                child2.stderr.on('data', (data) => {
-                    console.error(`stderr (scp static.json to ${alias}): ${data}`);
-                });
-
-                child2.on('error', (err) => {
-                    console.error(`There was an error executing the static.json copy command for ${alias}: ${err}`);
-                });
-
-                child2.on('close', (code) => {
-                    if (code === 0) {
-                        console.log(`The static.json file was sent to ${alias}`);
-                    } else {
-                        console.error(`scp process for static.json to ${alias} exited with code ${code}`);
                     }
                 });
             }
@@ -188,11 +163,10 @@ function ssh(command, directory = "~/") {
             for (const alias in staticIPs[type]) {
                 const ip = staticIPs[type][alias].static_IP_address;
                 let remoteCommand = command;
-                if (directory !== "~/")
-                {
-                    remoteCommand = `cd ${directory} && ${command}` 
+                if (directory !== "~/") {
+                    remoteCommand = `cd ${directory} && ${command}`
                 }
-                    const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
+                const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
                 const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
 
                 child1.stdout.on('data', (data) => {
@@ -228,8 +202,8 @@ switch (command) {
         generateInstructions();
         break;
     case 'send':
-        console.log("Sending the instructions and static files to each Raspberry Pi");
-        sendInstructions();
+        console.log("Sending the instruction.txt and static.json files to each Raspberry Pi");
+        sendFiles();
         break;
     case 'execute':
         console.log("Running the simulation");
@@ -251,11 +225,6 @@ switch (command) {
         console.log("Installing the neccessary packages");
         ssh(`${initNVM} && npm install`, '~/vast-library');
         break;
-    case 'pull':
-        console.log("Pulling from the git repo");
-        ssh(`git pull https://github.com/Samuel-Sorour123/vast-library.git`);
-        break;
-
     default:
         console.log("Not a valid argument");
 }
