@@ -3,6 +3,20 @@ const path = require("path");
 //Running an experiment on a single host (Matchers are stationary but clients are moving)
 //The script generates a text file that the simulator uses to run a simulation
 
+//Change
+/*
+newMatcher GW true "192.168.0.12" 8000 8001 20000 713 588 33
+wait 3430
+newClient C1 "192.168.0.14" 20000 853 326 1
+wait 2167
+subscribe C1 293 452 204 channel3
+wait 3749
+wait 3424
+end
+
+newClient C1 "192.168.0.14" 20000 853 326 1 this line should be newClient C1 "192.168.0.12" 20000 853 326 1
+lets see if you can spot the difference
+*/
 const channels = ["channel1", "channel2", "channel3"];
 const payloadLength = [10, 40];
 const asciiValueRange = [97, 122];
@@ -265,7 +279,7 @@ function createMatchers(numMatchers) {
     } else {
       let matcherID = "M" + m.toString();
       let vonPort = ((m - 1) * 10 + 8000).toString();
-      let clientPort = ((m - 1) * 10 + 20000).toString();
+      let clientPort = ((m - 1) * 10 + 21000).toString();
       let staticAddress = matchersAliasToStaticIP[matcherID];
       let matcher = new Matcher(
         matcherID,
@@ -292,8 +306,8 @@ function createClients(numClients) {
     let x = getRandomInt(0, 1000);
     let y = getRandomInt(0, 1000);
     let clientID = "C" + c.toString();
-    let staticAddress = '\"' + clientsAliasToStaticIP[clientID] + '\"';
-    let client = new Client(clientID, staticAddress, "20000", x, y, r);
+    let staticAddress = '\"' + matchersAliasToStaticIP["GW"] + '\"';
+    let client = new Client(clientID, staticAddress, "21000", x, y, r);
     clients[clientID] = client;
   }
 }
@@ -395,15 +409,6 @@ function fetchInstructionSet() {
   return instructions;
 }
 
-function readFile(filePath) {
-  try {
-    const data = fs.readFileSync(filePath);
-    return data.toString();
-  } catch (error) {
-    console.error("Unable to read the file");
-  }
-}
-
 function getRandomSubsetAndRemove(obj, numToSelect) {
   let keys = Object.keys(obj); // Get array of keys
 
@@ -461,9 +466,6 @@ function assignAddresses(info) {
   saveStaticIPs(static);
 }
 
-// const jsonInput = process.argv[2];
-// const staticAddressFile = process.argv[3];
-// const args = processData(jsonInput);
 
 const jsonFileName = process.argv[2];
 const info = JSON.parse(fs.readFileSync(jsonFileName));

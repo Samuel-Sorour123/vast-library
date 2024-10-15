@@ -4,6 +4,5 @@ newClient C1 "192.168.0.14" 20000 853 326 1
 wait 2167
 subscribe C1 293 452 204 channel3
 wait 3749
-publish C1 610 849 25 channel1 "jcslikdtgpqaiayhbfstllnyerlevpqh"
 wait 3424
 end

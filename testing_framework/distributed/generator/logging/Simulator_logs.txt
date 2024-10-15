@@ -1,0 +1,21 @@
+{"time":1728948247790,"msg":"All the clients have published 'ready'"}
+{"time":1728948247792,"msg":"Unsubscribed from ready"}
+{"time":1728948247793,"msg":"Subscribed to 'result'"}
+{"time":1728948247794,"msg":"Publishing instruction 0. Type: newMatcher"}
+{"time":1728948247795,"msg":"Executing wait instruction with step 1: Waiting 3430"}
+{"time":1728948247847,"msg":"Instruction fail: step0 undefined"}
+{"time":1728948248104,"msg":"Instruction success: instruction 0"}
+{"time":1728948251228,"msg":"waited for 3430 milliseconds"}
+{"time":1728948251229,"msg":"Publishing instruction 2. Type: newClient"}
+{"time":1728948251230,"msg":"Executing wait instruction with step 3: Waiting 2167"}
+{"time":1728948253400,"msg":"waited for 2167 milliseconds"}
+{"time":1728948253400,"msg":"Publishing instruction 4. Type: subscribe"}
+{"time":1728948253400,"msg":"Executing wait instruction with step 5: Waiting 3749"}
+{"time":1728948253426,"msg":"Instruction success: instruction 4"}
+{"time":1728948258208,"msg":"waited for 3749 milliseconds"}
+{"time":1728948258208,"msg":"Publishing instruction 6. Type: publish"}
+{"time":1728948258208,"msg":"Executing wait instruction with step 7: Waiting 3424"}
+{"time":1728948258232,"msg":"Instruction success: instruction 6"}
+{"time":1728948261636,"msg":"waited for 3424 milliseconds"}
+{"time":1728948261636,"msg":"Executing the end instruction"}
+{"time":1728948261636,"msg":"End instruction executed"}
