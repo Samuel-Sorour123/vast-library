@@ -2,3 +2,4 @@
 /node_modules
 /visualiser/logs_and_events/*.txt
 /visualiser/script.txt
+/testing_framework/distributed/generator/files/*
