@@ -22,7 +22,7 @@ const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator
 const sshUser = 'pi';
 
 const filesDestinationPath = '~/vast-library/testing_framework/distributed/generator';
-const filesSourcePath = path.resolve(__dirname, './files');
+const filesSourcePath = path.resolve(__dirname, 'files');
 
 function startExecution() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
@@ -94,7 +94,7 @@ function sendFiles() {
                 const ip = staticIPs[type][alias].static_IP_address;
 
                 // Send files
-                const instructionCommand = ['scp', , '-r', filesSourcePath, `${sshUser}@${ip}:${filesDestinationPath}`];
+                const instructionCommand = ['scp', '-r', filesSourcePath, `${sshUser}@${ip}:${filesDestinationPath}`];
                 const child1 = spawn(instructionCommand[0], instructionCommand.slice(1), { shell: false });
 
                 child1.stdout.on('data', (data) => {
@@ -215,7 +215,8 @@ switch (command) {
         break;
     case 'delete':
         console.log("Deleting current vast-library");
-        ssh("rm -rf vast-library");
+        ssh(`rm -rf vast-library || true`);
+
         break;
     case 'download':
         console.log("Downloading the latest vast-library");

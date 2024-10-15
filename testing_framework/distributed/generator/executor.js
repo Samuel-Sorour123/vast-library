@@ -420,15 +420,13 @@ function startMQTT() {
 
 // Function called when the master connects to the MQTT broker
 async function onMasterConnect() {
-    // console.log("Master was able to connect to the MQTT broker");
-
     const expectedClients = determineExpectedClients();
-
     try {
         // Wait for all clients to be ready
         await waitForClientsReady(expectedClients);
         log.debug("All the clients have published \'ready\'");
         // After all clients are ready, proceed
+        
         await mqttClient.unsubscribe('ready');
         // console.log("Master unsubscribed from 'ready' topic");
         log.debug("Unsubscribed from ready");
@@ -496,7 +494,7 @@ function handleMasterMessage(topic, message) {
         const result = payloadArray[0];
         const step = payloadArray[1] + " " + payloadArray[2];
         //console.log(`Master received message on 'result': ${message}`);
-
+        console.log("The payload is " + payload);
         if (result === 'success') {
             log.debug("Instruction success: " + step);
             console.log("Instruction success: " + step);
