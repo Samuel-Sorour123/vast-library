@@ -25,8 +25,8 @@ const sshUser = 'pi';
 const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
 const filesDestinationPath = '~/vast-library/testing_framework/distributed/generator';
 const filesSourcePath = path.resolve(__dirname, 'files');
-const eventsDirectory = path.resolve(__dirname, "Events");
-const simulationDirectory = path.resolve(__dirname, "Simulations")
+const eventsDirectory = path.resolve(__dirname, "svents");
+const simulationDirectory = path.resolve(__dirname, "simulations")
 
 function standardInput(question) {
     const rl = readline.createInterface({
