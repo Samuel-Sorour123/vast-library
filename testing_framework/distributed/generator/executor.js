@@ -168,6 +168,13 @@ async function execute(step) {
         let result = await executeInstructionWrapper(instructions[step], step);
         log.debug(result);
         console.log("Master has finished executing the instructions");
+
+        mqttClient.publish('instructions', 'end', function (err) {
+            if (!err) {
+                console.log("Master ends processes running on raspberry pi");
+            }
+
+        });
         setTimeout(() => process.exit(0), 100);
         return;
     }
@@ -427,7 +434,7 @@ async function onMasterConnect() {
         await waitForClientsReady(expectedClients);
         log.debug("All the clients have published \'ready\'");
         // After all clients are ready, proceed
-        
+
         await mqttClient.unsubscribe('ready');
         // console.log("Master unsubscribed from 'ready' topic");
         log.debug("Unsubscribed from ready");
@@ -498,10 +505,10 @@ function handleMasterMessage(topic, message) {
         console.log("The payload is " + payload);
         if (result === 'success') {
             log.debug("Instruction success: " + step);
-            console.log("Instruction success: " + step);
+            //  console.log("Instruction success: " + step);
         } else if (result === 'fail') {
             log.error("Instruction fail: " + step);
-            console.log("Instruction fail: " + step);
+            //  console.log("Instruction fail: " + step);
         }
     }
 }
@@ -529,44 +536,51 @@ async function onClientConnect() {
 // Handler for messages received by a client
 async function handleClientMessage(topic, message) {
     if (topic === 'instructions') {
+        if (message.toString() !== 'end')
+        {
+            const step = parseInt(message.toString(), 10);
+            //console.log(`${processRunning} received instruction ${step}`);
+            log.debug(`${processRunning} received instruction ${step}`);
 
-        const step = parseInt(message.toString(), 10);
-        //console.log(`${processRunning} received instruction ${step}`);
-        log.debug(`${processRunning} received instruction ${step}`);
+            const instruction = instructions[step];
+            const alias = instruction.opts?.alias || '';
 
-        const instruction = instructions[step];
-        const alias = instruction.opts?.alias || '';
+            if (alias === processRunning) {
+                try {
+                    log.debug(`${processRunning} is about to execute instruction ${step}:`);
+                    //console.log(`${processRunning} is about to execute instruction ${step}:`);
+                    //console.log(`Instruction ${instruction}`);
+                    log.debug(`Instruction ${instruction}`);
 
-        if (alias === processRunning) {
-            try {
-                log.debug(`${processRunning} is about to execute instruction ${step}:`);
-                //console.log(`${processRunning} is about to execute instruction ${step}:`);
-                //console.log(`Instruction ${instruction}`);
-                log.debug(`Instruction ${instruction}`);
+                    const result = await executeInstructionWrapper(instruction, step);
 
-                const result = await executeInstructionWrapper(instruction, step);
+                    log.debug(`${processRunning} executed instruction ${step}:`, result);
+                    //console.log(`${processRunning} executed instruction ${step}:`, result);
 
-                log.debug(`${processRunning} executed instruction ${step}:`, result);
-                //console.log(`${processRunning} executed instruction ${step}:`, result);
-
-                mqttClient.publish('result', `success instruction ${step}`, function (err) {
-                    if (err) {
-                        log.debug(`Failed to publish success step ${step}`);
-                        //console.log(`Failed to publish success step${step}`); 
-                    }
-                    else {
-                        log.debug(`Succeeded with publishing success step ${step}`);
-                        //console.log(`Succeeded with publishing success step${step}`);
-                    }
-                });
-            } catch (err) {
-                //console.error(`${processRunning} failed to execute step ${step}:`, err);
-                log.debug(`${processRunning} failed to execute step ${step}:`, err);
-                mqttClient.publish('result', `fail instruction ${step}`);
+                    mqttClient.publish('result', `success instruction ${step}`, function (err) {
+                        if (err) {
+                            log.debug(`Failed to publish success step ${step}`);
+                            //console.log(`Failed to publish success step${step}`); 
+                        }
+                        else {
+                            log.debug(`Succeeded with publishing success step ${step}`);
+                            //console.log(`Succeeded with publishing success step${step}`);
+                        }
+                    });
+                } catch (err) {
+                    //console.error(`${processRunning} failed to execute step ${step}:`, err);
+                    log.debug(`${processRunning} failed to execute step ${step}:`, err);
+                    mqttClient.publish('result', `fail instruction ${step}`);
+                }
+            } else {
+                log.debug(`Instruction alias ${alias} does not match ${processRunning}, ignoring`);
+                //console.log(`Instruction alias '${alias}' does not match '${processRunning}', ignoring`);
             }
-        } else {
-            log.debug(`Instruction alias ${alias} does not match ${processRunning}, ignoring`);
-            //console.log(`Instruction alias '${alias}' does not match '${processRunning}', ignoring`);
+        }
+        else
+        {
+            console.log(`${processRunning} is ending its process`);
+            process.exit(0);
         }
     }
 }

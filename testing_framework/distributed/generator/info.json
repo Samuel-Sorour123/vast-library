@@ -3,8 +3,7 @@
     "computer": "192.168.101.30",
     "raspberrypi": {
       "raspberrypi12": "192.168.101.12",
-      "raspberrypi14": "192.168.101.14",
-      "raspberrypi15": "192.168.101.15"
+      "raspberrypi14": "192.168.101.14"
     }
   },
   "simulation": {

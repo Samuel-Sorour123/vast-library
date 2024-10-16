@@ -24,6 +24,8 @@ const sshUser = 'pi';
 const filesDestinationPath = '~/vast-library/testing_framework/distributed/generator';
 const filesSourcePath = path.resolve(__dirname, 'files');
 
+
+
 function startExecution() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
 
@@ -148,11 +150,108 @@ function generateInstructions() {
 }
 
 function collectLogFiles() {
-    // Implementation needed
+
+    const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
+    const clientEventsPathRemote = filesDestinationPath + '/logs_and_events/Client_events.txt';
+    const clientEventsDirectory = path.resolve(__dirname, "Events");
+
+    if (!fs.existsSync(clientEventsDirectory)){
+        fs.mkdirSync(clientEventsDirectory);
+    }
+
+    for (const type in staticIPs) {
+        if (type !== "master") {
+            for (const alias in staticIPs[type]) {
+                const ip = staticIPs[type][alias].static_IP_address;
+                const hostname =  staticIPs[type][alias].hostname;
+                const clientEventsFile = hostname + '.txt'
+                const scpCommand = ['scp', `${sshUser}@${ip}:${clientEventsPathRemote}`,`${clientEventsDirectory}/${clientEventsFile}`];
+                const child1 = spawn(scpCommand[0], scpCommand.slice(1), { shell: false });
+
+                child1.stdout.on('data', (data) => {
+                    console.log(`stdout: ${command} (${alias}): ${data}`);
+                });
+
+                child1.stderr.on('data', (data) => {
+                    console.error(`stderr: ${command} (${alias}): ${data}`);
+                });
+
+                child1.on('error', (err) => {
+                    console.error(`error: ${command} (${alias}): ${err}`);
+                });
+
+                child1.on('close', (code) => {
+                    if (code === 0) {
+                        console.log(`Client_events.txt file from ${alias}(${hostname}) was retrieved`);
+                    } else {
+                        console.error(`Client_events.txt file from ${alias}(${hostname}) could not be retrieved`);
+                    }
+                });
+            }
+        }
+    }
 }
 
 function deleteLogFiles() {
-    // Implementation needed
+    const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
+
+    for (const type in staticIPs) {
+        if (type !== "master") {
+            for (const alias in staticIPs[type]) {
+                const ip = staticIPs[type][alias].static_IP_address;
+                let remoteCommand = `rm -r ${filesDestinationPath}/logs_and_events`
+                const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
+                const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
+
+                child1.stdout.on('data', (data) => {
+                    console.log(`stdout: ${command} (${alias}): ${data}`);
+                });
+
+                child1.stderr.on('data', (data) => {
+                    console.error(`stderr: ${command} (${alias}): ${data}`);
+                });
+
+                child1.on('error', (err) => {
+                    console.error(`error: ${command} (${alias}): ${err}`);
+                });
+
+                child1.on('close', (code) => {
+                    if (code === 0) {
+                        console.log(`${command} was successful on ${alias}`);
+                    } else {
+                        console.error(`${command} was unsuccessful on ${alias} exited with code ${code}`);
+                    }
+                });
+            }
+        }else
+        {
+            let localLogsPath = path.resolve(__dirname, 'logs_and_events');
+            let command = `rm -r ${localLogsPath}`;
+            let commandArray = command.split(" ");
+            const child1 = spawn(commandArray[0], commandArray.slice(1));
+
+            child1.stdout.on('data', (data) => {
+                console.log(`stdout: ${command} (${alias}): ${data}`);
+            });
+
+            child1.stderr.on('data', (data) => {
+                console.error(`stderr: ${command} (${alias}): ${data}`);
+            });
+
+            child1.on('error', (err) => {
+                console.error(`error: ${command} (${alias}): ${err}`);
+            });
+
+            child1.on('close', (code) => {
+                if (code === 0) {
+                    console.log('Log files successfully deleted on master');
+                } else {
+                    console.error(`Log files could not be deleted on master`);
+                }
+            });
+
+        }
+    }
 }
 
 function ssh(command, directory = "~/") {
@@ -216,7 +315,6 @@ switch (command) {
     case 'delete':
         console.log("Deleting current vast-library");
         ssh(`rm -rf vast-library || true`);
-
         break;
     case 'download':
         console.log("Downloading the latest vast-library");
