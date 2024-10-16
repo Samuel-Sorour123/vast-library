@@ -25,7 +25,7 @@ const sshUser = 'pi';
 const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
 const filesDestinationPath = '~/vast-library/testing_framework/distributed/generator';
 const filesSourcePath = path.resolve(__dirname, 'files');
-const eventsDirectory = path.resolve(__dirname, "svents");
+const eventsDirectory = path.resolve(__dirname, "events");
 const simulationDirectory = path.resolve(__dirname, "simulations")
 
 function standardInput(question) {
@@ -169,16 +169,15 @@ function collectLogFiles() {
 
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
     const clientEventsPathRemote = filesDestinationPath + '/logs_and_events/Client_events.txt';
-    const clientEventsDirectory = path.resolve(__dirname, "Events");
 
-    if (!fs.existsSync(clientEventsDirectory)) {
-        fs.mkdirSync(clientEventsDirectory);
+    if (!fs.existsSync(eventsDirectory)) {
+        fs.mkdirSync(eventsDirectory);
     }
-    for (const alias in staticIPs[type]) {
-        const ip = staticIPs[type][alias].static_IP_address;
-        const hostname = staticIPs[type][alias].hostname;
+    for (const alias in staticIPs.clients) {
+        const ip = staticIPs.clients[alias].static_IP_address;
+        const hostname = staticIPs.clients[alias].hostname;
         const clientEventsFile = hostname + '.txt'
-        const scpCommand = ['scp', `${sshUser}@${ip}:${clientEventsPathRemote}`, `${clientEventsDirectory}/${clientEventsFile}`];
+        const scpCommand = ['scp', `${sshUser}@${ip}:${clientEventsPathRemote}`, `${eventsDirectory}/${clientEventsFile}`];
         const child1 = spawn(scpCommand[0], scpCommand.slice(1), { shell: false });
 
         child1.stdout.on('data', (data) => {
@@ -205,7 +204,7 @@ function collectLogFiles() {
 
 function deleteDirectory(directory) {
     let directoryPath = path.resolve(__dirname, `${directory}`);
-    let command = `rm -r ${directoryPath} || true`;
+    let command = `rm -r "${directoryPath}" || true`;
     exec(command, (err, stdout, stderr) =>
     {
         if (err)
@@ -215,13 +214,10 @@ function deleteDirectory(directory) {
         }
         if (stderr)
         {
-            console.log(`stderr: ${err}`);
+            console.log("There is no logs and events folder on the master");
             return;
         }
-        if (stdout)
-        {
-            console.log(`Successfully deleted the ${directory}`);
-        }
+            console.log(`Master successfully deleted the ${directory}`);
     });
 }
 
@@ -259,7 +255,6 @@ function deleteDirectoryRemote(directory) {
         }
     }
 }
-
 
 function ssh(command, directory = "~/") {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
@@ -373,16 +368,17 @@ switch (command) {
         console.log("Collecting the Client_events.txt files on each Raspberry Pi");
         collectLogFiles();
         break;
-    case 'merge':
-        console.log("Merging the Client_event.txt files")
+    case 'merge':{
+        console.log("Merging the Client_event.txt files");
         (async () => {
-            const answer = await standardInput('Enter the name of the simulation');
+            const answer = await standardInput('Enter the name of the simulation: ');
             console.log(`You entered: ${answer}`);
             if (!fs.existsSync(simulationDirectory)) {
                 fs.mkdirSync(simulationDirectory);
             }
             merge(answer, eventsDirectory, simulationDirectory);
         })();
+    };
         break;
     case 'delete-events':
         console.log("Deleting the events directory")
