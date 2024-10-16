@@ -3,3 +3,5 @@
 /visualiser/logs_and_events/*.txt
 /visualiser/script.txt
 /testing_framework/distributed/generator/files/*
+/testing_framework/distributed/generator/events/*
+/testing_framework/distributed/generator/simulations/*

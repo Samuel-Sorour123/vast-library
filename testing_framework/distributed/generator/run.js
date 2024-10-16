@@ -11,20 +11,36 @@
  * The options.json file is used to specify the arguments of each script.
  */
 
+
+
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const path = require('path');
-const initNVM = 'source ~/.nvm/nvm.sh';
 const os = require('os');
+const readline = require('readline');
 
-
-const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
+const initNVM = 'source ~/.nvm/nvm.sh';
 const sshUser = 'pi';
 
+const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
 const filesDestinationPath = '~/vast-library/testing_framework/distributed/generator';
 const filesSourcePath = path.resolve(__dirname, 'files');
+const eventsDirectory = path.resolve(__dirname, "Events");
+const simulationDirectory = path.resolve(__dirname, "Simulations")
 
+function standardInput(question) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
 
+    return new Promise((resolve) => {
+        rl.question(question, (answer) => {
+            rl.close(); // Close the input after receiving the answer
+            resolve(answer); // Resolve the promise with the answer
+        });
+    });
+}
 
 function startExecution() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
@@ -155,64 +171,81 @@ function collectLogFiles() {
     const clientEventsPathRemote = filesDestinationPath + '/logs_and_events/Client_events.txt';
     const clientEventsDirectory = path.resolve(__dirname, "Events");
 
-    if (!fs.existsSync(clientEventsDirectory)){
+    if (!fs.existsSync(clientEventsDirectory)) {
         fs.mkdirSync(clientEventsDirectory);
     }
+    for (const alias in staticIPs[type]) {
+        const ip = staticIPs[type][alias].static_IP_address;
+        const hostname = staticIPs[type][alias].hostname;
+        const clientEventsFile = hostname + '.txt'
+        const scpCommand = ['scp', `${sshUser}@${ip}:${clientEventsPathRemote}`, `${clientEventsDirectory}/${clientEventsFile}`];
+        const child1 = spawn(scpCommand[0], scpCommand.slice(1), { shell: false });
 
-    for (const type in staticIPs) {
-        if (type !== "master") {
-            for (const alias in staticIPs[type]) {
-                const ip = staticIPs[type][alias].static_IP_address;
-                const hostname =  staticIPs[type][alias].hostname;
-                const clientEventsFile = hostname + '.txt'
-                const scpCommand = ['scp', `${sshUser}@${ip}:${clientEventsPathRemote}`,`${clientEventsDirectory}/${clientEventsFile}`];
-                const child1 = spawn(scpCommand[0], scpCommand.slice(1), { shell: false });
+        child1.stdout.on('data', (data) => {
+            console.log(`stdout: ${command} (${alias}): ${data}`);
+        });
 
-                child1.stdout.on('data', (data) => {
-                    console.log(`stdout: ${command} (${alias}): ${data}`);
-                });
+        child1.stderr.on('data', (data) => {
+            console.error(`stderr: ${command} (${alias}): ${data}`);
+        });
 
-                child1.stderr.on('data', (data) => {
-                    console.error(`stderr: ${command} (${alias}): ${data}`);
-                });
+        child1.on('error', (err) => {
+            console.error(`error: ${command} (${alias}): ${err}`);
+        });
 
-                child1.on('error', (err) => {
-                    console.error(`error: ${command} (${alias}): ${err}`);
-                });
-
-                child1.on('close', (code) => {
-                    if (code === 0) {
-                        console.log(`Client_events.txt file from ${alias}(${hostname}) was retrieved`);
-                    } else {
-                        console.error(`Client_events.txt file from ${alias}(${hostname}) could not be retrieved`);
-                    }
-                });
+        child1.on('close', (code) => {
+            if (code === 0) {
+                console.log(`Client_events.txt file from ${alias}(${hostname}) was retrieved`);
+            } else {
+                console.error(`Client_events.txt file from ${alias}(${hostname}) could not be retrieved`);
             }
-        }
+        });
     }
 }
 
-function deleteLogFiles() {
+function deleteDirectory(directory) {
+    let directoryPath = path.resolve(__dirname, `${directory}`);
+    let command = `rm -r ${directoryPath} || true`;
+    exec(command, (err, stdout, stderr) =>
+    {
+        if (err)
+        {
+            console.log(`error: ${err}`);
+            return;
+        }
+        if (stderr)
+        {
+            console.log(`stderr: ${err}`);
+            return;
+        }
+        if (stdout)
+        {
+            console.log(`Successfully deleted the ${directory}`);
+        }
+    });
+}
+
+function deleteDirectoryRemote(directory) {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
 
     for (const type in staticIPs) {
         if (type !== "master") {
             for (const alias in staticIPs[type]) {
                 const ip = staticIPs[type][alias].static_IP_address;
-                let remoteCommand = `rm -r ${filesDestinationPath}/logs_and_events`
+                let remoteCommand = `rm -r ${filesDestinationPath}/logs_and_events || true`
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
                 const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
 
                 child1.stdout.on('data', (data) => {
-                    console.log(`stdout: ${command} (${alias}): ${data}`);
+                    console.log(`stdout: ${data}`);
                 });
 
                 child1.stderr.on('data', (data) => {
-                    console.error(`stderr: ${command} (${alias}): ${data}`);
+                    console.error(`stderr: There is no ${directory} folder on ${alias}`);
                 });
 
                 child1.on('error', (err) => {
-                    console.error(`error: ${command} (${alias}): ${err}`);
+                    console.error(`error: (${alias}): ${err}`);
                 });
 
                 child1.on('close', (code) => {
@@ -223,36 +256,10 @@ function deleteLogFiles() {
                     }
                 });
             }
-        }else
-        {
-            let localLogsPath = path.resolve(__dirname, 'logs_and_events');
-            let command = `rm -r ${localLogsPath}`;
-            let commandArray = command.split(" ");
-            const child1 = spawn(commandArray[0], commandArray.slice(1));
-
-            child1.stdout.on('data', (data) => {
-                console.log(`stdout: ${command} (${alias}): ${data}`);
-            });
-
-            child1.stderr.on('data', (data) => {
-                console.error(`stderr: ${command} (${alias}): ${data}`);
-            });
-
-            child1.on('error', (err) => {
-                console.error(`error: ${command} (${alias}): ${err}`);
-            });
-
-            child1.on('close', (code) => {
-                if (code === 0) {
-                    console.log('Log files successfully deleted on master');
-                } else {
-                    console.error(`Log files could not be deleted on master`);
-                }
-            });
-
         }
     }
 }
+
 
 function ssh(command, directory = "~/") {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
@@ -292,6 +299,48 @@ function ssh(command, directory = "~/") {
     }
 }
 
+async function merge(simulationName) {
+    const allEvents = [];
+
+    // Read all files in the events directory
+    const files = fs.readdirSync(eventsDirectory);
+
+    // Process each file
+    for (const file of files) {
+        // Only process .txt files
+        if (path.extname(file) === '.txt') {
+            const filePath = path.join(eventsDirectory, file);
+            const data = fs.readFileSync(filePath, 'utf8');
+
+            // Split the file content into lines (each line is a JSON object)
+            const lines = data.trim().split('\n');
+
+            // Parse each line as JSON and add to the events array
+            lines.forEach(line => {
+                try {
+                    const event = JSON.parse(line);
+                    allEvents.push(event);
+                } catch (error) {
+                    console.error(`Error parsing line in file ${file}:`, line);
+                }
+            });
+        }
+    }
+
+    // Sort all events by the "time" property
+    allEvents.sort((a, b) => a.time - b.time);
+
+    // Create the output file path using the simulation name
+    const outputFilePath = simulationDirectory + `/${simulationName}.txt`;
+
+    // Write sorted events to the output file
+    const sortedData = allEvents.map(event => JSON.stringify(event)).join('\n');
+    fs.writeFileSync(outputFilePath, sortedData);
+
+    console.log(`Merged and sorted events saved to ${outputFilePath}`);
+}
+
+
 const args = process.argv.slice(2);
 const command = args[0];
 
@@ -308,11 +357,7 @@ switch (command) {
         console.log("Running the simulation");
         startExecution();
         break;
-    case 'fetch':
-        console.log("Collecting log files");
-        collectLogFiles();
-        break;
-    case 'delete':
+    case 'delete-vast':
         console.log("Deleting current vast-library");
         ssh(`rm -rf vast-library || true`);
         break;
@@ -324,6 +369,32 @@ switch (command) {
         console.log("Installing the neccessary packages");
         ssh(`${initNVM} && npm install`, '~/vast-library');
         break;
+    case 'collect':
+        console.log("Collecting the Client_events.txt files on each Raspberry Pi");
+        collectLogFiles();
+        break;
+    case 'merge':
+        console.log("Merging the Client_event.txt files")
+        (async () => {
+            const answer = await standardInput('Enter the name of the simulation');
+            console.log(`You entered: ${answer}`);
+            if (!fs.existsSync(simulationDirectory)) {
+                fs.mkdirSync(simulationDirectory);
+            }
+            merge(answer, eventsDirectory, simulationDirectory);
+        })();
+        break;
+    case 'delete-events':
+        console.log("Deleting the events directory")
+        deleteDirectory('Events');
+        break;
+    case 'delete-logs':
+        console.log("Deleting the logs_and_events directory on the master and Raspberry Pis");
+        deleteDirectoryRemote('logs_and_events');
+        deleteDirectory('logs_and_events');
+        break;
     default:
         console.log("Not a valid argument");
 }
+
+
