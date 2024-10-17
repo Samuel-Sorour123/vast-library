@@ -79,7 +79,7 @@ function startExecution() {
                 // Properly quote paths and commands
                 const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
-                const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: false});
+                const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: '/bin/bash'});
 
                 child.stdout.on('data', (data) => {
                     console.log(`stdout (${alias}): ${data}`);
