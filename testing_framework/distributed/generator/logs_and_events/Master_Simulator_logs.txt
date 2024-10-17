@@ -1,8 +1,1 @@
-{"time":1729198096994,"msg":"wrong input in line number 7"}
-{"time":1729198177565,"msg":"wrong input in line number 7"}
-{"time":1729198187155,"msg":"wrong input in line number 7"}
-{"time":1729198230657,"msg":"wrong input in line number 7"}
-{"time":1729198378732,"msg":"wrong input in line number 7"}
-{"time":1729199076239,"msg":"wrong input in line number 7"}
-{"time":1729199676903,"msg":"wrong input in line number 7"}
-{"time":1729199828356,"msg":"wrong input in line number 7"}
+{"time":1729201929603,"msg":"wrong input in line number 7"}

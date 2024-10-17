@@ -5,7 +5,7 @@
 
   tasks:
     - name: Run Node.js script with alias using bash
-      shell: "source ~/.nvm/nvm.sh && nvm use default && cd ~/vast-library/testing_framework/distributed/generator && node executor.js {{ alias }}"
+      shell: "source ~/.nvm/nvm.sh && cd ~/vast-library/testing_framework/distributed/generator && node executor.js {{ alias }}"
       args:
         executable: /bin/bash  # Explicitly use bash
       when: ansible_host == static_IP

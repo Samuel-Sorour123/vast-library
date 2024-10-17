@@ -348,7 +348,7 @@ switch (command) {
         break;
     case 'download':
         console.log("Downloading the latest vast-library");
-        ssh("git clone https://github.com/Samuel-Sorour123/vast-library.git");
+        ssh("git clone -b ansible https://github.com/Samuel-Sorour123/vast-library.git");
         break;
     case 'install':
         console.log("Installing the neccessary packages");
