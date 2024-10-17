@@ -7,6 +7,9 @@ const path = require("path");
 const channels = ["channel1", "channel2", "channel3"];
 const payloadLength = [10, 40];
 const asciiValueRange = [97, 122];
+const latencyPublicationProbability = 0.3;
+
+var clientLatencyPublication = {};
 
 class Matcher {
   constructor(
@@ -63,6 +66,8 @@ class Client {
     this.xCoord = xCoord;
     this.yCoord = yCoord;
     this.radius = radius;
+
+    clientLatencyPublication[clientID] = 0;
   }
 
   fetchInstruction() {
@@ -146,15 +151,6 @@ class InstructionManager {
     }
   }
 }
-
-const processData = (jsonString) => {
-  try {
-    const data = JSON.parse(jsonString);
-    return data;
-  } catch (error) {
-    console.error("Invalid JSON input:", error);
-  }
-};
 
 function saveInstructionsToFile(instructions) {
   const directory = './files'; // Directory path
@@ -250,7 +246,7 @@ function createMatchers(numMatchers) {
     let y = getRandomInt(0, 1000);
 
     if (m == 1) {
-      let staticAddress = '\"' + matchersAliasToStaticIP["GW"] +'\"';
+      let staticAddress = '\"' + matchersAliasToStaticIP["GW"] + '\"';
       let matcher = new Matcher(
         "GW",
         true,
@@ -299,19 +295,19 @@ function createClients(numClients) {
   }
 }
 
-function fetchRandomPublicationString() {
-  let publication = "publish ";
-  let r = getRandomInt(1, 300).toString();
-  let x = getRandomInt(r, 1000 - r).toString();
-  let y = getRandomInt(r, 1000 - r).toString();
-  let channelIndex = getRandomInt(0, channels.length - 1);
-  let channel = channels[channelIndex];
-  let payload = generateRandomPayload(payloadLength[0], payloadLength[1]);
+function fetchRandomLatencyPublicationString() {
   let clientKeyArray = Object.keys(clients);
-  let clientID = clientKeyArray[getRandomInt(0, clientKeyArray.length - 1)];
+  let client = clients[clientKeyArray[getRandomInt(0, clientKeyArray.length - 1)]];
+  let publication = "publish "
+  let r = client.radius;
+  let x = client.xCoord
+  let y = client.yCoord
+  let channel = "latency-" + client.clientID;
+  let payload = clientLatencyPublication[client.clientID];
+  clientLatencyPublication[client.clientID]++;
   publication =
     publication +
-    clientID +
+    client.clientID +
     " " +
     x +
     " " +
@@ -322,6 +318,40 @@ function fetchRandomPublicationString() {
     channel +
     " " +
     payload;
+    return publication;
+}
+
+function fetchRandomPublicationString() {
+  let publication;
+  let isLatencyPublication = probabilisticChoice([1 - latencyPublicationProbability, latencyPublicationProbability]);
+  if (isLatencyPublication) {
+    publication = fetchRandomLatencyPublicationString();
+  }
+  else {
+    publication = "publish "
+    let r = getRandomInt(1, 300).toString();
+    let x = getRandomInt(r, 1000 - r).toString();
+    let y = getRandomInt(r, 1000 - r).toString();
+    let channelIndex = getRandomInt(0, channels.length - 1);
+    let channel = channels[channelIndex];
+    let payload = generateRandomPayload(payloadLength[0], payloadLength[1]);
+    let clientKeyArray = Object.keys(clients);
+    let clientID = clientKeyArray[getRandomInt(0, clientKeyArray.length - 1)];
+    publication =
+      publication +
+      clientID +
+      " " +
+      x +
+      " " +
+      y +
+      " " +
+      r +
+      " " +
+      channel +
+      " " +
+      payload;
+  }
+
   return publication;
 }
 
@@ -370,6 +400,18 @@ function fetchInstructionSet() {
     instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
     instructionInfo.updateCounter("newClient");
     instructionInfo.displayInstructionManager();
+  }
+
+  for (let k = 0; k < clientIDArray.length; k++) {
+    let client = clients[clientIDArray[k]];
+    let subscription = "subscribe ";
+    let x = client.xCoord.toString();
+    let r = client.radius.toString();
+    let y = client.yCoord.toString();
+    let channel = "latency-" + client.clientID;
+    let clientID = client.clientID
+    subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
+    instructions = instructions + "\n" + subscription;
   }
 
   while ((instructionInfo.numInsutructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0) {
@@ -425,18 +467,18 @@ function assignAddresses(info) {
   let randomSubset = getRandomSubsetAndRemove(hosts, settings.newMatcher);
   let randomSubsetKeys = Object.keys(randomSubset);
   let static = {};
-  static["master"] = {"hostname": "Lenovo", "static_IP_address" : info.hosts.computer};
+  static["master"] = { "hostname": "Lenovo", "static_IP_address": info.hosts.computer };
   static.clients = {};
   static.matchers = {};
   for (let i = 0; i < settings.newMatcher; i++) {
     if (i == 0) {
       matchersAliasToStaticIP["GW"] = randomSubset[randomSubsetKeys[i]];
-      static.matchers["GW"] = {"hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]]};
+      static.matchers["GW"] = { "hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]] };
     }
     else {
       let alias = "M" + (i + 1).toString();
       matchersAliasToStaticIP[alias] = randomSubset[randomSubsetKeys[i]];
-      static.matchers[alias] = {"hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]]};
+      static.matchers[alias] = { "hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]] };
     }
   }
 
@@ -446,10 +488,10 @@ function assignAddresses(info) {
   for (let j = 0; j < settings.newClient; j++) {
     let alias = "C" + (j + 1).toString();
     clientsAliasToStaticIP[alias] = randomSubset[randomSubsetKeys[j]];
-    static.clients[alias] = {"hostname": randomSubsetKeys[j], "static_IP_address": randomSubset[randomSubsetKeys[j]]};
+    static.clients[alias] = { "hostname": randomSubsetKeys[j], "static_IP_address": randomSubset[randomSubsetKeys[j]] };
   }
 
- 
+
   saveStaticIPs(static);
 }
 
@@ -467,6 +509,7 @@ var matchers = {};
 var clients = {};
 createMatchers(instructionInfo.categories["newMatcher"].numInstructions);
 createClients(instructionInfo.categories["newClient"].numInstructions);
+
 var instructions = fetchInstructionSet();
 
 

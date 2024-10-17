@@ -19,7 +19,9 @@ const path = require('path');
 const os = require('os');
 const readline = require('readline');
 
-const initNVM = 'source ~/.nvm/nvm.sh';
+//const initNVM = 'source ~/.nvm/nvm.sh';
+const initNVM = 'source ~/.nvm/nvm.sh && nvm use default && export PATH=$PATH:';
+
 const sshUser = 'pi';
 
 const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
@@ -47,8 +49,8 @@ function startExecution() {
 
     for (const type in staticIPs) {
         if (type === "master") {
-            const executorPath = path.resolve(__dirname, 'executor2.js');
-            const child = spawn('node', [executorPath, 'master'], { cwd: __dirname });
+            const executorPath = path.resolve(__dirname, 'executor.js');
+            const child = spawn('node', [executorPath, 'master']);
 
             child.stdout.on('data', (data) => {
                 console.log(`stdout (master): ${data}`);
@@ -77,7 +79,7 @@ function startExecution() {
                 // Properly quote paths and commands
                 const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
-                const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
+                const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: false});
 
                 child.stdout.on('data', (data) => {
                     console.log(`stdout (${alias}): ${data}`);
@@ -382,7 +384,7 @@ switch (command) {
         break;
     case 'delete-events':
         console.log("Deleting the events directory")
-        deleteDirectory('Events');
+        deleteDirectory('events');
         break;
     case 'delete-logs':
         console.log("Deleting the logs_and_events directory on the master and Raspberry Pis");

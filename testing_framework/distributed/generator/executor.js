@@ -169,12 +169,7 @@ async function execute(step) {
         log.debug(result);
         console.log("Master has finished executing the instructions");
 
-        mqttClient.publish('instructions', 'end', function (err) {
-            if (!err) {
-                console.log("Master ends processes running on raspberry pi");
-            }
-
-        });
+        mqttClient.publish('instructions', 'end');
         setTimeout(() => process.exit(0), 100);
         return;
     }
@@ -502,7 +497,7 @@ function handleMasterMessage(topic, message) {
         const result = payloadArray[0];
         const step = payloadArray[1] + " " + payloadArray[2];
         //console.log(`Master received message on 'result': ${message}`);
-        console.log("The payload is " + payload);
+        //console.log("The payload is " + payload);
         if (result === 'success') {
             log.debug("Instruction success: " + step);
             //  console.log("Instruction success: " + step);
@@ -604,6 +599,7 @@ if (processRunning === 'master') {
 }
 
 console.log("The process running is " + processRunning);
+console.log("Node.js version is " + process.version);
 main(instructionsPath);
 
 

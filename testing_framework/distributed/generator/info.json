@@ -2,16 +2,19 @@
   "hosts": {
     "computer": "192.168.101.30",
     "raspberrypi": {
-      "raspberrypi12": "192.168.101.12",
-      "raspberrypi14": "192.168.101.14"
+      "raspberrypi7": "192.168.0.7",
+      "raspberrypi9": "192.168.0.9",
+      "raspberrypi12": "192.168.0.12",
+      "raspberrypi14": "192.168.0.14",
+      "raspberrypi15": "192.168.0.15"
     }
   },
   "simulation": {
     "nodes": {
-      "newMatcher": 1,
-      "newClient": 1,
-      "publish": 1,
-      "subscribe": 1,
+      "newMatcher": 2,
+      "newClient": 3,
+      "publish": 20,
+      "subscribe": 2,
       "moveClient": 0
     },
     "settings": {}

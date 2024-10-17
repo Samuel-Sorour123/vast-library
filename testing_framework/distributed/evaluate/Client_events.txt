@@ -1,0 +1,41 @@
+{"time":1728941153162,"event":0,"id":"C1","alias":"unnamed_client","pos":{"x":300,"y":100},"matcher":0}
+{"time":1728941153162,"event":2,"id":"C1","alias":"unnamed_client","pos":{"x":300,"y":100},"matcher":0}
+{"time":1728941153162,"event":4,"id":"C1","alias":"unnamed_client","pos":{"x":300,"y":100},"matcher":1}
+{"time":1728941153175,"event":2,"id":"C1","alias":"unnamed_client","pos":{"x":300,"y":100},"matcher":2}
+{"time":1728941153175,"event":4,"id":"C1","alias":"unnamed_client","pos":{"x":300,"y":100},"matcher":2}
+{"time":1728941153370,"event":6,"id":"C1","alias":"unnamed_client","matcher":2,"sub":{"hostID":2,"hostPos":{"x":167,"y":500},"clientID":"C1","subID":"C1-gbAEo","channel":"channel1","aoi":{"center":{"x":300,"y":100},"radius":100},"recipients":[],"heartbeat":1728941153368}}
+{"time":1728941153380,"event":0,"id":"C2","alias":"unnamed_client","pos":{"x":200,"y":200},"matcher":0}
+{"time":1728941153380,"event":2,"id":"C2","alias":"unnamed_client","pos":{"x":200,"y":200},"matcher":0}
+{"time":1728941153380,"event":4,"id":"C2","alias":"unnamed_client","pos":{"x":200,"y":200},"matcher":1}
+{"time":1728941153390,"event":2,"id":"C2","alias":"unnamed_client","pos":{"x":200,"y":200},"matcher":2}
+{"time":1728941153390,"event":4,"id":"C2","alias":"unnamed_client","pos":{"x":200,"y":200},"matcher":2}
+{"time":1728941153686,"event":6,"id":"C2","alias":"unnamed_client","matcher":2,"sub":{"hostID":2,"hostPos":{"x":167,"y":500},"clientID":"C2","subID":"C2-hWNxR","channel":"channel1","aoi":{"center":{"x":200,"y":200},"radius":100},"recipients":[],"heartbeat":1728941153685}}
+{"time":1728941153693,"event":0,"id":"C3","alias":"unnamed_client","pos":{"x":500,"y":200},"matcher":0}
+{"time":1728941153693,"event":2,"id":"C3","alias":"unnamed_client","pos":{"x":500,"y":200},"matcher":0}
+{"time":1728941153693,"event":4,"id":"C3","alias":"unnamed_client","pos":{"x":500,"y":200},"matcher":1}
+{"time":1728941154097,"event":6,"id":"C3","alias":"unnamed_client","matcher":1,"sub":{"hostID":1,"hostPos":{"x":500,"y":500},"clientID":"C3","subID":"C3-GgP2Z","channel":"channel1","aoi":{"center":{"x":500,"y":500},"radius":500},"recipients":[],"heartbeat":1728941154094}}
+{"time":1728941154097,"event":6,"id":"C3","alias":"unnamed_client","matcher":1,"sub":{"hostID":1,"hostPos":{"x":500,"y":500},"clientID":"C3","subID":"C3-DkAxF","channel":"channel2","aoi":{"center":{"x":500,"y":500},"radius":500},"recipients":[],"heartbeat":1728941154095}}
+{"time":1728941154196,"event":9,"id":"C1","alias":"unnamed_client","matcher":2,"pub":{"pubID":"C1-1","aoi":{"center":{"x":300,"y":100},"radius":10},"channel":"channel1","payload":"hello from C1!"}}
+{"time":1728941154299,"event":9,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"pubID":"C2-1","aoi":{"center":{"x":200,"y":200},"radius":100},"channel":"channel1","payload":"C2 also says hello!"}}
+{"time":1728941154302,"event":10,"id":"C1","alias":"unnamed_client","matcher":2,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-1","aoi":{"center":{"x":200,"y":200},"radius":100},"payload":"C2 also says hello!","channel":"channel1","recipients":[2],"chain":[2]}}
+{"time":1728941154302,"event":10,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-1","aoi":{"center":{"x":200,"y":200},"radius":100},"payload":"C2 also says hello!","channel":"channel1","recipients":[2],"chain":[2]}}
+{"time":1728941154303,"event":10,"id":"C3","alias":"unnamed_client","matcher":1,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-1","aoi":{"center":{"x":200,"y":200},"radius":100},"payload":"C2 also says hello!","channel":"channel1","recipients":[2],"chain":[2]}}
+{"time":1728941154400,"event":9,"id":"C3","alias":"unnamed_client","matcher":1,"pub":{"pubID":"C3-1","aoi":{"center":{"x":250,"y":250},"radius":50},"channel":"channel1","payload":"C3 sending a message far way"}}
+{"time":1728941154401,"event":10,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"matcherID":1,"clientID":"C3","pubID":"C3-1","aoi":{"center":{"x":250,"y":250},"radius":50},"payload":"C3 sending a message far way","channel":"channel1","recipients":[2],"chain":[1,2]}}
+{"time":1728941154402,"event":10,"id":"C3","alias":"unnamed_client","matcher":1,"pub":{"matcherID":1,"clientID":"C3","pubID":"C3-1","aoi":{"center":{"x":250,"y":250},"radius":50},"payload":"C3 sending a message far way","channel":"channel1","recipients":[2],"chain":[1,2]}}
+{"time":1728941154502,"event":9,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"pubID":"C2-2","aoi":{"center":{"x":200,"y":200},"radius":5},"channel":"channel2","payload":"C2 publishing on channel2. Only C3 should receive this pub."}}
+{"time":1728941154506,"event":10,"id":"C3","alias":"unnamed_client","matcher":1,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-2","aoi":{"center":{"x":200,"y":200},"radius":5},"payload":"C2 publishing on channel2. Only C3 should receive this pub.","channel":"channel2","recipients":[2],"chain":[2]}}
+{"time":1728941154605,"event":5,"id":"C1","alias":"unnamed_client","pos":{"x":350,"y":500},"oldpos":{"x":300,"y":100},"matcher":2}
+{"time":1728941154617,"event":2,"id":"C1","alias":"unnamed_client","pos":{"x":350,"y":500},"matcher":1}
+{"time":1728941154617,"event":4,"id":"C1","alias":"unnamed_client","pos":{"x":350,"y":500},"matcher":1}
+{"time":1728941155606,"event":5,"id":"C1","alias":"unnamed_client","pos":{"x":400,"y":600},"oldpos":{"x":300,"y":100},"matcher":1}
+{"time":1728941155607,"event":9,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"pubID":"C2-3","aoi":{"center":{"x":400,"y":600},"radius":10},"channel":"channel1","payload":"Hi to C1/C3"}}
+{"time":1728941155607,"event":9,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"pubID":"C2-4","aoi":{"center":{"x":200,"y":200},"radius":10},"channel":"channel1","payload":"C2/C3 hello"}}
+{"time":1728941155610,"event":10,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-4","aoi":{"center":{"x":200,"y":200},"radius":10},"payload":"C2/C3 hello","channel":"channel1","recipients":[2],"chain":[2]}}
+{"time":1728941155610,"event":10,"id":"C3","alias":"unnamed_client","matcher":1,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-3","aoi":{"center":{"x":400,"y":600},"radius":10},"payload":"Hi to C1/C3","channel":"channel1","recipients":[1],"chain":[2,1]}}
+{"time":1728941155610,"event":10,"id":"C3","alias":"unnamed_client","matcher":1,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-4","aoi":{"center":{"x":200,"y":200},"radius":10},"payload":"C2/C3 hello","channel":"channel1","recipients":[2],"chain":[2]}}
+{"time":1728941155708,"event":9,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"pubID":"C2-5","aoi":{"center":{"x":500,"y":500},"radius":1000},"channel":"channel1","payload":"global hello"}}
+{"time":1728941155711,"event":10,"id":"C1","alias":"unnamed_client","matcher":1,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-5","aoi":{"center":{"x":500,"y":500},"radius":1000},"payload":"global hello","channel":"channel1","recipients":[1,2,3],"chain":[2,1]}}
+{"time":1728941155711,"event":10,"id":"C3","alias":"unnamed_client","matcher":1,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-5","aoi":{"center":{"x":500,"y":500},"radius":1000},"payload":"global hello","channel":"channel1","recipients":[1,2,3],"chain":[2,1]}}
+{"time":1728941155712,"event":10,"id":"C2","alias":"unnamed_client","matcher":2,"pub":{"matcherID":2,"clientID":"C2","pubID":"C2-5","aoi":{"center":{"x":500,"y":500},"radius":1000},"payload":"global hello","channel":"channel1","recipients":[1,2,3],"chain":[2,1,2]}}
+{"time":1728941156710,"event":1,"id":"C1","alias":"unnamed_client","matcher":1}
