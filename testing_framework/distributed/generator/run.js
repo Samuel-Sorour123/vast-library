@@ -11,7 +11,7 @@
  * The options.json file is used to specify the arguments of each script.
  */
 
-
+staticAddressLink = { "192.168.0.7": 0, "192.168.0.9": 1, "192.168.0.12": 2, "192.168.0.14": 3, "192.168.0.15": 4 };
 
 const fs = require('fs');
 const { spawn, exec } = require('child_process');
@@ -29,6 +29,7 @@ const filesDestinationPath = '~/vast-library/testing_framework/distributed/gener
 const filesSourcePath = path.resolve(__dirname, 'files');
 const eventsDirectory = path.resolve(__dirname, "events");
 const simulationDirectory = path.resolve(__dirname, "simulations")
+const jsonData = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
 
 function standardInput(question) {
     const rl = readline.createInterface({
@@ -46,64 +47,54 @@ function standardInput(question) {
 
 function startExecution() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
-
+    let command = `ansible-playbook -i inventory run-node-script.yml --extra-vars `;
+    let arguments = '\"';
     for (const type in staticIPs) {
-        if (type === "master") {
-            const executorPath = path.resolve(__dirname, 'executor.js');
-            const child = spawn('node', [executorPath, 'master']);
-
-            child.stdout.on('data', (data) => {
-                console.log(`stdout (master): ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                console.error(`stderr (master): ${data}`);
-            });
-
-            child.on('error', (err) => {
-                console.error(`The executor.js script could not be started with the argument master: ${err}`);
-            });
-
-            child.on('close', (code) => {
-                if (code === 0) {
-                    console.log('The script executor.js master executed successfully.');
-                    process.exit(0);
-                } else {
-                    console.error(`Master process exited with code ${code}`);
-                }
-            });
-        } else {
+        if (type !== "master") {
             for (const alias in staticIPs[type]) {
-                const ip = staticIPs[type][alias].static_IP_address;
-
-                // Properly quote paths and commands
-                const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
-                const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
-                const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: false});
-
-                child.stdout.on('data', (data) => {
-                    console.log(`stdout (${alias}): ${data}`);
-                });
-
-                child.stderr.on('data', (data) => {
-                    console.error(`stderr (${alias}): ${data}`);
-                });
-
-                child.on('error', (err) => {
-                    console.error(`There was an error executing the command line arguments for ${alias}: ${err}`);
-                });
-
-                child.on('close', (code) => {
-                    if (code === 0) {
-                        console.log(`Execution for ${alias} completed successfully.`);
-                    } else {
-                        console.error(`Child process for ${alias} exited with code ${code}`);
-                    }
-                });
+                runPlaybook(alias);
             }
+        } else {
+            const executorPath = path.resolve(__dirname, 'executor.js');
+            let masterCommand = `node "${executorPath}" master`;
+            exec(masterCommand);
         }
     }
 }
+
+// Function to run Ansible playbook for a specific alias
+function runPlaybook(alias) {
+    let hostname, static_IP;
+  
+    if (jsonData.clients[alias]) {
+      hostname = jsonData.clients[alias].hostname;
+      static_IP = jsonData.clients[alias].static_IP_address;
+    } else if (jsonData.matchers[alias]) {
+      hostname = jsonData.matchers[alias].hostname;
+      static_IP = jsonData.matchers[alias].static_IP_address;
+    } else if (alias === 'master') {
+      hostname = jsonData.master.hostname;
+      static_IP = jsonData.master.static_IP_address;
+    } else {
+      console.error(`Alias ${alias} not found`);
+      return;
+    }
+  
+    // Construct the command to run Ansible playbook with --extra-vars
+    const command = `ansible-playbook -i ./inventory run-node-script.yml --extra-vars "host=${hostname} static_IP=${static_IP} alias=${alias}"`;
+  
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+    });
+  }
 
 function sendFiles() {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, './files/static.json')));
@@ -207,19 +198,16 @@ function collectLogFiles() {
 function deleteDirectory(directory) {
     let directoryPath = path.resolve(__dirname, `${directory}`);
     let command = `rm -r "${directoryPath}" || true`;
-    exec(command, (err, stdout, stderr) =>
-    {
-        if (err)
-        {
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
             console.log(`error: ${err}`);
             return;
         }
-        if (stderr)
-        {
+        if (stderr) {
             console.log("There is no logs and events folder on the master");
             return;
         }
-            console.log(`Master successfully deleted the ${directory}`);
+        console.log(`Master successfully deleted the ${directory}`);
     });
 }
 
@@ -370,7 +358,7 @@ switch (command) {
         console.log("Collecting the Client_events.txt files on each Raspberry Pi");
         collectLogFiles();
         break;
-    case 'merge':{
+    case 'merge': {
         console.log("Merging the Client_event.txt files");
         (async () => {
             const answer = await standardInput('Enter the name of the simulation: ');
