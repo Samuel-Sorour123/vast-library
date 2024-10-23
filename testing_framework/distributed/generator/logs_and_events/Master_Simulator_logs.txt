@@ -1,0 +1,168 @@
+{"time":1729202465929,"msg":"wrong input in line number 7"}
+{"time":1729203351191,"msg":"All the clients have published 'ready'"}
+{"time":1729203351193,"msg":"Unsubscribed from ready"}
+{"time":1729203351194,"msg":"Subscribed to 'result'"}
+{"time":1729203351194,"msg":"Publishing instruction 0. Type: newMatcher"}
+{"time":1729203351195,"msg":"Executing wait instruction with step 1: Waiting 3471"}
+{"time":1729203351448,"msg":"Instruction success: instruction 0"}
+{"time":1729203355731,"msg":"waited for 3471 milliseconds"}
+{"time":1729203355731,"msg":"Publishing instruction 2. Type: newClient"}
+{"time":1729203355731,"msg":"Executing wait instruction with step 3: Waiting 3243"}
+{"time":1729203356164,"msg":"Instruction success: instruction 2"}
+{"time":1729203358975,"msg":"waited for 3243 milliseconds"}
+{"time":1729203358975,"msg":"Publishing instruction 4. Type: newClient"}
+{"time":1729203358976,"msg":"Executing wait instruction with step 5: Waiting 3009"}
+{"time":1729203359373,"msg":"Instruction success: instruction 4"}
+{"time":1729203361987,"msg":"waited for 3009 milliseconds"}
+{"time":1729203361988,"msg":"Publishing instruction 6. Type: subscribe"}
+{"time":1729203361988,"msg":"Publishing instruction 7. Type: subscribe"}
+{"time":1729203361988,"msg":"Publishing instruction 8. Type: publish"}
+{"time":1729203361988,"msg":"Executing wait instruction with step 9: Waiting 2367"}
+{"time":1729203362002,"msg":"Instruction success: instruction 6"}
+{"time":1729203362053,"msg":"Instruction success: instruction 7"}
+{"time":1729203362097,"msg":"Instruction success: instruction 8"}
+{"time":1729203364356,"msg":"waited for 2367 milliseconds"}
+{"time":1729203364356,"msg":"Publishing instruction 10. Type: publish"}
+{"time":1729203364356,"msg":"Executing wait instruction with step 11: Waiting 3268"}
+{"time":1729203364366,"msg":"Instruction success: instruction 10"}
+{"time":1729203367626,"msg":"waited for 3268 milliseconds"}
+{"time":1729203367626,"msg":"Publishing instruction 12. Type: publish"}
+{"time":1729203367626,"msg":"Executing wait instruction with step 13: Waiting 3928"}
+{"time":1729203367637,"msg":"Instruction success: instruction 12"}
+{"time":1729203371556,"msg":"waited for 3928 milliseconds"}
+{"time":1729203371556,"msg":"Publishing instruction 14. Type: publish"}
+{"time":1729203371556,"msg":"Executing wait instruction with step 15: Waiting 3579"}
+{"time":1729203371566,"msg":"Instruction success: instruction 14"}
+{"time":1729203375137,"msg":"waited for 3579 milliseconds"}
+{"time":1729203375137,"msg":"Publishing instruction 16. Type: publish"}
+{"time":1729203375137,"msg":"Executing wait instruction with step 17: Waiting 3206"}
+{"time":1729203375146,"msg":"Instruction success: instruction 16"}
+{"time":1729203378345,"msg":"waited for 3206 milliseconds"}
+{"time":1729203378346,"msg":"Publishing instruction 18. Type: publish"}
+{"time":1729203378346,"msg":"Executing wait instruction with step 19: Waiting 3220"}
+{"time":1729203378356,"msg":"Instruction success: instruction 18"}
+{"time":1729203381569,"msg":"waited for 3220 milliseconds"}
+{"time":1729203381569,"msg":"Publishing instruction 20. Type: publish"}
+{"time":1729203381570,"msg":"Executing wait instruction with step 21: Waiting 2993"}
+{"time":1729203381582,"msg":"Instruction success: instruction 20"}
+{"time":1729203384564,"msg":"waited for 2993 milliseconds"}
+{"time":1729203384564,"msg":"Publishing instruction 22. Type: publish"}
+{"time":1729203384564,"msg":"Executing wait instruction with step 23: Waiting 3951"}
+{"time":1729203384575,"msg":"Instruction success: instruction 22"}
+{"time":1729203389594,"msg":"waited for 3951 milliseconds"}
+{"time":1729203389594,"msg":"Publishing instruction 24. Type: publish"}
+{"time":1729203389595,"msg":"Executing wait instruction with step 25: Waiting 3614"}
+{"time":1729203389604,"msg":"Instruction success: instruction 24"}
+{"time":1729203393213,"msg":"waited for 3614 milliseconds"}
+{"time":1729203393213,"msg":"Publishing instruction 26. Type: publish"}
+{"time":1729203393214,"msg":"Executing wait instruction with step 27: Waiting 3674"}
+{"time":1729203393221,"msg":"Instruction success: instruction 26"}
+{"time":1729203396891,"msg":"waited for 3674 milliseconds"}
+{"time":1729203396891,"msg":"Publishing instruction 28. Type: publish"}
+{"time":1729203396892,"msg":"Executing wait instruction with step 29: Waiting 3851"}
+{"time":1729203396903,"msg":"Instruction success: instruction 28"}
+{"time":1729203400745,"msg":"waited for 3851 milliseconds"}
+{"time":1729203400745,"msg":"Publishing instruction 30. Type: publish"}
+{"time":1729203400745,"msg":"Executing wait instruction with step 31: Waiting 3987"}
+{"time":1729203400756,"msg":"Instruction success: instruction 30"}
+{"time":1729203404736,"msg":"waited for 3987 milliseconds"}
+{"time":1729203404736,"msg":"Publishing instruction 32. Type: publish"}
+{"time":1729203404736,"msg":"Executing wait instruction with step 33: Waiting 2483"}
+{"time":1729203404744,"msg":"Instruction success: instruction 32"}
+{"time":1729203407222,"msg":"waited for 2483 milliseconds"}
+{"time":1729203407222,"msg":"Publishing instruction 34. Type: subscribe"}
+{"time":1729203407222,"msg":"Executing wait instruction with step 35: Waiting 3166"}
+{"time":1729203407234,"msg":"Instruction success: instruction 34"}
+{"time":1729203410391,"msg":"waited for 3166 milliseconds"}
+{"time":1729203410391,"msg":"Publishing instruction 36. Type: publish"}
+{"time":1729203410391,"msg":"Executing wait instruction with step 37: Waiting 3859"}
+{"time":1729203410401,"msg":"Instruction success: instruction 36"}
+{"time":1729203414251,"msg":"waited for 3859 milliseconds"}
+{"time":1729203414251,"msg":"Publishing instruction 38. Type: publish"}
+{"time":1729203414252,"msg":"Executing wait instruction with step 39: Waiting 3223"}
+{"time":1729203414260,"msg":"Instruction success: instruction 38"}
+{"time":1729203417478,"msg":"waited for 3223 milliseconds"}
+{"time":1729203417478,"msg":"Publishing instruction 40. Type: publish"}
+{"time":1729203417478,"msg":"Executing wait instruction with step 41: Waiting 2583"}
+{"time":1729203417488,"msg":"Instruction success: instruction 40"}
+{"time":1729203420063,"msg":"waited for 2583 milliseconds"}
+{"time":1729203420064,"msg":"Publishing instruction 42. Type: subscribe"}
+{"time":1729203420064,"msg":"Executing wait instruction with step 43: Waiting 2576"}
+{"time":1729203420072,"msg":"Instruction success: instruction 42"}
+{"time":1729203423725,"msg":"waited for 2576 milliseconds"}
+{"time":1729203423725,"msg":"Publishing instruction 44. Type: publish"}
+{"time":1729203423725,"msg":"Executing wait instruction with step 45: Waiting 3516"}
+{"time":1729203423733,"msg":"Instruction success: instruction 44"}
+{"time":1729203427242,"msg":"waited for 3516 milliseconds"}
+{"time":1729203427242,"msg":"Publishing instruction 46. Type: publish"}
+{"time":1729203427242,"msg":"Executing wait instruction with step 47: Waiting 3651"}
+{"time":1729203427252,"msg":"Instruction success: instruction 46"}
+{"time":1729203430897,"msg":"waited for 3651 milliseconds"}
+{"time":1729203430897,"msg":"Publishing instruction 48. Type: publish"}
+{"time":1729203430897,"msg":"Executing wait instruction with step 49: Waiting 3326"}
+{"time":1729203430903,"msg":"Instruction success: instruction 48"}
+{"time":1729203434226,"msg":"waited for 3326 milliseconds"}
+{"time":1729203434226,"msg":"Publishing instruction 50. Type: publish"}
+{"time":1729203434226,"msg":"Executing wait instruction with step 51: Waiting 3379"}
+{"time":1729203434234,"msg":"Instruction success: instruction 50"}
+{"time":1729203437607,"msg":"waited for 3379 milliseconds"}
+{"time":1729203437607,"msg":"Executing the end instruction"}
+{"time":1729203437608,"msg":"End instruction executed"}
+{"time":1729203561668,"msg":"All the clients have published 'ready'"}
+{"time":1729203561670,"msg":"Unsubscribed from ready"}
+{"time":1729203561670,"msg":"Subscribed to 'result'"}
+{"time":1729203561671,"msg":"Publishing instruction 0. Type: newMatcher"}
+{"time":1729203561671,"msg":"Executing wait instruction with step 1: Waiting 3471"}
+{"time":1729203561948,"msg":"Instruction success: instruction 0"}
+{"time":1729203565145,"msg":"waited for 3471 milliseconds"}
+{"time":1729203565145,"msg":"Publishing instruction 2. Type: newClient"}
+{"time":1729203565146,"msg":"Executing wait instruction with step 3: Waiting 3243"}
+{"time":1729203565582,"msg":"Instruction success: instruction 2"}
+{"time":1729203568390,"msg":"waited for 3243 milliseconds"}
+{"time":1729203568390,"msg":"Publishing instruction 4. Type: newClient"}
+{"time":1729203568390,"msg":"Executing wait instruction with step 5: Waiting 3009"}
+{"time":1729203568728,"msg":"Instruction success: instruction 4"}
+{"time":1729203571403,"msg":"waited for 3009 milliseconds"}
+{"time":1729203571403,"msg":"Publishing instruction 6. Type: subscribe"}
+{"time":1729203571403,"msg":"Publishing instruction 7. Type: subscribe"}
+{"time":1729203571403,"msg":"Publishing instruction 8. Type: publish"}
+{"time":1729203571403,"msg":"Executing wait instruction with step 9: Waiting 2367"}
+{"time":1729203571417,"msg":"Instruction success: instruction 6"}
+{"time":1729203571471,"msg":"Instruction success: instruction 7"}
+{"time":1729203571517,"msg":"Instruction success: instruction 8"}
+{"time":1729203573772,"msg":"waited for 2367 milliseconds"}
+{"time":1729203573772,"msg":"Publishing instruction 10. Type: publish"}
+{"time":1729203573772,"msg":"Executing wait instruction with step 11: Waiting 3268"}
+{"time":1729203573782,"msg":"Instruction success: instruction 10"}
+{"time":1729203577043,"msg":"waited for 3268 milliseconds"}
+{"time":1729203577043,"msg":"Publishing instruction 12. Type: publish"}
+{"time":1729203577043,"msg":"Executing wait instruction with step 13: Waiting 3928"}
+{"time":1729203577055,"msg":"Instruction success: instruction 12"}
+{"time":1729203580975,"msg":"waited for 3928 milliseconds"}
+{"time":1729203580975,"msg":"Publishing instruction 14. Type: publish"}
+{"time":1729203580975,"msg":"Executing wait instruction with step 15: Waiting 3579"}
+{"time":1729203580985,"msg":"Instruction success: instruction 14"}
+{"time":1729203584559,"msg":"waited for 3579 milliseconds"}
+{"time":1729203584559,"msg":"Publishing instruction 16. Type: publish"}
+{"time":1729203584559,"msg":"Executing wait instruction with step 17: Waiting 3206"}
+{"time":1729203584568,"msg":"Instruction success: instruction 16"}
+{"time":1729203588992,"msg":"waited for 3206 milliseconds"}
+{"time":1729203588992,"msg":"Publishing instruction 18. Type: publish"}
+{"time":1729203588993,"msg":"Executing wait instruction with step 19: Waiting 3220"}
+{"time":1729203589003,"msg":"Instruction success: instruction 18"}
+{"time":1729203592216,"msg":"waited for 3220 milliseconds"}
+{"time":1729203592217,"msg":"Publishing instruction 20. Type: publish"}
+{"time":1729203592217,"msg":"Executing wait instruction with step 21: Waiting 2993"}
+{"time":1729203592226,"msg":"Instruction success: instruction 20"}
+{"time":1729203595214,"msg":"waited for 2993 milliseconds"}
+{"time":1729203595214,"msg":"Publishing instruction 22. Type: publish"}
+{"time":1729203595214,"msg":"Executing wait instruction with step 23: Waiting 3951"}
+{"time":1729203595224,"msg":"Instruction success: instruction 22"}
+{"time":1729203599169,"msg":"waited for 3951 milliseconds"}
+{"time":1729203599169,"msg":"Publishing instruction 24. Type: publish"}
+{"time":1729203599169,"msg":"Executing wait instruction with step 25: Waiting 3614"}
+{"time":1729203599180,"msg":"Instruction success: instruction 24"}
+{"time":1729203602785,"msg":"waited for 3614 milliseconds"}
+{"time":1729203602786,"msg":"Publishing instruction 26. Type: publish"}
+{"time":1729203602786,"msg":"Executing wait instruction with step 27: Waiting 3674"}
+{"time":1729203602794,"msg":"Instruction success: instruction 26"}

@@ -24,7 +24,7 @@ const initNVM = 'source ~/.nvm/nvm.sh && nvm use default && export PATH=$PATH:';
 
 const sshUser = 'pi';
 
-const remoteScriptPath = '~/vast-library/testing_framework/distributed/generator/executor.js';
+const remoteScriptPath = './vast-library/testing_framework/distributed/generator/executor.js';
 const filesDestinationPath = '~/vast-library/testing_framework/distributed/generator';
 const filesSourcePath = path.resolve(__dirname, 'files');
 const eventsDirectory = path.resolve(__dirname, "events");
@@ -77,7 +77,8 @@ function startExecution() {
                 const ip = staticIPs[type][alias].static_IP_address;
 
                 // Properly quote paths and commands
-                const remoteCommand = `${initNVM} && node ${remoteScriptPath} ${alias}`;
+                //const remoteCommand = `node ${remoteScriptPath} ${alias}`;
+                const remoteCommand = `node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
                 const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: '/bin/bash'});
 

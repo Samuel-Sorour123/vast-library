@@ -9,8 +9,8 @@
   },
   "simulation": {
     "nodes": {
-      "newMatcher": 2,
-      "newClient": 3,
+      "newMatcher": 1,
+      "newClient": 2,
       "publish": 20,
       "subscribe": 2,
       "moveClient": 0

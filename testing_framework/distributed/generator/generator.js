@@ -302,7 +302,7 @@ function fetchRandomLatencyPublicationString() {
   let r = client.radius;
   let x = client.xCoord
   let y = client.yCoord
-  let channel = "latency-" + client.clientID;
+  let channel = "latency" + client.clientID;
   let payload = clientLatencyPublication[client.clientID];
   clientLatencyPublication[client.clientID]++;
   publication =
@@ -408,7 +408,7 @@ function fetchInstructionSet() {
     let x = client.xCoord.toString();
     let r = client.radius.toString();
     let y = client.yCoord.toString();
-    let channel = "latency-" + client.clientID;
+    let channel = "latency" + client.clientID;
     let clientID = client.clientID
     subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
     instructions = instructions + "\n" + subscription;
