@@ -258,7 +258,7 @@ function ssh(command, directory = "~/") {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
 
     for (const type in staticIPs) {
-        if (type !== "master") {
+        if (type !== "master" && type!== "brokers") {
             for (const alias in staticIPs[type]) {
                 const ip = staticIPs[type][alias].static_IP_address;
                 let remoteCommand = command;

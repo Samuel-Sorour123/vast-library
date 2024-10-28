@@ -5,6 +5,10 @@
       "raspberrypi12": "192.168.0.12",
       "raspberrypi14": "192.168.0.14",
       "raspberrypi15": "192.168.0.15"
+    },
+    "brokers":{
+      "broker1": "192.168.0.20",
+      "broker2": "192.168.0.21"
     }
   },
   "simulation": {

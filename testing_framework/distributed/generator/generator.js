@@ -462,33 +462,36 @@ function getRandomSubsetAndRemove(obj, numToSelect) {
 
 function assignAddresses(info) {
 
-  let hosts = info.hosts.raspberrypi;
+  let brks = info.hosts.brokers;
   let settings = info.simulation.nodes;
-  let randomSubset = getRandomSubsetAndRemove(hosts, settings.newMatcher);
-  let randomSubsetKeys = Object.keys(randomSubset);
+  let brokerRandomSubset = getRandomSubsetAndRemove(brks, settings.newMatcher);
+  let brokerRandomSubsetKeys = Object.keys(brokerRandomSubset);
+  console.log("The random subset keys are: " + brokerRandomSubsetKeys);
   let static = {};
   static["master"] = { "hostname": "Lenovo", "static_IP_address": info.hosts.computer };
   static.clients = {};
   static.matchers = {};
   for (let i = 0; i < settings.newMatcher; i++) {
     if (i == 0) {
-      matchersAliasToStaticIP["GW"] = randomSubset[randomSubsetKeys[i]];
-      static.matchers["GW"] = { "hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]] };
+      matchersAliasToStaticIP["GW"] = brokerRandomSubset[brokerRandomSubsetKeys[i]];
+      static.matchers["GW"] = { "hostname": brokerRandomSubsetKeys[i], "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]] };
     }
     else {
       let alias = "M" + (i + 1).toString();
-      matchersAliasToStaticIP[alias] = randomSubset[randomSubsetKeys[i]];
-      static.matchers[alias] = { "hostname": randomSubsetKeys[i], "static_IP_address": randomSubset[randomSubsetKeys[i]] };
+      matchersAliasToStaticIP[alias] = brokerRandomSubset[brokerRandomSubsetKeys[i]];
+      static.matchers[alias] = { "hostname": brokerRandomSubsetKeys[i], "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]] };
     }
   }
 
-  randomSubset = getRandomSubsetAndRemove(hosts, settings.newClient);
-  randomSubsetKeys = Object.keys(randomSubset);
+
+  let rpis = info.hosts.raspberrypi;
+  let clientRandomSubset = getRandomSubsetAndRemove(rpis, settings.newClient);
+  let clientRandomSubsetKeys = Object.keys(clientRandomSubset);
 
   for (let j = 0; j < settings.newClient; j++) {
     let alias = "C" + (j + 1).toString();
-    clientsAliasToStaticIP[alias] = randomSubset[randomSubsetKeys[j]];
-    static.clients[alias] = { "hostname": randomSubsetKeys[j], "static_IP_address": randomSubset[randomSubsetKeys[j]] };
+    clientsAliasToStaticIP[alias] = clientRandomSubset[clientRandomSubsetKeys[j]];
+    static.clients[alias] = { "hostname": clientRandomSubsetKeys[j], "static_IP_address": clientRandomSubset[clientRandomSubsetKeys[j]]};
   }
 
 
