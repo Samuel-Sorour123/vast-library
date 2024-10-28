@@ -208,16 +208,11 @@ function collectLogFiles() {
 function deleteDirectory(directory) {
     let directoryPath = path.resolve(__dirname, `${directory}`);
     let command = `rm -r "${directoryPath}" || true`;
-    exec(command, (err, stdout, stderr) =>
+    exec(command, (err) =>
     {
         if (err)
         {
             console.log(`error: ${err}`);
-            return;
-        }
-        if (stderr)
-        {
-            console.log("There is no logs and events folder on the master");
             return;
         }
             console.log(`Master successfully deleted the ${directory}`);
