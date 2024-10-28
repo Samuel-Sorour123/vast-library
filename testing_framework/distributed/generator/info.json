@@ -7,8 +7,7 @@
       "raspberrypi15": "192.168.0.15"
     },
     "brokers":{
-      "broker1": "192.168.0.20",
-      "broker2": "192.168.0.21"
+      "Samuel Sorour": "192.168.0.20"
     }
   },
   "simulation": {

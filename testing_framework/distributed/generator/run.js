@@ -80,7 +80,7 @@ function startExecution() {
                 //const remoteCommand = `node ${remoteScriptPath} ${alias}`;
                 const remoteCommand = `node ${remoteScriptPath} ${alias}`;
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
-                const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: '/bin/bash'});
+                const child = spawn(sshCommand[0], sshCommand.slice(1), { shell: '/bin/bash' });
 
                 child.stdout.on('data', (data) => {
                     console.log(`stdout (${alias}): ${data}`);
@@ -111,33 +111,68 @@ function sendFiles() {
 
     for (const type in staticIPs) {
         if (type !== "master") {
-            for (const alias in staticIPs[type]) {
-                const ip = staticIPs[type][alias].static_IP_address;
+            if (type == "clients") {
+                for (const alias in staticIPs[type]) {
+                    const ip = staticIPs[type][alias].static_IP_address;
 
-                // Send files
-                const instructionCommand = ['scp', '-r', filesSourcePath, `${sshUser}@${ip}:${filesDestinationPath}`];
-                const child1 = spawn(instructionCommand[0], instructionCommand.slice(1), { shell: false });
+                    // Send files
+                    const instructionCommand = ['scp', '-r', filesSourcePath, `${sshUser}@${ip}:${filesDestinationPath}`];
+                    const child1 = spawn(instructionCommand[0], instructionCommand.slice(1), { shell: false });
 
-                child1.stdout.on('data', (data) => {
-                    console.log(`stdout (scp instructions to ${alias}): ${data}`);
-                });
+                    child1.stdout.on('data', (data) => {
+                        console.log(`stdout (scp instructions to ${alias}): ${data}`);
+                    });
 
-                child1.stderr.on('data', (data) => {
-                    console.error(`stderr (scp instructions to ${alias}): ${data}`);
-                });
+                    child1.stderr.on('data', (data) => {
+                        console.error(`stderr (scp instructions to ${alias}): ${data}`);
+                    });
 
-                child1.on('error', (err) => {
-                    console.error(`There was an error executing the instruction copy command for ${alias}: ${err}`);
-                });
+                    child1.on('error', (err) => {
+                        console.error(`There was an error executing the instruction copy command for ${alias}: ${err}`);
+                    });
 
-                child1.on('close', (code) => {
-                    if (code === 0) {
-                        console.log(`The instructions.txt file was sent to ${alias}`);
-                    } else {
-                        console.error(`scp process for instructions.txt to ${alias} exited with code ${code}`);
-                    }
-                });
+                    child1.on('close', (code) => {
+                        if (code === 0) {
+                            console.log(`The instructions.txt file was sent to ${alias}`);
+                        } else {
+                            console.error(`scp process for instructions.txt to ${alias} exited with code ${code}`);
+                        }
+                    });
+                }
             }
+            else if (type == 'matchers') {
+                for (const alias in staticIPs[type]) {
+                    const ip = staticIPs[type][alias].static_IP_address;
+                    const user = staticIPs[type][alias].hostname;
+                    exec(`scp -r '${filesSourcePath}' '${user}@${ip}:\\Users\\${user}'`, (err, stdout, stderr) => {
+                        if (err) {
+                            console.log("err: " + err);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log("sterr: " + stderr);
+                        }
+                        if (stdout) {
+                            console.log("stdout: " + stdout);
+                        }
+                    });
+                    
+    
+                    exec(`ssh "${user}@${ip}" "wsl bash -c 'cd /mnt/c/Users/Samuel\\ Sorour && cp -r files ~/vast-library/testing_framework/distributed/generator'"`, (err, stdout, stderr) => {
+                        if (err) {
+                            console.log("err: " + err);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log("sterr: " + stderr);
+                        }
+                        if (stdout) {
+                            console.log("stdout: " + stdout);
+                        }
+                    });
+                }
+            }
+
         }
     }
 }
@@ -208,14 +243,12 @@ function collectLogFiles() {
 function deleteDirectory(directory) {
     let directoryPath = path.resolve(__dirname, `${directory}`);
     let command = `rm -r "${directoryPath}" || true`;
-    exec(command, (err) =>
-    {
-        if (err)
-        {
+    exec(command, (err) => {
+        if (err) {
             console.log(`error: ${err}`);
             return;
         }
-            console.log(`Master successfully deleted the ${directory}`);
+        console.log(`Master successfully deleted the ${directory}`);
     });
 }
 
@@ -254,40 +287,73 @@ function deleteDirectoryRemote(directory) {
     }
 }
 
-function ssh(command, directory = "~/") {
+function ssh(command, directory = "~/", otherCommand = "none") {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
 
     for (const type in staticIPs) {
-        if (type !== "master" && type!== "brokers") {
-            for (const alias in staticIPs[type]) {
-                const ip = staticIPs[type][alias].static_IP_address;
-                let remoteCommand = command;
-                if (directory !== "~/") {
-                    remoteCommand = `cd ${directory} && ${command}`
-                }
-                const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
-                const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
-
-                child1.stdout.on('data', (data) => {
-                    console.log(`stdout: ${command} (${alias}): ${data}`);
-                });
-
-                child1.stderr.on('data', (data) => {
-                    console.error(`stderr: ${command} (${alias}): ${data}`);
-                });
-
-                child1.on('error', (err) => {
-                    console.error(`error: ${command} (${alias}): ${err}`);
-                });
-
-                child1.on('close', (code) => {
-                    if (code === 0) {
-                        console.log(`${command} was successful on ${alias}`);
-                    } else {
-                        console.error(`${command} was unsuccessful on ${alias} exited with code ${code}`);
+        if (type !== "master") {
+            if (type === "clients") {
+                for (const alias in staticIPs[type]) {
+                    const ip = staticIPs[type][alias].static_IP_address;
+                    let remoteCommand = command;
+                    if (directory !== "~/") {
+                        remoteCommand = `cd ${directory} && ${command}`
                     }
-                });
+
+                    const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
+                    const child1 = spawn(sshCommand[0], sshCommand.slice(1), { shell: false });
+
+                    child1.stdout.on('data', (data) => {
+                        console.log(`stdout: ${command} (${alias}): ${data}`);
+                    });
+
+                    child1.stderr.on('data', (data) => {
+                        console.error(`stderr: ${command} (${alias}): ${data}`);
+                    });
+
+                    child1.on('error', (err) => {
+                        console.error(`error: ${command} (${alias}): ${err}`);
+                    });
+
+                    child1.on('close', (code) => {
+                        if (code === 0) {
+                            console.log(`${command} was successful on ${alias}`);
+                        } else {
+                            console.error(`${command} was unsuccessful on ${alias} exited with code ${code}`);
+                        }
+                    });
+                }
             }
+            else if (type === 'matchers') {
+                for (const alias in staticIPs[type]) {
+                    const ip = staticIPs[type][alias].static_IP_address;
+                    const user = staticIPs[type][alias].hostname;
+                    let remoteCommand = `cd ${directory} `;
+                    if (otherCommand !== "none") {
+                        remoteCommand = `${remoteCommand} && ${otherCommand}`;
+                    }
+                    else {
+                        remoteCommand = `${remoteCommand} && ${command}`;
+                    }
+                    const wslCommand = `wsl bash -c \"${remoteCommand}\"`;
+                    const sshCommand = `ssh '${user}@${ip}' '${wslCommand}'`;
+
+                    exec(sshCommand, (err, stdout, stderr) => {
+                        if (err) {
+                            console.log("err: " + err);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log("sterr: " + stderr);
+                        }
+                        if (stdout) {
+                            console.log("stdout: " + stdout);
+                        }
+                        console.log(`${command} was successful on ${alias}`)
+                    });
+                }
+            }
+
         }
     }
 }
@@ -360,13 +426,13 @@ switch (command) {
         break;
     case 'install':
         console.log("Installing the neccessary packages");
-        ssh(`${initNVM} && npm install`, '~/vast-library');
+        ssh(`${initNVM} && npm install`, '~/vast-library', 'source ~/.nvm/nvm.sh && npm install');
         break;
     case 'collect':
         console.log("Collecting the Client_events.txt files on each Raspberry Pi");
         collectLogFiles();
         break;
-    case 'merge':{
+    case 'merge': {
         console.log("Merging the Client_event.txt files");
         (async () => {
             const answer = await standardInput('Enter the name of the simulation: ');
