@@ -388,19 +388,19 @@ function fetchInstructionSet() {
 
   for (let i = 0; i < matcherIDArray.length; i++) {
     if (i == 0) {
-      instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+      instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(100, 200);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
     else {
-      instructions = instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+      instructions = instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(100, 200);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
   }
   instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
   for (let j = 0; j < clientIDArray.length; j++) {
-    instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+    instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInstruction(100, 200);
     instructionInfo.updateCounter("newClient");
     instructionInfo.displayInstructionManager();
   }
@@ -413,12 +413,12 @@ function fetchInstructionSet() {
     let channel = "latency" + client.clientID;
     let clientID = client.clientID
     subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
-    instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(timeInterval[0],timeInterval[1]);
+    instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(100,200);
   }
   instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
   for (let h = 0; h < args.subscribe; h++)
   {
-      instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+      instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(60, 80);
         instructionInfo.updateCounter("subscribe");
         instructionInfo.displayInstructionManager();
   }
@@ -473,34 +473,31 @@ function getRandomSubsetAndRemove(obj, numToSelect) {
 function assignAddresses(info) {
 
   let brks = info.hosts.brokers;
+  let brksKeys = Object.keys(brks);
   let settings = info.simulation.nodes;
-  let brokerRandomSubset = getRandomSubsetAndRemove(brks, settings.newMatcher);
-  let brokerRandomSubsetKeys = Object.keys(brokerRandomSubset);
   let static = {};
   static["master"] = { "hostname": "Lenovo", "user": info.hosts.computer.user, "static_IP_address": info.hosts.computer.ip };
   static.clients = {};
   static.matchers = {};
   for (let i = 0; i < settings.newMatcher; i++) {
     if (i == 0) {
-      matchersAliasToStaticIP["GW"] = brokerRandomSubset[brokerRandomSubsetKeys[i]].ip;
-      static.matchers["GW"] = { "hostname": brokerRandomSubsetKeys[i], "user": brokerRandomSubset[brokerRandomSubsetKeys[i]].user, "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]].ip };
+      matchersAliasToStaticIP["GW"] = brks[brksKeys[i]].ip;
+      static.matchers["GW"] = { "hostname": brksKeys[i], "user": brks[brksKeys[i]].user, "static_IP_address": brks[brksKeys[i]].ip };
     }
     else {
       let alias = "M" + (i + 1).toString();
-      matchersAliasToStaticIP[alias] = brokerRandomSubset[brokerRandomSubsetKeys[i]].ip;
-      static.matchers[alias] = { "hostname": brokerRandomSubsetKeys[i],"user":brokerRandomSubset[brokerRandomSubsetKeys[i]].user, "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]].ip };
+      matchersAliasToStaticIP[alias] = brks[brksKeys[i]].ip;
+      static.matchers[alias] = { "hostname": brksKeys[i],"user":brks[brksKeys[i]].user, "static_IP_address": brks[brksKeys[i]].ip };
     }
   }
 
 
   let rpis = info.hosts.clients;
-  let clientRandomSubset = getRandomSubsetAndRemove(rpis, settings.newClient);
-  let clientRandomSubsetKeys = Object.keys(clientRandomSubset);
-
+  let rpisKeys = Object.keys(rpis);
   for (let j = 0; j < settings.newClient; j++) {
     let alias = "C" + (j + 1).toString();
-    clientsAliasToStaticIP[alias] = clientRandomSubset[clientRandomSubsetKeys[j]].ip;
-    static.clients[alias] = { "hostname": clientRandomSubsetKeys[j], "user": clientRandomSubset[clientRandomSubsetKeys[j]].user, "static_IP_address": clientRandomSubset[clientRandomSubsetKeys[j]].ip};
+    clientsAliasToStaticIP[alias] = rpis[rpisKeys[j]].ip;
+    static.clients[alias] = { "hostname": rpisKeys[j], "user": rpis[rpisKeys[j]].user, "static_IP_address":  rpis[rpisKeys[j]].ip};
   }
   saveStaticIPs(static);
 }
