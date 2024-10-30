@@ -254,7 +254,7 @@ function createMatchers(numMatchers) {
       let matcher = new Matcher(
         "GW",
         true,
-        staticAddress,
+        gatewayIp,
         "8000",
         "8001",
         "21000",
@@ -398,6 +398,7 @@ function fetchInstructionSet() {
       instructionInfo.displayInstructionManager();
     }
   }
+  instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
   for (let j = 0; j < clientIDArray.length; j++) {
     instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
     instructionInfo.updateCounter("newClient");
@@ -414,6 +415,15 @@ function fetchInstructionSet() {
     subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
     instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(timeInterval[0],timeInterval[1]);
   }
+  instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
+  for (let h = 0; h < args.subscribe; h++)
+  {
+      instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+        instructionInfo.updateCounter("subscribe");
+        instructionInfo.displayInstructionManager();
+  }
+
+  instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
   while ((instructionInfo.numInstructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0) {
     let choice = probabilisticChoice(instructionInfo.fetchProbabilities(2));
     switch (choice) {

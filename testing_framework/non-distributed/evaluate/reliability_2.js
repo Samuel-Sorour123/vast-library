@@ -220,7 +220,7 @@ function countErrors() {
   return [type1, type2, type3, totalExpected, totalReceived];
 }
 
-const filePath = "./../../visualiser/logs_and_events/Client_events.txt";
+const filePath = "test.txt";
 var clientEvents = getRelevantClientEvents(filePath);
 var clientMessageTrackers = intialiseClientMessageTrackers(clientEvents);
 var activeSubscriptions = [];

@@ -226,11 +226,23 @@ function errorType3() {
     let keysClients = Object.keys(receivedPublication.clients);
     if (!allPublications[keysPubs[i]]) {
       for (let j = 0; j < keysClients.length; j++) {
+        console.log(receivedPublication[keysPubs[i]].toString());
         errorCount = errorCount + receivedPublication.clients[keysClients[j]];
       }
     } else {
       for (let j = 0; j < keysClients.length; j++) {
         if (!allPublications[keysPubs[i]].clients[keysClients[j]]) {
+          console.log(receivedPublication.toString());
+          console.log(allPublications[keysPubs[i]].toString());
+          console.log(allPublications[keysPubs[i]]);
+          let time = allPublications[keysPubs[i]].time;
+          let activeSub = obtainActiveSubscriptions(time);
+          let keys = Object.keys(activeSub);
+          for (let i = 0; i < keys.length; i++)
+          {
+            console.log(activeSub[keys[i]].toString());
+          }
+
           errorCount = errorCount + receivedPublication.clients[keysClients[j]];
         }
       }
@@ -303,7 +315,7 @@ function determineConsistency(error1)
   return consistency;
 }
 
-const filePath = "sim1.txt";
+const filePath = "test.txt";
 //The allSubscriptions, allPublications and allPublicationsReceived JSON objects are assigned values at specific indexes.
 loadData(filePath);
 

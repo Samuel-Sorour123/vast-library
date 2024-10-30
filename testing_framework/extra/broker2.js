@@ -1,5 +1,5 @@
 // imports  
-const matcher = require('./lib/matcher.js');  
+const matcher = require('../../lib/matcher.js');  
 
 // Gateway information  
 const GatewayHostname = '192.168.0.20';  

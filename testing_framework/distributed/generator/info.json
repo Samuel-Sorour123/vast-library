@@ -24,7 +24,7 @@
       "asciiValueRange": [97, 122],
       "payloadLength": [10, 40],
       "channels": ["channel1", "channel2", "channel3"],
-      "timeInterval": [15, 30]
+      "timeInterval": [70, 100]
     }
   }
 }
