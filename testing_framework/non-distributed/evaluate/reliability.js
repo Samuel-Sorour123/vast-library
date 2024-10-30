@@ -315,7 +315,8 @@ function determineConsistency(error1)
   return consistency;
 }
 
-const filePath = "test.txt";
+
+const filePath = process.argv[2];
 //The allSubscriptions, allPublications and allPublicationsReceived JSON objects are assigned values at specific indexes.
 loadData(filePath);
 
