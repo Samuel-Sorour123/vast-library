@@ -242,7 +242,7 @@ function generateWaitInstruction(minLength, maxLength) {
 }
 
 function createMatchers(numMatchers) {
-
+  let gatewayIp;
   let createdSoFar = Object.keys(clients).length;
   for (let m = 1 + createdSoFar; m <= createdSoFar + numMatchers; m++) {
     let r = getRandomInt(0, 100);
@@ -250,7 +250,7 @@ function createMatchers(numMatchers) {
     let y = getRandomInt(0, 1000);
 
     if (m == 1) {
-      let staticAddress = '\"' + matchersAliasToStaticIP["GW"] + '\"';
+      gatewayIp = '\"' + matchersAliasToStaticIP["GW"] + '\"';
       let matcher = new Matcher(
         "GW",
         true,
@@ -267,11 +267,10 @@ function createMatchers(numMatchers) {
       let matcherID = "M" + m.toString();
       let vonPort = ((m - 1) * 10 + 8000).toString();
       let clientPort = ((m - 1) * 10 + 21000).toString();
-      let staticAddress = '\"' + matchersAliasToStaticIP[matcherID] + '\"';
       let matcher = new Matcher(
         matcherID,
         false,
-        staticAddress,
+        gatewayIp,
         "8000",
         vonPort,
         clientPort,
