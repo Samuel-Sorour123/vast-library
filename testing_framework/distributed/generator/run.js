@@ -143,7 +143,21 @@ function sendFiles() {
             else if (type == 'matchers') {
                 for (const alias in staticIPs[type]) {
                     const ip = staticIPs[type][alias].static_IP_address;
-                    const user = staticIPs[type][alias].hostname;
+                    const user = staticIPs[type][alias].user;
+
+                    exec(`ssh '${user}@${ip}' ' if exist files rmdir /s /q files'`, (err, stdout, stderr) => {
+                        if (err) {
+                            console.log("err: " + err);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log("sterr: " + stderr);
+                        }
+                        if (stdout) {
+                            console.log("stdout: " + stdout);
+                        }
+                    });
+
                     exec(`scp -r '${filesSourcePath}' '${user}@${ip}:\\Users\\${user}'`, (err, stdout, stderr) => {
                         if (err) {
                             console.log("err: " + err);
@@ -156,9 +170,9 @@ function sendFiles() {
                             console.log("stdout: " + stdout);
                         }
                     });
-                    
-    
-                    exec(`ssh "${user}@${ip}" "wsl bash -c 'cd /mnt/c/Users/Samuel\\ Sorour && cp -r files ~/vast-library/testing_framework/distributed/generator'"`, (err, stdout, stderr) => {
+
+                    //`ssh '${user}@${ip}' 'wsl bash -c \"cd /mnt/c/Users/${user} && cp -r files ${filesDestinationPath}\"'`
+                    exec(`ssh '${user}@${ip}' 'wsl bash -c "cd \\"/mnt/c/Users/${user}\\" && cp -r files ${filesDestinationPath}"'`, (err, stdout, stderr) => {
                         if (err) {
                             console.log("err: " + err);
                             return;
@@ -256,8 +270,9 @@ function deleteDirectoryRemote(directory) {
     const staticIPs = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'files/static.json')));
 
     for (const type in staticIPs) {
-        if (type !== "master") {
+        if (type !== "master" && type !== "matchers") {
             for (const alias in staticIPs[type]) {
+                
                 const ip = staticIPs[type][alias].static_IP_address;
                 let remoteCommand = `rm -r ${filesDestinationPath}/logs_and_events || true`
                 const sshCommand = ['ssh', `${sshUser}@${ip}`, remoteCommand];
@@ -327,7 +342,7 @@ function ssh(command, directory = "~/", otherCommand = "none") {
             else if (type === 'matchers') {
                 for (const alias in staticIPs[type]) {
                     const ip = staticIPs[type][alias].static_IP_address;
-                    const user = staticIPs[type][alias].hostname;
+                    const user = staticIPs[type][alias].user;
                     let remoteCommand = `cd ${directory} `;
                     if (otherCommand !== "none") {
                         remoteCommand = `${remoteCommand} && ${otherCommand}`;
@@ -426,7 +441,7 @@ switch (command) {
         break;
     case 'install':
         console.log("Installing the neccessary packages");
-        ssh(`${initNVM} && npm install`, '~/vast-library', 'source ~/.nvm/nvm.sh && npm install');
+        ssh(`${initNVM} && npm install`, '~/vast-library', 'source ~/.nvm/nvm.sh && nvm use default && npm install');
         break;
     case 'collect':
         console.log("Collecting the Client_events.txt files on each Raspberry Pi");

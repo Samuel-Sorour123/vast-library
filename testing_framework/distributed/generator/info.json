@@ -1,23 +1,30 @@
 {
   "hosts": {
-    "computer": "192.168.0.30",
-    "raspberrypi": {
-      "raspberrypi12": "192.168.0.12",
-      "raspberrypi14": "192.168.0.14",
-      "raspberrypi15": "192.168.0.15"
+    "computer":{ "user": "Samuel", "ip": "192.168.0.30"},
+    "clients": {
+      "craftberrypi12": { "user": "pi", "ip": "192.168.0.12"},
+      "craftberrypi14":  { "user": "pi", "ip": "192.168.0.14"},
+      "craftberrypi15":  { "user": "pi", "ip": "192.168.0.15"},
+      "craftberrypi9": {"user": "pi", "ip": "192.168.0.9"}
     },
-    "brokers":{
-      "Samuel Sorour": "192.168.0.20"
+    "brokers": {
+      "dell": { "user": "Samuel Sorour", "ip": "192.168.0.20"},
+      "thinkpad": { "user": "Samuel Sorour", "ip": "192.168.0.21"}
     }
   },
   "simulation": {
     "nodes": {
-      "newMatcher": 1,
-      "newClient": 2,
-      "publish": 20,
-      "subscribe": 2,
+      "newMatcher": 2,
+      "newClient": 4,
+      "publish": 100,
+      "subscribe": 20,
       "moveClient": 0
     },
-    "settings": {}
+    "settings": {
+      "asciiValueRange": [97, 122],
+      "payloadLength": [10, 40],
+      "channels": ["channel1", "channel2", "channel3"],
+      "timeInterval": [15, 30]
+    }
   }
 }

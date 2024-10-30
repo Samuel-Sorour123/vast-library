@@ -1,13 +1,17 @@
+const { time } = require("console");
 const fs = require("fs");
 const path = require("path");
 //Running an experiment on a single host (Matchers are stationary but clients are moving)
 //The script generates a text file that the simulator uses to run a simulation
 
+const jsonFileName = process.argv[2];
+const data = JSON.parse(fs.readFileSync(jsonFileName));
 
-const channels = ["channel1", "channel2", "channel3"];
-const payloadLength = [10, 40];
-const asciiValueRange = [97, 122];
-const latencyPublicationProbability = 0.3;
+const channels = data.simulation.settings.channels;
+const payloadLength = data.simulation.settings.payloadLength;
+const asciiValueRange = data.simulation.settings.asciiValueRange;
+const timeInterval = data.simulation.settings.timeInterval;
+const latencyPublicationProbability = 0;
 
 var clientLatencyPublication = {};
 
@@ -94,7 +98,7 @@ class InstructionManager {
     this.keys = Object.keys(args);
     this.categories = {};
     this.totalInstructionsGenerated = 0;
-    this.numInsutructionsToGenerate = 0;
+    this.numInstructionsToGenerate = 0;
 
     for (let i = 0; i < this.keys.length; i++) {
       this.categories[this.keys[i]] = {
@@ -102,7 +106,7 @@ class InstructionManager {
         instructionCounter: 0,
         instructionProbability: 0,
       };
-      this.numInsutructionsToGenerate = this.numInsutructionsToGenerate + args[this.keys[i]];
+      this.numInstructionsToGenerate = this.numInstructionsToGenerate + args[this.keys[i]];
     }
     this.calculateProbabilities();
   }
@@ -119,7 +123,7 @@ class InstructionManager {
   }
 
   calculateProbabilities() {
-    let totalInstructionsLeft = this.numInsutructionsToGenerate - this.totalInstructionsGenerated;
+    let totalInstructionsLeft = this.numInstructionsToGenerate - this.totalInstructionsGenerated;
     if (totalInstructionsLeft == 0) {
       for (let i = 0; i < this.keys.length; i++) {
         this.categories[this.keys[i]].instructionProbability = 0;
@@ -231,7 +235,7 @@ function generateRandomPayload(minCharacter, maxCharacters) {
   return payload;
 }
 
-function generateWaitInsruction(minLength, maxLength) {
+function generateWaitInstruction(minLength, maxLength) {
   let length = getRandomInt(minLength, maxLength);
   let instruction = "wait " + length.toString();
   return instruction;
@@ -263,7 +267,7 @@ function createMatchers(numMatchers) {
       let matcherID = "M" + m.toString();
       let vonPort = ((m - 1) * 10 + 8000).toString();
       let clientPort = ((m - 1) * 10 + 21000).toString();
-      let staticAddress = matchersAliasToStaticIP[matcherID];
+      let staticAddress = '\"' + matchersAliasToStaticIP[matcherID] + '\"';
       let matcher = new Matcher(
         matcherID,
         false,
@@ -385,23 +389,21 @@ function fetchInstructionSet() {
 
   for (let i = 0; i < matcherIDArray.length; i++) {
     if (i == 0) {
-      instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
+      instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
     else {
-      instructions = instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
+      instructions = instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
   }
-
   for (let j = 0; j < clientIDArray.length; j++) {
-    instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInsruction(2000, 4000);
+    instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
     instructionInfo.updateCounter("newClient");
     instructionInfo.displayInstructionManager();
   }
-
   for (let k = 0; k < clientIDArray.length; k++) {
     let client = clients[clientIDArray[k]];
     let subscription = "subscribe ";
@@ -411,24 +413,23 @@ function fetchInstructionSet() {
     let channel = "latency" + client.clientID;
     let clientID = client.clientID
     subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
-    instructions = instructions + "\n" + subscription;
+    instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(timeInterval[0],timeInterval[1]);
   }
-
-  while ((instructionInfo.numInsutructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0) {
+  while ((instructionInfo.numInstructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0) {
     let choice = probabilisticChoice(instructionInfo.fetchProbabilities(2));
     switch (choice) {
       case 0:
-        instructions = instructions + "\n" + fetchRandomPublicationString() + "\n" + generateWaitInsruction(2000, 4000);
+        instructions = instructions + "\n" + fetchRandomPublicationString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
         instructionInfo.updateCounter("publish");
         instructionInfo.displayInstructionManager();
         break;
       case 1:
-        instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInsruction(2000, 4000);
+        instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
         instructionInfo.updateCounter("subscribe");
         instructionInfo.displayInstructionManager();
         break;
       case 2:
-        instructions = instructions + "\n" + fetchRandomClientMovement() + "\n" + generateWaitInsruction(2000, 4000);
+        instructions = instructions + "\n" + fetchRandomClientMovement() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
         instructionInfo.updateCounter("moveClient");
         instructionInfo.displayInstructionManager();
         break;
@@ -466,54 +467,46 @@ function assignAddresses(info) {
   let settings = info.simulation.nodes;
   let brokerRandomSubset = getRandomSubsetAndRemove(brks, settings.newMatcher);
   let brokerRandomSubsetKeys = Object.keys(brokerRandomSubset);
-  console.log("The random subset keys are: " + brokerRandomSubsetKeys);
   let static = {};
-  static["master"] = { "hostname": "Lenovo", "static_IP_address": info.hosts.computer };
+  static["master"] = { "hostname": "Lenovo", "user": info.hosts.computer.user, "static_IP_address": info.hosts.computer.ip };
   static.clients = {};
   static.matchers = {};
   for (let i = 0; i < settings.newMatcher; i++) {
     if (i == 0) {
-      matchersAliasToStaticIP["GW"] = brokerRandomSubset[brokerRandomSubsetKeys[i]];
-      static.matchers["GW"] = { "hostname": brokerRandomSubsetKeys[i], "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]] };
+      matchersAliasToStaticIP["GW"] = brokerRandomSubset[brokerRandomSubsetKeys[i]].ip;
+      static.matchers["GW"] = { "hostname": brokerRandomSubsetKeys[i], "user": brokerRandomSubset[brokerRandomSubsetKeys[i]].user, "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]].ip };
     }
     else {
       let alias = "M" + (i + 1).toString();
-      matchersAliasToStaticIP[alias] = brokerRandomSubset[brokerRandomSubsetKeys[i]];
-      static.matchers[alias] = { "hostname": brokerRandomSubsetKeys[i], "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]] };
+      matchersAliasToStaticIP[alias] = brokerRandomSubset[brokerRandomSubsetKeys[i]].ip;
+      static.matchers[alias] = { "hostname": brokerRandomSubsetKeys[i],"user":brokerRandomSubset[brokerRandomSubsetKeys[i]].user, "static_IP_address": brokerRandomSubset[brokerRandomSubsetKeys[i]].ip };
     }
   }
 
 
-  let rpis = info.hosts.raspberrypi;
+  let rpis = info.hosts.clients;
   let clientRandomSubset = getRandomSubsetAndRemove(rpis, settings.newClient);
   let clientRandomSubsetKeys = Object.keys(clientRandomSubset);
 
   for (let j = 0; j < settings.newClient; j++) {
     let alias = "C" + (j + 1).toString();
-    clientsAliasToStaticIP[alias] = clientRandomSubset[clientRandomSubsetKeys[j]];
-    static.clients[alias] = { "hostname": clientRandomSubsetKeys[j], "static_IP_address": clientRandomSubset[clientRandomSubsetKeys[j]]};
+    clientsAliasToStaticIP[alias] = clientRandomSubset[clientRandomSubsetKeys[j]].ip;
+    static.clients[alias] = { "hostname": clientRandomSubsetKeys[j], "user": clientRandomSubset[clientRandomSubsetKeys[j]].user, "static_IP_address": clientRandomSubset[clientRandomSubsetKeys[j]].ip};
   }
-
-
   saveStaticIPs(static);
 }
 
 
-const jsonFileName = process.argv[2];
-const info = JSON.parse(fs.readFileSync(jsonFileName));
-const args = info.simulation.nodes;
+
+const args = data.simulation.nodes;
 
 var matchersAliasToStaticIP = {}
 var clientsAliasToStaticIP = {}
-assignAddresses(info);
-
+assignAddresses(data);
 var instructionInfo = new InstructionManager(args);
 var matchers = {};
 var clients = {};
 createMatchers(instructionInfo.categories["newMatcher"].numInstructions);
 createClients(instructionInfo.categories["newClient"].numInstructions);
-
 var instructions = fetchInstructionSet();
-
-
 saveInstructionsToFile(instructions);

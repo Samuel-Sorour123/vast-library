@@ -11,7 +11,7 @@ class Latency {
   }
 
   toString() {
-    return "Client ID that made the publication: " + this.pubSender + "\nClient ID that received the publication: " + this.pubReceiver + "\nTime that was elapsed: " + this.timeElapsed + "\nThe publication was: " + this.publication + "\n";
+    return "Client ID that made the publication: " + this.pubSender + "\nClient ID that received the publication: " + this.pubReceiver + "\nTime that was elapsed: " + this.timeElapsed + "\nThe publication was: " + JSON.stringify(this.publication) + "\n";
   }
 }
 
@@ -25,45 +25,66 @@ function readFile(filePath) {
 }
 
 function loadData(filePath) {
-    let data = readFile(filePath);
-    let dataLines = data.split("\n");
-    for (let i = 0; i < dataLines.length - 1; i++) {
-      let clientEvent = JSON.parse(dataLines[i]);
-  
-      if (clientEvent.event == 9) {
-        allPublications[clientEvent.pub.pubID] = clientEvent;
-      } else if (clientEvent.event == 10) {
-        // Ensure it is an array or initialize as an array
-        if (!Array.isArray(allPublicationsReceived[clientEvent.pub.pubID])) {
-          allPublicationsReceived[clientEvent.pub.pubID] = [];
-        }
-  
-        // Add the event to the array
-        allPublicationsReceived[clientEvent.pub.pubID].push(clientEvent);
+  let data = readFile(filePath);
+  let dataLines = data.split("\n");
+  for (let i = 0; i < dataLines.length - 1; i++) {
+    let clientEvent = JSON.parse(dataLines[i]);
+
+    if (clientEvent.event == 9) {
+      allPublications[clientEvent.pub.pubID] = clientEvent;
+    } else if (clientEvent.event == 10) {
+      // Ensure it is an array or initialize as an array
+      if (!Array.isArray(allPublicationsReceived[clientEvent.pub.pubID])) {
+        allPublicationsReceived[clientEvent.pub.pubID] = [];
       }
+
+      // Add the event to the array
+      allPublicationsReceived[clientEvent.pub.pubID].push(clientEvent);
     }
   }
+}
 
 var allPublications = {};
 var allPublicationsReceived = {};
 var latencyInformation = [];
 
-loadData("./../../visualiser/logs_and_events/Client_events.txt");
+loadData("Simulation.txt");
+
+// let pubKeys = Object.keys(allPublications);
+// let pubReceiveKeys = Object.keys(allPublicationsReceived);
+// for (let i = 0; i < pubKeys.length; i++) {
+
+//   while (allPublicationsReceived[pubReceiveKeys[i]] && allPublicationsReceived[pubReceiveKeys[i]].length !== 0) {
+//     let pubSent = allPublications[pubKeys[i]];
+//     let pubReceived = allPublicationsReceived[pubReceiveKeys[i]].pop();
+//     let timeElapsed = pubReceived.time - pubSent.time;
+//     let latency = new Latency(pubSent.id, pubReceived.id, timeElapsed, pubSent.pub);
+//     latencyInformation.push(latency);
+//   }
+// }
 
 let pubKeys = Object.keys(allPublications);
 let pubReceiveKeys = Object.keys(allPublicationsReceived);
-for (let i = 0; i < pubKeys.length; i++) {
-  
-  while (allPublicationsReceived[pubReceiveKeys[i]].length != 0) {
-    let pubSent = allPublications[pubKeys[i]];
-    let pubReceived = allPublicationsReceived[pubReceiveKeys[i]].pop();
-    let timeElapsed = pubReceived.time - pubSent.time;
-    let latency = new Latency(pubSent.id, pubReceived.id, timeElapsed, pubSent.pub);
-    latencyInformation.push(latency);
+for (let i = 0; i < pubReceiveKeys.length; i++) {
+  console.log("pubReceiveKeys[" + i +"] = " + pubReceiveKeys[i]);
+  for (let j = 0; j < pubKeys.length; j++) {
+    console.log("pubReceiveKeys[" + j +"] = " + pubKeys[j]);
+    if (pubReceiveKeys[i] == pubKeys[j])
+    {
+      console.log("We have a match for " + pubReceiveKeys[i]);
+      while(allPublicationsReceived[pubReceiveKeys[i]] && allPublicationsReceived[pubReceiveKeys[i]].length !== 0)
+      {
+        let pubReceived = allPublicationsReceived[pubReceiveKeys[i]].pop();
+        let pubSent = allPublications[pubKeys[j]];
+        let timeElapsed = pubReceived.time - pubSent.time;
+        let latency = new Latency(pubSent.id, pubReceived.id, timeElapsed, pubSent.pub);
+        latencyInformation.push(latency);
+      }
+    }
   }
 }
 
-for (let j = 0; j < latencyInformation.length; j++)
-{
-    console.log(latencyInformation[j].toString());
+
+for (let j = 0; j < latencyInformation.length; j++) {
+  console.log(latencyInformation[j].toString());
 }

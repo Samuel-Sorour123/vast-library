@@ -303,7 +303,7 @@ function determineConsistency(error1)
   return consistency;
 }
 
-const filePath = "./../../visualiser/logs_and_events/Client_events.txt";
+const filePath = "sim1.txt";
 //The allSubscriptions, allPublications and allPublicationsReceived JSON objects are assigned values at specific indexes.
 loadData(filePath);
 
@@ -327,7 +327,7 @@ let error2 = errorType2();
 //This is the number of unwanted publications that were received. It is unwanted if a client receives publication to which it is not subscribed. 
 let error3 = errorType3();
 
-let correctnesss = determineCorrectnesss(error1, error2, error3);
+let correctnesss = determineCorrectness(error1, error2, error3);
 let consistency = determineConsistency(error1);
 
 
