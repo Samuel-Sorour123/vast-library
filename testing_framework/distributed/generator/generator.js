@@ -487,7 +487,7 @@ function assignAddresses(info) {
   let brksKeys = Object.keys(brks);
   let settings = info.simulation.nodes;
   let static = {};
-  static["master"] = { "hostname": "Lenovo", "user": info.hosts.computer.user, "static_IP_address": info.hosts.computer.ip };
+  static["master"] = { "hostname": "Lenovo", "user": info.hosts.computer.user, "static_IP_address": info.hosts.computer.ip, "time": timeInterval[0] };
   static.clients = {};
   static.matchers = {};
   for (let i = 0; i < settings.newMatcher; i++) {
