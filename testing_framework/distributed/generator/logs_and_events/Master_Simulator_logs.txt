@@ -16,3 +16,4 @@
 {"time":1730413967985,"msg":"Master has unsubscribed from 'ready'"}
 {"time":1730413968039,"msg":"Master has subscribed to 'status'"}
 {"time":1730413968039,"msg":"Master has started the process"}
+{"time":1730415393896,"msg":"Master has subscribed to 'status'"}

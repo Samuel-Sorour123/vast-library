@@ -12,6 +12,10 @@ const path = require('path');
 const { start } = require('repl');
 const { finished } = require('stream');
 
+const info = JSON.parse(fs.readFileSync('./files/static.json'));
+const time = info.master.time;
+var brokerCount = 0;
+var clientCount = 0;
 
 // Data structures to store matchers
 // alias --> matcher{}.
@@ -547,7 +551,7 @@ function waitForClientsReady(expectedClients) {
 function waitForClientFinished(expectedClients) {
     return new Promise((resolve, reject) => {
         let finishedClients = [];
-        const expectedFinishedCount = expectedClients.length - info.simulation.newMatcher;
+        const expectedFinishedCount = expectedClients.length - clientCount;
         console.log(`Waiting for ${expectedFinishedCount} clients to finish`);
 
         mqttClient.on('message', onFinishedMessage);
@@ -600,9 +604,11 @@ function determineExpectedClients() {
     let expectedClients = [];
     for (const alias in staticAddresses.clients) {
         expectedClients.push(alias);
+        brokerCount = brokerCount + 1;
     }
     for (const alias in staticAddresses.matchers) {
         expectedClients.push(alias);
+        clientCount = clientCount + 1;
     }
     return expectedClients;
 }
@@ -618,8 +624,8 @@ if (processRunning === 'master') {
 console.log("The process running is " + processRunning);
 console.log("Node.js version is " + process.version);
 
-const info = JSON.parse(fs.readFileSync('./files/static.json'));
-const time = info.master.time;
+
+console.log(time);
 main(instructionsPath);
 
 
