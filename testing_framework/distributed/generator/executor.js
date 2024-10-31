@@ -430,14 +430,14 @@ async function execute(step = 0) {
 
 async function handleBroker() {
     return new Promise((resolve, reject) => {
-        mqttClient.subscribe('status', (err) => {
+        mqttClient.subscribe('statusBroker', (err) => {
             if (err) {
                 return reject(new Error("Subscription to 'status' topic failed."));
             }
 
             const onStatusMessage = (topic, message) => {
                 console.log("Broker received a message")
-                if (topic === 'status' && message.toString().trim() === 'master') {
+                if (topic === 'statusBroker' && message.toString().trim() === 'master') {
                     mqttClient.removeListener('message', onStatusMessage); // Cleanup listener
                     resolve();
                 }
@@ -490,27 +490,25 @@ async function onMasterConnect() {
             });
         });
 
-        mqttClient.publish('instructions', 'start', (err) =>{
-            if (err)
-            {
+        mqttClient.publish('instructions', 'start', (err) => {
+            if (err) {
                 console.log("The master could not publish to instructions");
             }
-            else
-            {
+            else {
                 console.log("The master could publish to instructions");
-            }});
+            }
+        });
 
         await waitForClientFinished(expectedClients);
-
-        await new Promise ((resolve, reject) => {
-            mqttClient.publish('status', 'master', (err) =>{
-                if (err)
-                {
+        await delay(300);
+        await new Promise((resolve, reject) => {
+            mqttClient.publish('statusBroker', 'master',{ qos: 1 }, (err) => {
+                if (err) {
                     reject("Master could not publish to status");
                 }
-                else
-                {
+                else {
                     resolve("Master could publish to status");
+                    console.log("Master could publish to statusBroker");
                 }
             });
         });
