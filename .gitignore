@@ -7,4 +7,5 @@
 /testing_framework/distributed/generator/simulations/*
 /testing_framework/distributed/generator/event/*
 /testing_framework/distributed/generator/info.json
+/simulations/*
 

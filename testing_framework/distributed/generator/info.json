@@ -2,6 +2,7 @@
   "hosts": {
     "computer":{ "user": "Samuel", "ip": "192.168.0.30"},
     "clients": {
+      "craftberrypi7": {"user": "pi", "ip": "192.168.0.7"},
       "craftberrypi9": {"user": "pi", "ip": "192.168.0.9"},
       "craftberrypi12": { "user": "pi", "ip": "192.168.0.12"},
       "craftberrypi14":  { "user": "pi", "ip": "192.168.0.14"},
@@ -15,16 +16,16 @@
   "simulation": {
     "nodes": {
       "newMatcher": 1,
-      "newClient": 1,
-      "publish": 2000,
-      "subscribe": 5,
-      "moveClient": 20
+      "newClient": 4,
+      "publish": 4000,
+      "subscribe": 20,
+      "moveClient": 80
     },
     "settings": {
       "asciiValueRange": [97, 122],
       "payloadLength": [10, 40],
-      "channels": ["channel1"],
-      "timeInterval": [2, 2],
+      "channels": ["channel1", "channel2", "channel3", "channel4"],
+      "timeInterval": [5, 5],
       "timeIntervalSubscription": [80, 100],
       "radiusSubscription": [50,100],
       "radiusPublication": [50,100] 
