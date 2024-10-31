@@ -570,7 +570,7 @@ if (processRunning === 'master') {
 console.log("The process running is " + processRunning);
 console.log("Node.js version is " + process.version);
 
-const info = JSON.parse(fs.readFileSync('static.json'));
+const info = JSON.parse(fs.readFileSync('./files/static.json'));
 const time = info.master.time;
 main(instructionsPath);
 
