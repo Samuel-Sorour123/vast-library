@@ -156,71 +156,6 @@ var executeInstructionWrapper = function (instruction, step) {
     });
 }
 
-async function execute(step) {
-    step = step || 0;
-    if (instructions[step].type == "end") {
-        console.log("Finished");
-        if (processRunning != "GW" && processRunning != "M2") {
-            mqttClient.publish('status', 'finished', (err)=>
-            {
-                if (err)
-                {
-                    console.log("there was an error");
-                }
-                else
-                {
-                    console.log("message submitted");
-                }
-            });
-        }
-        else {
-            await handleBroker();
-        }
-
-        process.exit(0);
-    }
-    else if (instructions[step].type == "wait") {
-        try {
-            console.log("waiting for " + time)
-            await delay(time)
-            execute(step + 1);
-        }
-        catch (error) {
-            log.error(error);
-        }
-    }
-    else {
-        try {
-            if (processRunning == instructions[step].opts.alias) {
-                let result = await executeInstructionWrapper(instructions[step], step);
-                console.log(result);
-            }
-            execute(step + 1);
-        }
-        catch (error) {
-        }
-    }
-
-}
-
-async function handleBroker() {
-    return new Promise((resolve, reject) => {
-        mqttClient.subscribe('status', (err) => {
-            if (err) {
-                return reject(new Error("Subscription to 'status' topic failed."));
-            }
-
-            const onStatusMessage = (topic, message) => {
-                if (topic === 'status' && message.toString().trim() === 'master') {
-                    mqttClient.removeListener('message', onStatusMessage); // Cleanup listener
-                    resolve();
-                }
-            };
-
-            mqttClient.on('message', onStatusMessage);
-        });
-    });
-}
 
 
 
@@ -434,6 +369,74 @@ var instruction = function (type, opts) {
     this.opts = opts;
 }
 
+async function execute(step) {
+    step = step || 0;
+    if (instructions[step].type == "end") {
+        console.log("Finished");
+        if (processRunning != "GW" && processRunning != "M2") {
+            await new Promise((resolve, reject) => {
+                mqttClient.publish('status', processRunning, (err) => {
+                    if (err) {
+                        console.log("There was an error publishing 'status':", err);
+                        reject(err);
+                    } else {
+                        console.log("Client has published its identifier:", processRunning);
+                        resolve();
+                    }
+                });
+            });
+        }
+        
+        else {
+            await handleBroker();
+        }
+
+        process.exit(0);
+    }
+    else if (instructions[step].type == "wait") {
+        try {
+            console.log("waiting for " + time)
+            await delay(time)
+            execute(step + 1);
+        }
+        catch (error) {
+            log.error(error);
+        }
+    }
+    else {
+        try {
+            if (processRunning == instructions[step].opts.alias) {
+                let result = await executeInstructionWrapper(instructions[step], step);
+                console.log(result);
+            }
+            execute(step + 1);
+        }
+        catch (error) {
+        }
+    }
+
+}
+
+async function handleBroker() {
+    return new Promise((resolve, reject) => {
+        mqttClient.subscribe('status', (err) => {
+            if (err) {
+                return reject(new Error("Subscription to 'status' topic failed."));
+            }
+
+            const onStatusMessage = (topic, message) => {
+                if (topic === 'status' && message.toString().trim() === 'master') {
+                    mqttClient.removeListener('message', onStatusMessage); // Cleanup listener
+                    resolve();
+                }
+            };
+
+            mqttClient.on('message', onStatusMessage);
+        });
+    });
+}
+
+
 function startMQTT() {
     mqttClient = mqtt.connect(`mqtt://${mqttBrokerAddress}`);
     mqttClient.on('connect', async () => {
@@ -448,53 +451,40 @@ function startMQTT() {
 async function onMasterConnect() {
     log.debug("Master reached this point");
     const expectedClients = determineExpectedClients();
+
     try {
         log.debug("Master waiting for clients");
         await waitForClientsReady(expectedClients);
         log.debug("Clients are ready");
         await mqttClient.unsubscribe('ready');
-        log.debug("Master has unsubscribed");
+        log.debug("Master has unsubscribed from 'ready'");
+
+        // Subscribe to 'status' before starting clients
+        await new Promise((resolve, reject) => {
+            mqttClient.subscribe('status', (err) => {
+                if (err) {
+                    reject("Master could not subscribe to 'status' topic");
+                } else {
+                    log.debug("Master has subscribed to 'status'");
+                    resolve();
+                }
+            });
+        });
+
         await mqttClient.publish('instructions', 'start');
         log.debug("Master has started the process");
+
         await waitForClientFinished(expectedClients);
         log.debug("Clients have finished");
-        await mqttClient.unsubscribe('finished');
+
+        await mqttClient.unsubscribe('status');
         await mqttClient.publish('status', 'master');
         process.exit(0);
-
     } catch (err) {
         console.error("Error while waiting for clients to be ready:", err);
     }
 }
 
-function waitForClientFinished(expectedClients) {
-    return new Promise((resolve, reject) => {
-        let finishedClients = [];
-        mqttClient.subscribe('status', (err) => {
-            if (!err) {
-                log.debug("Master has subscribed to finished");
-                const onFinishedMessage = (topic, message) => {
-                    if (topic == 'status') {
-                        if (message == 'finished') {
-                            log.debug("Master received message");
-                            const client = message.toString();
-                            if (!finishedClients.includes(client)) {
-                                finishedClients.push(client);
-                            }
-                            if (finishedClients.length === (expectedClients.length - info.simulation.newMatcher)) {
-                                mqttClient.removeListener('message', onFinishedMessage);
-                                resolve();
-                            }
-                        }
-
-                    }
-                }
-                log.debug("Master setting up on finished");
-                mqttClient.on('message', onFinishedMessage);
-            }
-        });
-    })
-}
 
 
 function waitForClientsReady(expectedClients) {
@@ -512,6 +502,7 @@ function waitForClientsReady(expectedClients) {
                         }
                         if (readyClients.length === expectedClients.length) {
                             mqttClient.removeListener('message', onReadyMessage);
+                            mqttClient.unsubscribe('ready');
                             resolve();
                         }
                     }
@@ -521,6 +512,28 @@ function waitForClientsReady(expectedClients) {
         });
     });
 }
+
+function waitForClientFinished(expectedClients) {
+    return new Promise((resolve, reject) => {
+        let finishedClients = [];
+        mqttClient.on('message', onFinishedMessage);
+
+        function onFinishedMessage(topic, message) {
+            if (topic === 'status') {
+                const client = message.toString();
+                if (!finishedClients.includes(client)) {
+                    finishedClients.push(client);
+                    log.debug(`Master received 'finished' from ${client}`);
+                    if (finishedClients.length === expectedClients.length - info.simulation.newMatcher) {
+                        mqttClient.removeListener('message', onFinishedMessage);
+                        resolve();
+                    }
+                }
+            }
+        }
+    });
+}
+
 
 async function onClientConnect() {
     try {

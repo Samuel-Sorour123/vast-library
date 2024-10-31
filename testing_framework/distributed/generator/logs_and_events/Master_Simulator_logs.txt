@@ -1,7 +1,12 @@
-{"time":1730408949151,"msg":"Master reached this point"}
-{"time":1730408949151,"msg":"Master waiting for clients"}
-{"time":1730408960644,"msg":"Clients are ready"}
-{"time":1730408960644,"msg":"Master has unsubscribed"}
-{"time":1730408960645,"msg":"Master has started the process"}
-{"time":1730408960700,"msg":"Master has subscribed to finished"}
-{"time":1730408960700,"msg":"Master setting up on finished"}
+{"time":1730410418659,"msg":"Master reached this point"}
+{"time":1730410418660,"msg":"Master waiting for clients"}
+{"time":1730410428319,"msg":"Clients are ready"}
+{"time":1730410428320,"msg":"Master has unsubscribed"}
+{"time":1730410428320,"msg":"Master has started the process"}
+{"time":1730410428377,"msg":"Master has subscribed to finished"}
+{"time":1730410428377,"msg":"Master setting up on finished"}
+{"time":1730412407446,"msg":"Master reached this point"}
+{"time":1730412418375,"msg":"Master has unsubscribed"}
+{"time":1730412418376,"msg":"Master has started the process"}
+{"time":1730412418425,"msg":"Master has subscribed to finished"}
+{"time":1730412418425,"msg":"Master setting up on finished"}
