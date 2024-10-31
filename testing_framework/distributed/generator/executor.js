@@ -165,6 +165,7 @@ async function execute(step) {
     }
     else if (instructions[step].type == "wait") {
         try {
+            console.log("waiting for " + time)
             await delay(time)
             execute(step + 1);
         }
@@ -176,6 +177,7 @@ async function execute(step) {
         try {
             if (processRunning == instructions[step].alias) {
                 let result = await executeInstructionWrapper(instructions[step], step);
+                console.log(result);
             }
             execute(step + 1);
         }

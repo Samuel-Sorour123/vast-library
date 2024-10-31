@@ -1,2 +1,0 @@
-{"time":1730403278205,"msg":"Master reached this point"}
-{"time":1730403278205,"msg":"Master waiting for clients"}
