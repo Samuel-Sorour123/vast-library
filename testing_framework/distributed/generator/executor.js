@@ -196,22 +196,22 @@ async function execute(step) {
 async function handleBroker() {
     return new Promise((resolve, reject) => {
         mqttClient.subscribe('status', (err) => {
-            if (!err) {
-                const onStatusMessage = (topic, message) => {
-                    if (topic == 'status')
-                    {
-                        if (message == 'master')
-                        {
-                            resolve();
-                        }
-                    }
-                }
-                mqttClient.on('message', onStatusMessage);
+            if (err) {
+                return reject(new Error("Subscription to 'status' topic failed."));
             }
 
-        })
-    })
+            const onStatusMessage = (topic, message) => {
+                if (topic === 'status' && message.toString().trim() === 'master') {
+                    mqttClient.removeListener('message', onStatusMessage); // Cleanup listener
+                    resolve();
+                }
+            };
+
+            mqttClient.on('message', onStatusMessage);
+        });
+    });
 }
+
 
 
 function delay(millis) {
@@ -460,7 +460,7 @@ async function onMasterConnect() {
 function waitForClientFinished(expectedClients) {
     return new Promise((resolve, reject) => {
         let finishedClients = [];
-        mqttClient.subscribe('finished', (err) => {
+        mqttClient.subscribe('status', (err) => {
             if (!err) {
                 log.debug("Master has subscribed to finished");
                 const onFinishedMessage = (topic, message) => {

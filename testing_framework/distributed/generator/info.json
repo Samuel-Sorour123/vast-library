@@ -17,7 +17,7 @@
     "nodes": {
       "newMatcher": 1,
       "newClient": 2,
-      "publish": 30000,
+      "publish": 300,
       "subscribe": 10,
       "moveClient": 4
     },
