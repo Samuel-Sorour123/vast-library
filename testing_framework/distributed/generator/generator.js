@@ -12,7 +12,9 @@ const payloadLength = data.simulation.settings.payloadLength;
 const asciiValueRange = data.simulation.settings.asciiValueRange;
 const timeInterval = data.simulation.settings.timeInterval;
 const timeIntervalSubscription = data.simulation.settings.timeIntervalSubscription;
+const timeOther = data.simulation.settings.timeOther;
 const latencyPublicationProbability = 0;
+const skipWaitProb = 1 - data.simulation.settings.skipWaitProbability;
 
 var clientLatencyPublication = {};
 
@@ -389,19 +391,19 @@ function fetchInstructionSet() {
 
   for (let i = 0; i < matcherIDArray.length; i++) {
     if (i == 0) {
-      instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(100, 200);
+      instructions = matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(timeOther[0], timeOther[0]);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
     else {
-      instructions = instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(100, 200);
+      instructions = instructions + "\n" + matchers[matcherIDArray[i]].fetchInstruction() + "\n" + generateWaitInstruction(timeOther[0], timeOther[1]);
       instructionInfo.updateCounter("newMatcher");
       instructionInfo.displayInstructionManager();
     }
   }
-  instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
+  instructions = instructions + "\n" + generateWaitInstruction(timeOther[0],timeOther[1]);
   for (let j = 0; j < clientIDArray.length; j++) {
-    instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInstruction(100, 200);
+    instructions = instructions + "\n" + clients[clientIDArray[j]].fetchInstruction() + "\n" + generateWaitInstruction(timeOther[0], timeOther[1]);
     instructionInfo.updateCounter("newClient");
     instructionInfo.displayInstructionManager();
   }
@@ -414,9 +416,9 @@ function fetchInstructionSet() {
     let channel = "latency" + client.clientID;
     let clientID = client.clientID
     subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
-    instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(100,200);
+    instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(timeIntervalSubscription[0],timeIntervalSubscription[1]);
   }
-  instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
+  instructions = instructions + "\n" + generateWaitInstruction(timeOther[0],timeOther[1]);
   for (let h = 0; h < args.subscribe; h++)
   {
       instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeIntervalSubscription[0], timeIntervalSubscription[1]);
@@ -424,14 +426,22 @@ function fetchInstructionSet() {
         instructionInfo.displayInstructionManager();
   }
 
-  instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
+  instructions = instructions + "\n" + generateWaitInstruction(timeOther[0],timeOther[1]);
   while ((instructionInfo.numInstructionsToGenerate - instructionInfo.totalInstructionsGenerated) != 0) {
     let choice = probabilisticChoice(instructionInfo.fetchProbabilities(2));
     switch (choice) {
       case 0:
-        instructions = instructions + "\n" + fetchRandomPublicationString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
         instructionInfo.updateCounter("publish");
         instructionInfo.displayInstructionManager();
+        let skipWait = probabilisticChoice([skipWaitProb, 1-skipWaitProb]);
+        if (skipWait)
+        {
+          instructions = instructions + "\n" + fetchRandomPublicationString() 
+        }
+        else
+        {
+          instructions = instructions + "\n" + fetchRandomPublicationString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+        }
         break;
       case 1:
         instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);

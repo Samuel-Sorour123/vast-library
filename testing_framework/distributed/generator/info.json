@@ -2,11 +2,11 @@
   "hosts": {
     "computer":{ "user": "Samuel", "ip": "192.168.0.30"},
     "clients": {
-      "craftberrypi7": {"user": "pi", "ip": "192.168.0.7"},
       "craftberrypi9": {"user": "pi", "ip": "192.168.0.9"},
       "craftberrypi12": { "user": "pi", "ip": "192.168.0.12"},
       "craftberrypi14":  { "user": "pi", "ip": "192.168.0.14"},
-      "craftberrypi15":  { "user": "pi", "ip": "192.168.0.15"}
+      "craftberrypi15":  { "user": "pi", "ip": "192.168.0.15"},
+      "craftberrypi7": {"user": "pi", "ip": "192.168.0.7"}
     },
     "brokers": {
       "dell": { "user": "Samuel Sorour", "ip": "192.168.0.20"},
@@ -18,17 +18,19 @@
       "newMatcher": 1,
       "newClient": 4,
       "publish": 4000,
-      "subscribe": 20,
+      "subscribe": 15,
       "moveClient": 80
     },
     "settings": {
       "asciiValueRange": [97, 122],
-      "payloadLength": [10, 40],
+      "payloadLength": [30, 40],
       "channels": ["channel1", "channel2", "channel3", "channel4"],
-      "timeInterval": [5, 5],
+      "timeInterval": [2, 2],
       "timeIntervalSubscription": [80, 100],
+      "timeOther": [100, 200],
       "radiusSubscription": [50,100],
-      "radiusPublication": [50,100] 
+      "radiusPublication": [50,100],
+      "skipWaitProbability": 0.4
     }
   }
 }
