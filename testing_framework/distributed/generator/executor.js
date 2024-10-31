@@ -159,13 +159,14 @@ var executeInstructionWrapper = function (instruction, step) {
 async function execute(step) {
     step = step || 0;
     if (instructions[step].type == "end") {
+        console.log("Finished");
         await mqttClient.publish('status', 'finished');
         process.exit(0);
     }
     else if (instructions[step].type == "wait") {
         try {
             await delay(time)
-            await execute(step + 1);
+            execute(step + 1);
         }
         catch (error) {
             log.error(error);
@@ -173,11 +174,10 @@ async function execute(step) {
     }
     else {
         try {
-            if (processRunning == instructions[step].alias)
-            {
+            if (processRunning == instructions[step].alias) {
                 let result = await executeInstructionWrapper(instructions[step], step);
             }
-            await execute(step + 1);
+            execute(step + 1);
         }
         catch (error) {
         }
@@ -408,12 +408,18 @@ function startMQTT() {
 }
 
 async function onMasterConnect() {
+    log.debug("Master reached this point");
     const expectedClients = determineExpectedClients();
     try {
+        log.debug("Master waiting for clients");
         await waitForClientsReady(expectedClients);
+        log.debug("Clients are ready");
         await mqttClient.unsubscribe('ready');
-        await mqtt.publish('instructions', 'start');
+        log.debug("Master has unsubscribed");
+        await mqttClient.publish('instructions', 'start');
+        log.debug("Master has started the process");
         await waitForClientFinished(expectedClients);
+        log.debug("Clients have finished");
         await mqttClient.unsubscribe('finished');
         process.exit(0);
 
@@ -427,22 +433,26 @@ function waitForClientFinished(expectedClients) {
         let finishedClients = [];
         mqttClient.subscribe('finished', (err) => {
             if (!err) {
-
+                log.debug("Master has subscribed to finished");
                 const onFinishedMessage = (topic, message) => {
-                    if (topic == 'finished') {
-                        const client = message.toString();
-                        if (!finishedClients.includes(client)) {
-                            finishedClients.push(client);
+                    if (topic == 'status') {
+                        if (message == 'finished') {
+                            log.debug("Master received message");
+                            const client = message.toString();
+                            if (!finishedClients.includes(client)) {
+                                finishedClients.push(client);
+                            }
+                            if (finishedClients.length === expectedClients.length) {
+                                mqttClient.removeListener('message', onFinishedMessage);
+                                resolve();
+                            }
                         }
-                        if (finishedClients.length === expectedClients.length) {
-                            mqttClient.removeListener('message', onFinishedMessage);
-                            resolve();
-                        }
+
                     }
                 }
                 mqttClient.on('message', onFinishedMessage);
             }
-        })
+        });
     })
 }
 
@@ -475,8 +485,10 @@ function waitForClientsReady(expectedClients) {
 async function onClientConnect() {
     try {
         await mqttClient.subscribe('instructions');
+        console.log("Client subscribed to instructions");
         mqttClient.on('message', handleClientMessage);
         mqttClient.publish('ready', processRunning);
+        console.log("Client has published ready");
     } catch (err) {
         console.error(`${processRunning} could not subscribe to 'instructions':`, err);
     }
@@ -486,7 +498,8 @@ async function onClientConnect() {
 async function handleClientMessage(topic, message) {
     if (topic === 'instructions') {
         if (message.toString() == 'start') {
-            await execute();
+            console.log("Clients start executing");
+            execute();
         }
         else {
             console.log(`${processRunning} is ending its process`);
@@ -518,7 +531,7 @@ console.log("The process running is " + processRunning);
 console.log("Node.js version is " + process.version);
 
 const info = JSON.parse(fs.readFileSync('info.json'));
-const time = info.simulation.settings.timeInterval;
+const time = info.simulation.settings.timeInterval[0];
 main(instructionsPath);
 
 
