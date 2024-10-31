@@ -161,7 +161,17 @@ async function execute(step) {
     if (instructions[step].type == "end") {
         console.log("Finished");
         if (processRunning != "GW" && processRunning != "M2") {
-            await mqttClient.publish('status', 'finished');
+            mqttClient.publish('status', 'finished', (err)=>
+            {
+                if (err)
+                {
+                    console.log("there was an error");
+                }
+                else
+                {
+                    console.log("message submitted");
+                }
+            });
         }
         else {
             await handleBroker();
