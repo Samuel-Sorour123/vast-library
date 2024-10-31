@@ -48,7 +48,7 @@ var allPublications = {};
 var allPublicationsReceived = {};
 var latencyInformation = [];
 
-loadData("Simulation.txt");
+loadData(process.argv[2]);
 
 // let pubKeys = Object.keys(allPublications);
 // let pubReceiveKeys = Object.keys(allPublicationsReceived);
@@ -62,23 +62,26 @@ loadData("Simulation.txt");
 //     latencyInformation.push(latency);
 //   }
 // }
-
+let averageLatency = 0;
+let count = 0;
 let pubKeys = Object.keys(allPublications);
 let pubReceiveKeys = Object.keys(allPublicationsReceived);
 for (let i = 0; i < pubReceiveKeys.length; i++) {
-  console.log("pubReceiveKeys[" + i +"] = " + pubReceiveKeys[i]);
   for (let j = 0; j < pubKeys.length; j++) {
-    console.log("pubReceiveKeys[" + j +"] = " + pubKeys[j]);
     if (pubReceiveKeys[i] == pubKeys[j])
     {
-      console.log("We have a match for " + pubReceiveKeys[i]);
       while(allPublicationsReceived[pubReceiveKeys[i]] && allPublicationsReceived[pubReceiveKeys[i]].length !== 0)
       {
         let pubReceived = allPublicationsReceived[pubReceiveKeys[i]].pop();
         let pubSent = allPublications[pubKeys[j]];
         let timeElapsed = pubReceived.time - pubSent.time;
-        let latency = new Latency(pubSent.id, pubReceived.id, timeElapsed, pubSent.pub);
-        latencyInformation.push(latency);
+        if (timeElapsed > 0)
+        {
+         averageLatency = averageLatency + timeElapsed;
+         count++
+          let latency = new Latency(pubSent.id, pubReceived.id, timeElapsed, pubSent.pub);
+          latencyInformation.push(latency);
+        }
       }
     }
   }
@@ -88,3 +91,6 @@ for (let i = 0; i < pubReceiveKeys.length; i++) {
 for (let j = 0; j < latencyInformation.length; j++) {
   console.log(latencyInformation[j].toString());
 }
+
+averageLatency = averageLatency/count;
+console.log("The average latency is:" + averageLatency);

@@ -11,6 +11,7 @@ const channels = data.simulation.settings.channels;
 const payloadLength = data.simulation.settings.payloadLength;
 const asciiValueRange = data.simulation.settings.asciiValueRange;
 const timeInterval = data.simulation.settings.timeInterval;
+const timeIntervalSubscription = data.simulation.settings.timeIntervalSubscription;
 const latencyPublicationProbability = 0;
 
 var clientLatencyPublication = {};
@@ -418,7 +419,7 @@ function fetchInstructionSet() {
   instructions = instructions + "\n" + generateWaitInstruction(1000,1200);
   for (let h = 0; h < args.subscribe; h++)
   {
-      instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(60, 80);
+      instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeIntervalSubscription[0], timeIntervalSubscription[1]);
         instructionInfo.updateCounter("subscribe");
         instructionInfo.displayInstructionManager();
   }
