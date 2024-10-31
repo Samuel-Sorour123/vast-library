@@ -160,7 +160,13 @@ async function execute(step) {
     step = step || 0;
     if (instructions[step].type == "end") {
         console.log("Finished");
-        await mqttClient.publish('status', 'finished');
+        if (processRunning != "GW" && processRunning != "M2") {
+            await mqttClient.publish('status', 'finished');
+        }
+        else {
+            await handleBroker();
+        }
+
         process.exit(0);
     }
     else if (instructions[step].type == "wait") {
@@ -175,7 +181,7 @@ async function execute(step) {
     }
     else {
         try {
-            if (processRunning == instructions[step].alias) {
+            if (processRunning == instructions[step].opts.alias) {
                 let result = await executeInstructionWrapper(instructions[step], step);
                 console.log(result);
             }
@@ -185,6 +191,26 @@ async function execute(step) {
         }
     }
 
+}
+
+async function handleBroker() {
+    return new Promise((resolve, reject) => {
+        mqttClient.subscribe('status', (err) => {
+            if (!err) {
+                const onStatusMessage = (topic, message) => {
+                    if (topic == 'status')
+                    {
+                        if (message == 'master')
+                        {
+                            resolve();
+                        }
+                    }
+                }
+                mqttClient.on('message', onStatusMessage);
+            }
+
+        })
+    })
 }
 
 
@@ -423,6 +449,7 @@ async function onMasterConnect() {
         await waitForClientFinished(expectedClients);
         log.debug("Clients have finished");
         await mqttClient.unsubscribe('finished');
+        await mqttClient.publish('status', 'master');
         process.exit(0);
 
     } catch (err) {
@@ -444,7 +471,7 @@ function waitForClientFinished(expectedClients) {
                             if (!finishedClients.includes(client)) {
                                 finishedClients.push(client);
                             }
-                            if (finishedClients.length === expectedClients.length) {
+                            if (finishedClients.length === (expectedClients.length - info.simulation.newMatcher)) {
                                 mqttClient.removeListener('message', onFinishedMessage);
                                 resolve();
                             }

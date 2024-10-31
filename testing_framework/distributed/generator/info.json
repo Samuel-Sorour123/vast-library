@@ -17,20 +17,20 @@
     "nodes": {
       "newMatcher": 1,
       "newClient": 2,
-      "publish": 50,
+      "publish": 30000,
       "subscribe": 10,
-      "moveClient": 20
+      "moveClient": 4
     },
     "settings": {
       "asciiValueRange": [97, 122],
-      "payloadLength": [30, 40],
+      "payloadLength": [60, 40],
       "channels": ["channel1", "channel2"],
-      "timeInterval": [30, 30],
+      "timeInterval": [60, 70],
       "timeIntervalSubscription": [80, 100],
       "timeOther": [100, 200],
       "radiusSubscription": [50,100],
       "radiusPublication": [50,100],
-      "skipWaitProbability": 0.4
+      "skipWaitProbability": 0
     }
   }
 }
