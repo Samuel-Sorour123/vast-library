@@ -418,7 +418,7 @@ async function execute(step = 0) {
         try {
             if (processRunning === instructions[step].opts.alias) {
                 let result = await executeInstructionWrapper(instructions[step], step);
-                if (instruction[step].type =! "publish")
+                if (instructions[step].type != "publish")
                 {
                     await delay(200);
                 }
