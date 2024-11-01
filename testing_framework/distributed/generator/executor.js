@@ -410,7 +410,6 @@ async function execute(step = 0) {
     } else if (instructions[step].type === "wait") {
         try {
             console.log("waiting for " + time);
-            await delay(time);
             await execute(step + 1);
         } catch (error) {
             log.error("Error during wait step:", error);
@@ -419,6 +418,14 @@ async function execute(step = 0) {
         try {
             if (processRunning === instructions[step].opts.alias) {
                 let result = await executeInstructionWrapper(instructions[step], step);
+                if (instruction[step].type =! "publish")
+                {
+                    await delay(200);
+                }
+                else
+                {
+                    await delay(time);
+                }
                 console.log(result);
             }
             await execute(step + 1);
