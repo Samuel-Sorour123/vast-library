@@ -10,12 +10,7 @@ const mqtt = require('mqtt');
 const { map, data } = require('jquery');
 const path = require('path');
 const { start } = require('repl');
-const { finished } = require('stream');
 
-const info = JSON.parse(fs.readFileSync('./files/static.json'));
-const time = info.master.time;
-var brokerCount = 0;
-var clientCount = 0;
 
 // Data structures to store matchers
 // alias --> matcher{}.
@@ -160,7 +155,46 @@ var executeInstructionWrapper = function (instruction, step) {
     });
 }
 
+async function execute(step) {
+    step = step || 0;
 
+    if (step == 0) {
+        console.log("Master starts executing the instructions");
+    }
+
+    if (instructions[step].type == "end") {
+        log.debug('Executing the end instruction')
+        let result = await executeInstructionWrapper(instructions[step], step);
+        log.debug(result);
+        console.log("Master has finished executing the instructions");
+
+        mqttClient.publish('instructions', 'end');
+        setTimeout(() => process.exit(0), 100);
+        return;
+    }
+    else if (instructions[step].type == "wait") {
+        try {
+            log.debug('Executing wait instruction with step ' + step + ': Waiting ' + instructions[step].opts.waitTime);
+            let result = await executeInstructionWrapper(instructions[step], step);
+            log.debug(result);
+            execute(step + 1);
+        }
+        catch (error) {
+            log.error(error);
+        }
+    }
+    else {
+        try {
+            log.debug('Publishing instruction ' + step + '. Type: ' + instructions[step].type);
+            mqttClient.publish('instructions', step.toString());
+            execute(step + 1);
+        }
+        catch (error) {
+            log.error("Could not publish instruction with step " + step);
+        }
+    }
+
+}
 
 
 function delay(millis) {
@@ -373,219 +407,120 @@ var instruction = function (type, opts) {
     this.opts = opts;
 }
 
-async function execute(step = 0) {
-    if (instructions[step].type === "end") {
-        console.log("Finished");
-        if (processRunning !== "GW" && processRunning !== "M2") {
-            try {
-                console.log(`Client ${processRunning} is publishing 'finished'`);
-                await new Promise((resolve, reject) => {
-                    mqttClient.publish('status', processRunning, { qos: 1 }, (err) => {
-                        if (err) {
-                            console.log("There was an error publishing 'status':", err);
-                            reject(err);
-                        } else {
-                            console.log("Client has published its identifier:", processRunning);
-                            resolve();
-                        }
-                    });
-                });
-
-                // End the MQTT client gracefully
-                mqttClient.end(false, {}, () => {
-                    console.log('MQTT client disconnected');
-                    process.exit(0);
-                });
-            } catch (error) {
-                console.error("Error during client publish and disconnect:", error);
-                process.exit(1);
-            }
-        } else {
-            await handleBroker();
-            mqttClient.end(false, {}, () => {
-                console.log('MQTT client disconnected');
-                process.exit(0);
-            });
-        }
-    } else if (instructions[step].type === "wait") {
-        try {
-            console.log("waiting for " + time);
-            await execute(step + 1);
-        } catch (error) {
-            log.error("Error during wait step:", error);
-        }
-    } else {
-        try {
-            if (processRunning === instructions[step].opts.alias) {
-                let result = await executeInstructionWrapper(instructions[step], step);
-                if (instructions[step].type != "publish")
-                {
-                    await delay(200);
-                }
-                else
-                {
-                    await delay(time);
-                }
-                console.log("Hello there" + result);
-            }
-            await execute(step + 1);
-        } catch (error) {
-            log.error("Error executing instruction:", error);
-        }
-    }
-}
-
-async function handleBroker() {
-    return new Promise((resolve, reject) => {
-        mqttClient.subscribe('statusBroker', (err) => {
-            if (err) {
-                return reject(new Error("Subscription to 'status' topic failed."));
-            }
-
-            const onStatusMessage = (topic, message) => {
-                console.log("Broker received a message")
-                if (topic === 'statusBroker' && message.toString().trim() === 'master') {
-                    mqttClient.removeListener('message', onStatusMessage); // Cleanup listener
-                    resolve();
-                }
-            };
-
-            mqttClient.on('message', onStatusMessage);
-        });
-    });
-}
-
-
 function startMQTT() {
     mqttClient = mqtt.connect(`mqtt://${mqttBrokerAddress}`);
+
     mqttClient.on('connect', async () => {
         if (processRunning === "master") {
-            console.log("Master starting onMasterConnect");
             await onMasterConnect();
         } else {
-            console.log("Client starting onClientConnect");
             await onClientConnect();
         }
     });
 }
 
+// Function called when the master connects to the MQTT broker
 async function onMasterConnect() {
-    console.log("Master has entered onMasterConnect")
     const expectedClients = determineExpectedClients();
-    console.log("The expected client are: " + expectedClients)
     try {
-        console.log("The master is waiting for the clients");
+        // Wait for all clients to be ready
         await waitForClientsReady(expectedClients);
-        console.log("The clients are ready");
-        mqttClient.unsubscribe('ready', (err) => {
-            if (err) {
-                console.log("The master could not unsubscribe from ready");
-            }
-            else {
-                console.log("The master successfully unsubscribed from ready");
-            }
-        });
-        // Subscribe to 'status' before starting clients
-        await new Promise((resolve, reject) => {
-            mqttClient.subscribe('status', (err) => {
-                if (err) {
-                    reject("Master could not subscribe to 'status' topic");
-                } else {
-                    log.debug("Master has subscribed to 'status'");
-                    resolve();
-                }
-            });
-        });
+        log.debug("All the clients have published \'ready\'");
+        // After all clients are ready, proceed
 
-        mqttClient.publish('instructions', 'start', (err) => {
-            if (err) {
-                console.log("The master could not publish to instructions");
-            }
-            else {
-                console.log("The master could publish to instructions");
-            }
-        });
+        await mqttClient.unsubscribe('ready');
+        // console.log("Master unsubscribed from 'ready' topic");
+        log.debug("Unsubscribed from ready");
+        // Subscribe to 'logging' topic
+        await mqttClient.subscribe('result');
+        log.debug("Subscribed to \'result\'");
+        // console.log("Master subscribed to 'logging' topic");
 
-        await waitForClientFinished(expectedClients);
-        await delay(300);
-        await new Promise((resolve, reject) => {
-            mqttClient.publish('statusBroker', 'master',{ qos: 1 }, (err) => {
-                if (err) {
-                    reject("Master could not publish to status");
-                }
-                else {
-                    resolve("Master could publish to status");
-                    console.log("Master could publish to statusBroker");
-                }
-            });
-        });
-        process.exit(0);
+        // Set up message handler for 'logging' messages
+        mqttClient.on('message', handleMasterMessage);
+
+        // Start execution
+        execute(0);
+
     } catch (err) {
         console.error("Error while waiting for clients to be ready:", err);
     }
 }
 
-
-
+// Function to wait for all clients to be ready
 function waitForClientsReady(expectedClients) {
     return new Promise((resolve, reject) => {
         let readyClients = [];
+
+        // Subscribe to 'ready' topic
         mqttClient.subscribe('ready', (err) => {
             if (err) {
                 reject("Master could not subscribe to 'ready' topic");
             } else {
+                //  console.log("Master subscribed to 'ready' topic");
+
+                // Message handler for 'ready' messages
                 const onReadyMessage = (topic, message) => {
                     if (topic === 'ready') {
                         const client = message.toString();
+                        //  console.log(`Received 'ready' message from client: ${client}`);
+
                         if (!readyClients.includes(client)) {
                             readyClients.push(client);
                         }
+
+                        // Check if all expected clients are ready
                         if (readyClients.length === expectedClients.length) {
+                            //    console.log("All clients are ready");
+
+                            // Remove the 'message' listener for 'ready' messages
                             mqttClient.removeListener('message', onReadyMessage);
-                            mqttClient.unsubscribe('ready');
                             resolve();
                         }
                     }
                 };
+
+                // Attach the message handler
                 mqttClient.on('message', onReadyMessage);
             }
         });
     });
 }
 
-function waitForClientFinished(expectedClients) {
-    return new Promise((resolve, reject) => {
-        let finishedClients = [];
-        const expectedFinishedCount = expectedClients.length - clientCount;
-        console.log(`Waiting for ${expectedFinishedCount} clients to finish`);
-
-        mqttClient.on('message', onFinishedMessage);
-
-        function onFinishedMessage(topic, message) {
-            if (topic === 'status') {
-                const client = message.toString();
-                console.log(`Master received 'finished' from ${client}`);
-                if (!finishedClients.includes(client)) {
-                    finishedClients.push(client);
-                    if (finishedClients.length === expectedFinishedCount) {
-                        mqttClient.removeListener('message', onFinishedMessage);
-                        resolve();
-                    }
-                }
-            }
+// Handler for messages received by the master
+function handleMasterMessage(topic, message) {
+    if (topic === 'result') {
+        const payload = message.toString();
+        const payloadArray = payload.split(" ");
+        const result = payloadArray[0];
+        const step = payloadArray[1] + " " + payloadArray[2];
+        //console.log(`Master received message on 'result': ${message}`);
+        //console.log("The payload is " + payload);
+        if (result === 'success') {
+            log.debug("Instruction success: " + step);
+            //  console.log("Instruction success: " + step);
+        } else if (result === 'fail') {
+            log.error("Instruction fail: " + step);
+            //  console.log("Instruction fail: " + step);
         }
-    });
+    }
 }
 
-
-
+// Function called when a client connects to the MQTT broker
 async function onClientConnect() {
     try {
+
         await mqttClient.subscribe('instructions');
-        console.log("Client subscribed to instructions");
+        //console.log(`${processRunning} subscribed to 'instructions' topic`);
+        log.debug(`${processRunning} subscribed to 'instructions' topic`);
+
+        // Set up message handler for 'instructions' messages
         mqttClient.on('message', handleClientMessage);
+
+        // Notify master that this client is ready
         mqttClient.publish('ready', processRunning);
-        console.log("Client has published ready");
+        log.debug(`${processRunning} published 'ready' message`);
+        //console.log(`${processRunning} published 'ready' message`);
     } catch (err) {
         console.error(`${processRunning} could not subscribe to 'instructions':`, err);
     }
@@ -594,11 +529,49 @@ async function onClientConnect() {
 // Handler for messages received by a client
 async function handleClientMessage(topic, message) {
     if (topic === 'instructions') {
-        if (message.toString() == 'start') {
-            console.log("Clients start executing");
-            execute();
+        if (message.toString() !== 'end')
+        {
+            const step = parseInt(message.toString(), 10);
+            //console.log(`${processRunning} received instruction ${step}`);
+            log.debug(`${processRunning} received instruction ${step}`);
+
+            const instruction = instructions[step];
+            const alias = instruction.opts?.alias || '';
+
+            if (alias === processRunning) {
+                try {
+                    log.debug(`${processRunning} is about to execute instruction ${step}:`);
+                    //console.log(`${processRunning} is about to execute instruction ${step}:`);
+                    //console.log(`Instruction ${instruction}`);
+                    log.debug(`Instruction ${instruction}`);
+
+                    const result = await executeInstructionWrapper(instruction, step);
+
+                    log.debug(`${processRunning} executed instruction ${step}:`, result);
+                    //console.log(`${processRunning} executed instruction ${step}:`, result);
+
+                    mqttClient.publish('result', `success instruction ${step}`, function (err) {
+                        if (err) {
+                            log.debug(`Failed to publish success step ${step}`);
+                            //console.log(`Failed to publish success step${step}`); 
+                        }
+                        else {
+                            log.debug(`Succeeded with publishing success step ${step}`);
+                            //console.log(`Succeeded with publishing success step${step}`);
+                        }
+                    });
+                } catch (err) {
+                    //console.error(`${processRunning} failed to execute step ${step}:`, err);
+                    log.debug(`${processRunning} failed to execute step ${step}:`, err);
+                    mqttClient.publish('result', `fail instruction ${step}`);
+                }
+            } else {
+                log.debug(`Instruction alias ${alias} does not match ${processRunning}, ignoring`);
+                //console.log(`Instruction alias '${alias}' does not match '${processRunning}', ignoring`);
+            }
         }
-        else {
+        else
+        {
             console.log(`${processRunning} is ending its process`);
             process.exit(0);
         }
@@ -609,11 +582,9 @@ function determineExpectedClients() {
     let expectedClients = [];
     for (const alias in staticAddresses.clients) {
         expectedClients.push(alias);
-        brokerCount = brokerCount + 1;
     }
     for (const alias in staticAddresses.matchers) {
         expectedClients.push(alias);
-        clientCount = clientCount + 1;
     }
     return expectedClients;
 }
@@ -625,14 +596,8 @@ if (processRunning === 'master') {
     log = LOG.newLayer(`${processRunning}_Simulator_logs`, `${processRunning}_Simulator_logs`, "logs_and_events", 0, 5);
 }
 
-
 console.log("The process running is " + processRunning);
 console.log("Node.js version is " + process.version);
-
-
-console.log(time);
 main(instructionsPath);
-
-
 
 

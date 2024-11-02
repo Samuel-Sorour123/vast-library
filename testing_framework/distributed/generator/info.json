@@ -19,15 +19,15 @@
     "nodes": {
       "newMatcher": 1,
       "newClient": 7,
-      "publish": 3500,
-      "subscribe": 25,
-      "moveClient": 140
+      "publish": 4000,
+      "subscribe": 50,
+      "moveClient": 20
     },
     "settings": {
       "asciiValueRange": [97, 122],
       "payloadLength": [20, 40],
-      "channels": ["channel1", "channel2", "channel3"],
-      "timeInterval": [20, 20],
+      "channels": ["channel1", "c1", "fd", "fdf", "wewdw"],
+      "timeInterval": [1, 1],
       "timeIntervalSubscription": [80, 100],
       "timeOther": [100, 200],
       "radiusSubscription": [50,100],
