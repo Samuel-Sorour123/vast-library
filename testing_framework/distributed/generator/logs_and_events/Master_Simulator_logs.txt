@@ -1,2 +1,0 @@
-{"time":1730572759106,"msg":"Master has subscribed to 'status'"}
-{"time":1730572955382,"msg":"Master has subscribed to 'status'"}

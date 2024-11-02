@@ -378,6 +378,7 @@ var instruction = function (type, opts) {
 
 async function execute(step = 0) {
     if (instructions[step].type === "end") {
+        await delay(10000);
         console.log("Finished");
         if (processRunning !== "GW" && processRunning !== "M2") {
             try {
@@ -412,7 +413,6 @@ async function execute(step = 0) {
         }
     } else if (instructions[step].type === "wait") {
         try {
-            console.log("waiting for " + time);
             await execute(step + 1);
         } catch (error) {
             log.error("Error during wait step:", error);

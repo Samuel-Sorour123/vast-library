@@ -18,16 +18,16 @@
   "simulation": {
     "nodes": {
       "newMatcher": 1,
-      "newClient": 7,
+      "newClient": 4,
       "publish": 70000,
-      "subscribe": 35,
-      "moveClient": 140
+      "subscribe": 20,
+      "moveClient": 80
     },
     "settings": {
       "asciiValueRange": [97, 122],
       "payloadLength": [10, 30],
-      "channels": ["channel1", "channel2", "channel3", "channel4", "channel5", "channel6", "channel7"],
-      "timeInterval": [10,10],
+      "channels": ["channel1", "channel2", "channel3", "channel4"],
+      "timeInterval": [5,5],
       "timeIntervalSubscription": [80, 100],
       "timeOther": [100, 200],
       "radiusSubscription": [50,100],
