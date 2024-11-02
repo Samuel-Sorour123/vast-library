@@ -14,7 +14,7 @@ const timeInterval = data.simulation.settings.timeInterval;
 const timeIntervalSubscription = data.simulation.settings.timeIntervalSubscription;
 const timeOther = data.simulation.settings.timeOther;
 const latencyPublicationProbability = 0;
-const skipWaitProb = 1 - data.simulation.settings.skipWaitProbability;
+const throughputPublicationProbability = data.simulation.settings.throughputPublicationProbability;
 
 var clientLatencyPublication = {};
 
@@ -329,11 +329,37 @@ function fetchRandomLatencyPublicationString() {
 
 function fetchRandomPublicationString() {
   let publication;
-  let isLatencyPublication = probabilisticChoice([1 - latencyPublicationProbability, latencyPublicationProbability]);
-  if (isLatencyPublication) {
+  let publicationType = probabilisticChoice([latencyPublicationProbability, throughputPublicationProbability, 1-latencyPublicationProbability-throughputPublicationProbability]);
+  if (publicationType == 0) {
     publication = fetchRandomLatencyPublicationString();
   }
-  else {
+  else if (publicationType == 1)
+  {
+    publication = "publish "
+    let r = 100;
+    let x = 500;
+    let y = 500
+    let channel = "throughput"
+    let payload = generateRandomPayload(payloadLength[0], payloadLength[1]);
+    let clientKeyArray = Object.keys(clients);
+    let clientID = clientKeyArray[getRandomInt(0, clientKeyArray.length - 1)];
+    publication =
+      publication +
+      clientID +
+      " " +
+      x +
+      " " +
+      y +
+      " " +
+      r +
+      " " +
+      channel +
+      " " +
+      payload;
+  
+  }
+
+  else if (publicationType == 2){
     publication = "publish "
     let r = getRandomInt(1, 300).toString();
     let x = getRandomInt(r, 1000 - r).toString();
@@ -407,23 +433,46 @@ function fetchInstructionSet() {
     instructionInfo.updateCounter("newClient");
     instructionInfo.displayInstructionManager();
   }
-  for (let k = 0; k < clientIDArray.length; k++) {
-    let client = clients[clientIDArray[k]];
-    let subscription = "subscribe ";
-    let x = client.xCoord.toString();
-    let r = client.radius.toString();
-    let y = client.yCoord.toString();
-    let channel = "latency" + client.clientID;
-    let clientID = client.clientID
-    subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
-    instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(timeIntervalSubscription[0],timeIntervalSubscription[1]);
+  if (latencyPublicationProbability != 0)
+  {
+    for (let k = 0; k < clientIDArray.length; k++) {
+      let client = clients[clientIDArray[k]];
+      let subscription = "subscribe ";
+      let x = client.xCoord.toString();
+      let r = client.radius.toString();
+      let y = client.yCoord.toString();
+      let channel = "latency" + client.clientID;
+      let clientID = client.clientID
+      subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
+      instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(timeIntervalSubscription[0],timeIntervalSubscription[1]);
+    }
   }
+
+  if (throughputPublicationProbability != 0)
+  {
+    for (let k = 0; k < clientIDArray.length; k++) {
+      let client = clients[clientIDArray[k]];
+      let subscription = "subscribe ";
+      let x = 500;
+      let r = 100
+      let y = 500
+      let channel = "throughput"
+      let clientID = client.clientID
+      subscription = subscription + clientID + " " + x + " " + y + " " + r + " " + channel;
+      instructions = instructions + "\n" + subscription + "\n" + generateWaitInstruction(timeIntervalSubscription[0],timeIntervalSubscription[1]);
+    }
+  }
+  
   instructions = instructions + "\n" + generateWaitInstruction(timeOther[0],timeOther[1]);
   for (let h = 0; h < args.subscribe; h++)
   {
+    if (throughputPublicationProbability!= 1)
+    {
       instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeIntervalSubscription[0], timeIntervalSubscription[1]);
-        instructionInfo.updateCounter("subscribe");
-        instructionInfo.displayInstructionManager();
+      instructionInfo.updateCounter("subscribe");
+      instructionInfo.displayInstructionManager();
+    }
+      
   }
 
   instructions = instructions + "\n" + generateWaitInstruction(timeOther[0],timeOther[1]);
@@ -433,18 +482,16 @@ function fetchInstructionSet() {
       case 0:
         instructionInfo.updateCounter("publish");
         instructionInfo.displayInstructionManager();
-        let skipWait = probabilisticChoice([skipWaitProb, 1-skipWaitProb]);
-        if (skipWait)
-        {
-          instructions = instructions + "\n" + fetchRandomPublicationString() 
-        }
-        else
-        {
           instructions = instructions + "\n" + fetchRandomPublicationString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
-        }
+        
         break;
       case 1:
-        instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+        if (throughputPublicationProbability != 1)
+          
+        {
+          instructions = instructions + "\n" + fetchRandomSubscriptionString() + "\n" + generateWaitInstruction(timeInterval[0], timeInterval[1]);
+        }
+       
         instructionInfo.updateCounter("subscribe");
         instructionInfo.displayInstructionManager();
         break;
