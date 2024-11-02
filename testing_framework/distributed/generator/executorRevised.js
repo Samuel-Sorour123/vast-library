@@ -36,6 +36,8 @@ const matcherLogsAndEvents = path.resolve(__dirname, "logging/");
 var mqttClient;
 const mqttBrokerAddress = staticAddresses.master.static_IP_address;
 
+const throughputExp = process.argv[3];
+
 // Interpret and execute instruction
 async function executeInstruction(instruction, step, success, fail) {
     var opts = instruction.opts;
@@ -421,11 +423,19 @@ async function execute(step = 0) {
                 let result = await executeInstructionWrapper(instructions[step], step);
                 if (instructions[step].type != "publish")
                 {
-                    await delay(time1);
+                    if (!throughputExp)
+                    {
+                        await delay(time1);
+                    }
+                    
                 }
                 else
                 {
-                    await delay(time);
+                    if (!throughputExp)
+                    {
+                        await delay(time);
+                    }
+                    
                 }
                
             }
