@@ -423,11 +423,7 @@ async function execute(step = 0) {
                 let result = await executeInstructionWrapper(instructions[step], step);
                 if (instructions[step].type != "publish")
                 {
-                    if (!throughputExp)
-                    {
                         await delay(time1);
-                    }
-                    
                 }
                 else
                 {
